@@ -151,6 +151,10 @@
     <Compile Include="Migrations\202506100600200_CreateUserTable.Designer.cs">
       <DependentUpon>202506100600200_CreateUserTable.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202506100605105_CreateUser.cs" />
+    <Compile Include="Migrations\202506100605105_CreateUser.Designer.cs">
+      <DependentUpon>202506100605105_CreateUser.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\User.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -240,6 +244,9 @@
   <ItemGroup>
     <EmbeddedResource Include="Migrations\202506100600200_CreateUserTable.resx">
       <DependentUpon>202506100600200_CreateUserTable.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202506100605105_CreateUser.resx">
+      <DependentUpon>202506100605105_CreateUser.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>
