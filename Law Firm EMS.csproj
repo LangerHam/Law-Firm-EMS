@@ -147,20 +147,20 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\202506100600200_CreateUserTable.cs" />
-    <Compile Include="Migrations\202506100600200_CreateUserTable.Designer.cs">
-      <DependentUpon>202506100600200_CreateUserTable.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\202506100605105_CreateUser.cs" />
-    <Compile Include="Migrations\202506100605105_CreateUser.Designer.cs">
-      <DependentUpon>202506100605105_CreateUser.cs</DependentUpon>
-    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
+    <Compile Include="Models\Billing.cs" />
     <Compile Include="Models\Client.cs" />
     <Compile Include="Models\Consultant.cs" />
+    <Compile Include="Models\Document.cs" />
+    <Compile Include="Models\DocumentType.cs" />
+    <Compile Include="Models\Evaluation.cs" />
     <Compile Include="Models\HR.cs" />
+    <Compile Include="Models\Invoice.cs" />
+    <Compile Include="Models\Leave.cs" />
     <Compile Include="Models\Role.cs" />
-    <Compile Include="Models\User.cs" />
+    <Compile Include="Models\StatusType.cs" />
+    <Compile Include="Models\Tasks.cs" />
+    <Compile Include="Models\Transaction.cs" />
     <Compile Include="Models\Users.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -245,14 +245,6 @@
     <Content Include="Scripts\bootstrap.bundle.js.map" />
     <Content Include="Scripts\jquery-3.7.0.slim.min.map" />
     <Content Include="Scripts\jquery-3.7.0.min.map" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Migrations\202506100600200_CreateUserTable.resx">
-      <DependentUpon>202506100600200_CreateUserTable.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\202506100605105_CreateUser.resx">
-      <DependentUpon>202506100605105_CreateUser.cs</DependentUpon>
-    </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
