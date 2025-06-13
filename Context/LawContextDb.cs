@@ -4,6 +4,7 @@ namespace Law_Firm_EMS.Context
     using System;
     using System.Data.Entity;
     using System.Linq;
+    using System.Threading.Tasks;
 
     public class LawContextDb : DbContext
     {
@@ -22,6 +23,62 @@ namespace Law_Firm_EMS.Context
         // on configuring and using a Code First model, see http://go.microsoft.com/fwlink/?LinkId=390109.
 
         public virtual DbSet<Users> UsersEntity { get; set; }
+        public virtual DbSet<Billing> BillingEntity { get; set; }
+        public virtual DbSet<Consultant> ConsultantEntity { get; set; }
+        public virtual DbSet<Client> ClientEntity { get; set; }
+        public virtual DbSet<Document> DocumentEntity { get; set; }
+        public virtual DbSet<DocumentType> DocumentTypeEntity { get; set; }
+        public virtual DbSet<Evaluation> EvaluationEntity { get; set; }
+        public virtual DbSet<Form> FormEntity { get; set; }
+        public virtual DbSet<FormType> FormTypeEntity { get; set; }
+        public virtual DbSet<HR> HREntity { get; set; }
+        public virtual DbSet<Invoice> InvoiceEntity { get; set; }
+        public virtual DbSet<Leave> LeaveEntity { get; set; }
+        public virtual DbSet<Role> RoleEntity { get; set; }
+        public virtual DbSet<StatusType> StatusTypeEntity { get; set; }
+        public virtual DbSet<Tasks> TasksEntity { get; set; }
+        public virtual DbSet<Transaction> TransactionEntity { get; set; }
+
+        protected override void OnModelCreating(DbModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Document>()
+                .HasRequired(d => d.UploadedByUser)
+                .WithMany()
+                .HasForeignKey(d => d.UploadedByUserID)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<Tasks>()
+                .HasRequired(t => t.AssignedByHR)
+                .WithMany(h => h.AssignedTasks)
+                .HasForeignKey(t => t.AssignedByHRID)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<Tasks>()
+                .HasRequired(t => t.AssignedToConsultant)
+                .WithMany(c => c.AssignedTasks)
+                .HasForeignKey(t => t.AssignedToConsultantID)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<Invoice>()
+                .HasRequired(i => i.Client)
+                .WithMany(c => c.Invoices)
+                .HasForeignKey(i => i.ClientID)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<Invoice>()
+                .HasRequired(i => i.Consultant)
+                .WithMany(c => c.Invoices)
+                .HasForeignKey(i => i.ConsultantID)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<Invoice>()
+                .HasRequired(i => i.GeneratedByHR)
+                .WithMany(h => h.GeneratedInvoices)
+                .HasForeignKey(i => i.GeneratedByHRID)
+                .WillCascadeOnDelete(false);
+
+            base.OnModelCreating(modelBuilder);
+        }
     }
 
     //public class MyEntity

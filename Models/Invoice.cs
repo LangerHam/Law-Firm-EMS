@@ -13,12 +13,9 @@ namespace Law_Firm_EMS.Models
         public int InvoiceID { get; set; }
         public DateTime InvoiceDate { get; set; }
         public string ExportPath { get; set; }
-        [Column(TypeName = "decimal(18, 2)")]
         public decimal SalaryPaid { get; set; }
-        [Column(TypeName = "decimal(18, 2)")]
         public decimal ClientPaymentReceived { get; set; }
         [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
-        [Column(TypeName = "decimal(18, 2)")]
         public decimal CompanyProfit { get { return ClientPaymentReceived - SalaryPaid; } private set { } }
         public int ClientID { get; set; }
         [ForeignKey("ClientID")]

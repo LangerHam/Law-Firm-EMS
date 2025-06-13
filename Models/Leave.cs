@@ -20,7 +20,7 @@ namespace Law_Firm_EMS.Models
         [ForeignKey("RequestedByConsultantID")]
         public virtual Consultant RequestedByConsultant { get; set; }
         public int? ApprovedByHRID { get; set; }
-        [ForeignKey("ApprovedByAdminID")]
+        [ForeignKey("ApprovedByHRID")]
         public virtual HR ApprovedByHR { get; set; }
         public int StatusID { get; set; }
         [ForeignKey("StatusID")]

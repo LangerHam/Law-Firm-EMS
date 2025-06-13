@@ -9,12 +9,9 @@ namespace Law_Firm_EMS.Models
 {
 	public class Tasks
 	{
-        [Key]
-        public int TaskID { get; set; }
-        public string Instructions { get; set; }
-        [Index(IsUnique = true)]
+        [Key, ForeignKey("Document")]
         public int DocumentID { get; set; }
-        [ForeignKey("DocumentID")]
+        public string Instructions { get; set; }
         public virtual Document Document { get; set; }
         public int AssignedToConsultantID { get; set; }
         [ForeignKey("AssignedToConsultantID")]

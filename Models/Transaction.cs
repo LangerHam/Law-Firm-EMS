@@ -11,7 +11,6 @@ namespace Law_Firm_EMS.Models
 	{
         [Key]
         public int TransactionID { get; set; }
-        [Column(TypeName = "decimal(18, 2)")]
         public decimal Amount { get; set; }
         public DateTime PaymentDate { get; set; }
         public int BillingID { get; set; }
