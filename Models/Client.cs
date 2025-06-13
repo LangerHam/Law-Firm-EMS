@@ -29,5 +29,6 @@ namespace Law_Firm_EMS.Models
         public virtual ICollection<Document> Documents { get; set; }
         public virtual Billing Billing { get; set; }
         public virtual ICollection<Invoice> Invoices { get; set; }
+        public virtual ICollection<Form> Forms { get; set; }
     }
 }

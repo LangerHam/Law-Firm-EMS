@@ -154,6 +154,8 @@
     <Compile Include="Models\Document.cs" />
     <Compile Include="Models\DocumentType.cs" />
     <Compile Include="Models\Evaluation.cs" />
+    <Compile Include="Models\Form.cs" />
+    <Compile Include="Models\FormType.cs" />
     <Compile Include="Models\HR.cs" />
     <Compile Include="Models\Invoice.cs" />
     <Compile Include="Models\Leave.cs" />
