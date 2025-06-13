@@ -13,7 +13,7 @@ namespace Law_Firm_EMS.Migrations
         
         string IMigrationMetadata.Id
         {
-            get { return "202506130641463_CreateInitial"; }
+            get { return "202506130648232_CreateInitial"; }
         }
         
         string IMigrationMetadata.Source

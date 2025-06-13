@@ -33,7 +33,7 @@
                     })
                 .PrimaryKey(t => t.UserID)
                 .ForeignKey("dbo.Consultants", t => t.AssignedConsultantID)
-                .ForeignKey("dbo.StatusTypes", t => t.StatusID, cascadeDelete: true)
+                .ForeignKey("dbo.StatusTypes", t => t.StatusID)
                 .ForeignKey("dbo.Users", t => t.UserID)
                 .Index(t => t.UserID)
                 .Index(t => t.StatusID)
@@ -68,7 +68,7 @@
                 .PrimaryKey(t => t.DocumentID)
                 .ForeignKey("dbo.HRs", t => t.AssignedByHRID)
                 .ForeignKey("dbo.Consultants", t => t.AssignedToConsultantID)
-                .ForeignKey("dbo.StatusTypes", t => t.StatusID, cascadeDelete: true)
+                .ForeignKey("dbo.StatusTypes", t => t.StatusID)
                 .Index(t => t.AssignedToConsultantID)
                 .Index(t => t.AssignedByHRID)
                 .Index(t => t.StatusID);
@@ -98,8 +98,8 @@
                     })
                 .PrimaryKey(t => t.LeaveID)
                 .ForeignKey("dbo.HRs", t => t.ApprovedByHRID)
-                .ForeignKey("dbo.Consultants", t => t.RequestedByConsultantID, cascadeDelete: true)
-                .ForeignKey("dbo.StatusTypes", t => t.StatusID, cascadeDelete: true)
+                .ForeignKey("dbo.Consultants", t => t.RequestedByConsultantID)
+                .ForeignKey("dbo.StatusTypes", t => t.StatusID)
                 .Index(t => t.RequestedByConsultantID)
                 .Index(t => t.ApprovedByHRID)
                 .Index(t => t.StatusID);
@@ -125,8 +125,8 @@
                         EvaluatedByHRID = c.Int(nullable: false),
                     })
                 .PrimaryKey(t => t.EvalID)
-                .ForeignKey("dbo.Consultants", t => t.ConsultantID, cascadeDelete: true)
-                .ForeignKey("dbo.HRs", t => t.EvaluatedByHRID, cascadeDelete: true)
+                .ForeignKey("dbo.Consultants", t => t.ConsultantID)
+                .ForeignKey("dbo.HRs", t => t.EvaluatedByHRID)
                 .Index(t => t.ConsultantID)
                 .Index(t => t.EvaluatedByHRID);
             
@@ -163,7 +163,7 @@
                         RoleID = c.Int(nullable: false),
                     })
                 .PrimaryKey(t => t.UserID)
-                .ForeignKey("dbo.Roles", t => t.RoleID, cascadeDelete: true)
+                .ForeignKey("dbo.Roles", t => t.RoleID)
                 .Index(t => t.Email, unique: true)
                 .Index(t => t.RoleID);
             
@@ -189,10 +189,10 @@
                         ParentDocumentID = c.Int(),
                     })
                 .PrimaryKey(t => t.DocumentID)
-                .ForeignKey("dbo.Clients", t => t.ClientID, cascadeDelete: true)
-                .ForeignKey("dbo.DocumentTypes", t => t.DocumentTypeID, cascadeDelete: true)
+                .ForeignKey("dbo.Clients", t => t.ClientID)
+                .ForeignKey("dbo.DocumentTypes", t => t.DocumentTypeID)
                 .ForeignKey("dbo.Documents", t => t.ParentDocumentID)
-                .ForeignKey("dbo.StatusTypes", t => t.StatusID, cascadeDelete: true)
+                .ForeignKey("dbo.StatusTypes", t => t.StatusID)
                 .ForeignKey("dbo.Tasks", t => t.DocumentID)
                 .ForeignKey("dbo.Users", t => t.UploadedByUserID)
                 .Index(t => t.DocumentID)
@@ -223,9 +223,9 @@
                         StatusID = c.Int(nullable: false),
                     })
                 .PrimaryKey(t => t.FormID)
-                .ForeignKey("dbo.Clients", t => t.ClientID, cascadeDelete: true)
-                .ForeignKey("dbo.FormTypes", t => t.FormTypeID, cascadeDelete: true)
-                .ForeignKey("dbo.StatusTypes", t => t.StatusID, cascadeDelete: true)
+                .ForeignKey("dbo.Clients", t => t.ClientID)
+                .ForeignKey("dbo.FormTypes", t => t.FormTypeID)
+                .ForeignKey("dbo.StatusTypes", t => t.StatusID)
                 .Index(t => t.ClientID)
                 .Index(t => t.FormTypeID)
                 .Index(t => t.StatusID);
@@ -250,7 +250,7 @@
                         BillingID = c.Int(nullable: false),
                     })
                 .PrimaryKey(t => t.TransactionID)
-                .ForeignKey("dbo.Billings", t => t.BillingID, cascadeDelete: true)
+                .ForeignKey("dbo.Billings", t => t.BillingID)
                 .Index(t => t.BillingID);
             
         }
@@ -273,7 +273,6 @@
             DropForeignKey("dbo.Documents", "DocumentTypeID", "dbo.DocumentTypes");
             DropForeignKey("dbo.Documents", "ClientID", "dbo.Clients");
             DropForeignKey("dbo.Tasks", "AssignedToConsultantID", "dbo.Consultants");
-            DropForeignKey("dbo.Tasks", "AssignedByHRID", "dbo.HRs");
             DropForeignKey("dbo.HRs", "UserID", "dbo.Users");
             DropForeignKey("dbo.Users", "RoleID", "dbo.Roles");
             DropForeignKey("dbo.Consultants", "HRID", "dbo.HRs");
@@ -282,6 +281,7 @@
             DropForeignKey("dbo.Invoices", "ClientID", "dbo.Clients");
             DropForeignKey("dbo.Evaluations", "EvaluatedByHRID", "dbo.HRs");
             DropForeignKey("dbo.Evaluations", "ConsultantID", "dbo.Consultants");
+            DropForeignKey("dbo.Tasks", "AssignedByHRID", "dbo.HRs");
             DropForeignKey("dbo.Leaves", "StatusID", "dbo.StatusTypes");
             DropForeignKey("dbo.Leaves", "RequestedByConsultantID", "dbo.Consultants");
             DropForeignKey("dbo.Leaves", "ApprovedByHRID", "dbo.HRs");

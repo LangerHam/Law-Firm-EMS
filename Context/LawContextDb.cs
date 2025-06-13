@@ -3,6 +3,7 @@ namespace Law_Firm_EMS.Context
     using Law_Firm_EMS.Models;
     using System;
     using System.Data.Entity;
+    using System.Data.Entity.ModelConfiguration.Conventions;
     using System.Linq;
     using System.Threading.Tasks;
 
@@ -41,41 +42,12 @@ namespace Law_Firm_EMS.Context
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Document>()
-                .HasRequired(d => d.UploadedByUser)
-                .WithMany()
-                .HasForeignKey(d => d.UploadedByUserID)
-                .WillCascadeOnDelete(false);
+            modelBuilder.Conventions.Remove<OneToManyCascadeDeleteConvention>();
+            modelBuilder.Conventions.Remove<ManyToManyCascadeDeleteConvention>();
 
             modelBuilder.Entity<Tasks>()
-                .HasRequired(t => t.AssignedByHR)
-                .WithMany(h => h.AssignedTasks)
-                .HasForeignKey(t => t.AssignedByHRID)
-                .WillCascadeOnDelete(false);
-
-            modelBuilder.Entity<Tasks>()
-                .HasRequired(t => t.AssignedToConsultant)
-                .WithMany(c => c.AssignedTasks)
-                .HasForeignKey(t => t.AssignedToConsultantID)
-                .WillCascadeOnDelete(false);
-
-            modelBuilder.Entity<Invoice>()
-                .HasRequired(i => i.Client)
-                .WithMany(c => c.Invoices)
-                .HasForeignKey(i => i.ClientID)
-                .WillCascadeOnDelete(false);
-
-            modelBuilder.Entity<Invoice>()
-                .HasRequired(i => i.Consultant)
-                .WithMany(c => c.Invoices)
-                .HasForeignKey(i => i.ConsultantID)
-                .WillCascadeOnDelete(false);
-
-            modelBuilder.Entity<Invoice>()
-                .HasRequired(i => i.GeneratedByHR)
-                .WithMany(h => h.GeneratedInvoices)
-                .HasForeignKey(i => i.GeneratedByHRID)
-                .WillCascadeOnDelete(false);
+                .HasRequired(t => t.Document)
+                .WithRequiredPrincipal(d => d.Task);
 
             base.OnModelCreating(modelBuilder);
         }
