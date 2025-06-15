@@ -36,7 +36,7 @@
 
     <div class="flex h-screen bg-gray-100">
         <!-- Sidebar -->
-        <aside id="sidebar" class="w-64 bg-gray-800 text-white flex-shrink-0 transition-all duration-300 ease-in-out">
+        <aside id="sidebar" class="w-72 bg-gray-800 text-white flex-shrink-0 transition-all duration-300 ease-in-out">
             <div class="flex flex-col h-full">
                 <!-- Logo -->
                 <div class="flex items-center justify-center h-16 border-b border-gray-700">
@@ -146,9 +146,9 @@
         const icon = sidebarToggle.querySelector('i');
 
         sidebarToggle.addEventListener('click', () => {
-            sidebar.classList.toggle('w-64');
+            sidebar.classList.toggle('w-72');
             sidebar.classList.toggle('w-0');
-            sidebar.classList.toggle('p-0'); /
+            sidebar.classList.toggle('p-0'); 
 
             if (sidebar.classList.contains('w-0')) {
                 icon.setAttribute('data-lucide', 'panel-left-open');
