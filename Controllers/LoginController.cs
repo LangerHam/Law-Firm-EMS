@@ -56,5 +56,34 @@ namespace Law_Firm_EMS.Controllers
                 return RedirectToAction("LandingPagee");
             }
         }
+
+        public ActionResult Login()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public ActionResult Login(string email, string password)
+        {
+            var user = db.UsersEntity.FirstOrDefault(u => u.Email == email && u.PasswordHash == password);
+
+            if (user != null)
+            {
+                Session["UserID"] = user.UserID;
+                Session["Email"] = user.Email;
+                Session["RoleID"] = user.RoleID;
+
+                switch (user.RoleID)
+                {
+                    case 1: return RedirectToAction("Dashboard", "Client");
+                    case 2: return RedirectToAction("Dashboard", "Consultant");
+                    case 3: return RedirectToAction("Dashboard", "HR");
+                    default: return RedirectToAction("Login");
+                }
+            }
+
+            ViewBag.Error = "Invalid email or password";
+            return View();
+        }
     }
 }

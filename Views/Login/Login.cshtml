@@ -1,0 +1,186 @@
+﻿@model Law_Firm_EMS.Models.Users
+@{
+    ViewBag.Title = "Login";
+    Layout = "~/Views/Shared/_Layout2.cshtml";
+}
+
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>User Login</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            width: 100vw;
+            padding: 0;
+            background-color: rgb(249, 252, 255);
+            position: relative;
+        }
+
+        .form-box {
+            width: 600px;
+            height: 400px;
+            background-color: rgb(16, 164, 236);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 40px;
+            border-radius: 0px;
+            box-shadow: 0 0 25px rgba(0, 0, 0, 0.25);
+            color: white;
+        }
+
+        .form-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            border-radius: 20px;
+        }
+
+
+
+        .form-title {
+            font-size: 30px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+
+        .input-container {
+            position: relative;
+            margin-bottom: 20px;
+            width: 250px; /* optional max cap */
+        }
+
+        .input-field {
+            width: 100%;
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid #fff;
+            color: white;
+            outline: none;
+            font-size: 16px;
+            padding: 8px 0;
+        }
+
+        .input-label {
+            position: absolute;
+            top: 8px;
+            left: 0;
+            color: #eee;
+            font-size: 16px;
+            transition: 0.2s ease all;
+            pointer-events: none;
+        }
+
+        .input-field:focus ~ .input-label,
+        .input-field:not(:placeholder-shown) ~ .input-label {
+            top: -16px;
+            font-size: 14px;
+            color: #fff;
+        }
+
+        .submit-button {
+            width: 100%;
+            background-color: white;
+            color: rgb(16, 164, 236);
+            border: none;
+            border-radius: 25px;
+            padding: 10px 0;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+            .submit-button:hover {
+                background-color: rgb(2, 22, 38);
+            }
+
+        .client-msg {
+            font-size: 12px;
+            color:firebrick;
+            margin-top: 4px;
+        }
+
+        .change-link {
+            display: block;
+            margin-top: 12px;
+            text-align: center;
+            color: #e0e0e0;
+            font-size: 14px;
+            text-decoration: none;
+        }
+
+         .change-link:hover {
+            color: darkred;
+            text-decoration: underline;
+         }
+    </style>
+</head>
+<body>
+
+    <div class="form-box">
+        <div class="form-title">Login</div>
+
+        <div class="form-content">
+            @if (ViewBag.Error != null)
+            {
+                <div class="alert alert-danger text-center">@ViewBag.Error</div>
+            }
+
+            @using (Html.BeginForm("Login", "Login", FormMethod.Post, new { onsubmit = "return validateLogin();" }))
+            {
+                @Html.AntiForgeryToken()
+
+                <div class="input-container">
+                    @Html.TextBoxFor(m => m.Email, new { @class = "input-field", id = "email", placeholder = " " })
+                    <label class="input-label" for="email">Email</label>
+                    <p id="msg" class="client-msg"></p>
+                </div>
+
+                <div class="input-container">
+                    @Html.PasswordFor(m => m.PasswordHash, new { @class = "input-field", id = "password", placeholder = " " })
+                    <label class="input-label" for="password">Password</label>
+                    <p id="msg1" class="client-msg"></p>
+                </div>
+
+                <button type="submit" class="submit-button">Submit</button>
+            }
+
+            <a href="#" class="change-link">Change password?</a>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById("email").oninput = function () {
+            document.getElementById("msg").innerText = "";
+        };
+        document.getElementById("password").oninput = function () {
+            document.getElementById("msg1").innerText = "";
+        };
+
+        function validateLogin() {
+            const email = document.getElementById("email").value.trim();
+            const password = document.getElementById("password").value.trim();
+            let isValid = true;
+
+            if (email === "") {
+                document.getElementById("msg").innerText = "Please enter your email.";
+                isValid = false;
+            }
+
+            if (password === "") {
+                document.getElementById("msg1").innerText = "Password is required.";
+                isValid = false;
+            }
+
+            return isValid;
+        }
+    </script>
+
+</body>
+</html>
