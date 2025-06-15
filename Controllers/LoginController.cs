@@ -75,9 +75,9 @@ namespace Law_Firm_EMS.Controllers
 
                 switch (user.RoleID)
                 {
-                    case 1: return RedirectToAction("Dashboard", "Client");
-                    case 2: return RedirectToAction("Dashboard", "Consultant");
-                    case 3: return RedirectToAction("Dashboard", "HR");
+                    case 1: return RedirectToAction("Dashboard", "HR");
+                    case 2: return RedirectToAction("Dashboard", "Client");
+                    case 3: return RedirectToAction("Dashboard", "Consultant");
                     default: return RedirectToAction("Login");
                 }
             }
