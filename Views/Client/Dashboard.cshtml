@@ -1,0 +1,194 @@
+﻿@model Law_Firm_EMS.ViewModels.ClientDashboardViewModel
+
+@{
+    ViewBag.Title = "Dashboard";
+    Layout = "~/Views/Shared/_Layout2.cshtml";
+}
+
+@section styles {
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: white;
+            color: #1c1f1c;
+        }
+
+        .topbar {
+            background: rgb(16, 164, 236);
+            color: white;
+            padding: 20px 40px;
+            position: fixed;
+            top: 0;
+            left: 270px;
+            width: calc(100% - 270px);
+            z-index: 1000;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+        }
+
+        .sidebar {
+            width: 270px;
+            background: rgb(16, 164, 236);
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            padding: 30px 20px;
+            color: white;
+        }
+
+            .sidebar h2 {
+                font-size: 22px;
+                margin-bottom: 20px;
+            }
+
+            .sidebar ul {
+                list-style: none;
+                padding: 0;
+            }
+
+                .sidebar ul h3 {
+                    margin-top: 40px;
+                    font-size: 16px;
+                    border-bottom: 1px solid rgba(255,255,255,0.3);
+                    padding-bottom: 5px;
+                }
+
+                .sidebar ul li {
+                    margin: 10px 0;
+                }
+
+                    .sidebar ul li a {
+                        color: white;
+                        text-decoration: none;
+                        font-size: 14px;
+                        display: block;
+                    }
+
+        .main {
+            margin-left: 270px;
+            padding: 100px 40px 40px;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .card, .card1 {
+            background: rgb(242, 243, 248);
+            padding: 20px;
+            border-radius: 15px;
+            color: #1c1f1c;
+        }
+
+        .card1 {
+            grid-column: span 2;
+        }
+
+        table {
+            width: 100%;
+            margin-top: 10px;
+            border-collapse: collapse;
+        }
+
+            table th, table td {
+                padding: 8px;
+                text-align: left;
+            }
+
+        .highlight {
+            font-weight: bold;
+            color: rgb(16, 164, 236);
+        }
+    </style>
+}
+
+<div class="topbar">
+    Consultant Name: <b class="ms-2">@Model.ConsultantName</b>
+</div>
+
+<div class="sidebar">
+    <div class="top-section">
+        <h2>@Model.ClientName</h2>
+        <h3>Menu</h3>
+        <ul>
+
+            <li><a href="#">Home</a></li>
+            <li><a href="#">Forms</a></li>
+            <li><a href="#">Documents</a></li>
+            <li><a href="#">Billing</a></li>
+        </ul>
+        <h3>Others</h3>
+        <ul>
+
+            <li><a href="#">Settings</a></li>
+            <li><a href="#">Logout</a></li>
+        </ul>
+    </div>
+</div>
+
+<div class="main">
+    <div class="dashboard-grid">
+        <div class="card1">
+            <b>LOR Review Process</b>
+            <p><a href="#">Submit LOR</a></p>
+            <table>
+                <tr><th>Document</th><th>Status</th></tr>
+                @foreach (var lor in Model.LORs)
+                {
+                    <tr>
+                        <td>@System.IO.Path.GetFileName(lor.UploadPath)</td>
+                        <td class="highlight">@lor.StatusName</td>
+                    </tr>
+                }
+            </table>
+        </div>
+
+        <div class="card">
+            <b>EIA Status:</b> <span class="highlight">@Model.EIAStatus</span>
+        </div>
+
+        <div class="card">
+            <b>PESP Status:</b> <span class="highlight">@Model.PESPStatus</span>
+        </div>
+
+        <div class="card" style="grid-column: span 3;">
+            <b>Overall Bar Chart</b>
+            <canvas id="statusChart"></canvas>
+        </div>
+
+        <div class="card">📄 <b>Paid Invoices:</b> @Model.Paid</div>
+        <div class="card">💰 <b>Dues:</b> @Model.Due</div>
+        <div class="card">📊 <b>Total Fees:</b> @Model.TotalFees</div>
+    </div>
+</div>
+
+@section scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const ctx = document.getElementById('statusChart').getContext('2d');
+        const chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: @Html.Raw(Json.Encode(Model.StatusSummary.Select(s => s.Status))),
+                datasets: [{
+                    label: 'Document Status',
+                    data: @Html.Raw(Json.Encode(Model.StatusSummary.Select(s => s.Count))),
+                    backgroundColor: 'rgba(16, 164, 236, 0.7)'
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+    </script>
+}
+
+
