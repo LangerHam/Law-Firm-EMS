@@ -10,9 +10,15 @@ namespace Law_Firm_EMS.Controllers
 {
     public class LoginController : Controller
     {
+        private LawContextDb db;
+        public LoginController()
+        {
+            this.db = new LawContextDb();
+        }
         // GET: Login
         public ActionResult LandingPage()
         {
+            db.SaveChanges();
             return View();
         }
 
