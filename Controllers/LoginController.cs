@@ -63,12 +63,14 @@ namespace Law_Firm_EMS.Controllers
         }
 
         [HttpPost]
-        public ActionResult Login(string email, string password)
+        [ValidateAntiForgeryToken]
+        public ActionResult Login(Users model)
         {
-            var user = db.UsersEntity.FirstOrDefault(u => u.Email == email && u.PasswordHash == password);
+            var user = db.UsersEntity.FirstOrDefault(u => u.Email == model.Email && u.PasswordHash == model.PasswordHash);
 
             if (user != null)
             {
+
                 Session["UserID"] = user.UserID;
                 Session["Email"] = user.Email;
                 Session["RoleID"] = user.RoleID;
