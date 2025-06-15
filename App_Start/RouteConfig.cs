@@ -16,7 +16,7 @@ namespace Law_Firm_EMS
             routes.MapRoute(
                 name: "Default",
                 url: "{controller}/{action}/{id}",
-                defaults: new { controller = "Home", action = "Index", id = UrlParameter.Optional }
+                defaults: new { controller = "Login", action = "LandingPage", id = UrlParameter.Optional }
             );
         }
     }
