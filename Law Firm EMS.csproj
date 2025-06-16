@@ -227,6 +227,7 @@
     <Content Include="Views\HR\Dashboard.cshtml" />
     <Content Include="Views\Shared\HRnavbar.cshtml" />
     <Content Include="Views\Client\Dashboard.cshtml" />
+    <Content Include="Views\Shared\ClientNavbar.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

@@ -87,5 +87,13 @@ namespace Law_Firm_EMS.Controllers
             ViewBag.Error = "Invalid email or password";
             return View();
         }
+
+        public ActionResult Logout()
+        {
+            Session.Clear();  
+            Session.Abandon(); 
+            return RedirectToAction("LandingPage");
+        }
+
     }
 }

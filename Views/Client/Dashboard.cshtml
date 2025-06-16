@@ -2,194 +2,137 @@
 
 @{
     ViewBag.Title = "Dashboard";
-    Layout = "~/Views/Shared/HRnavbar.cshtml";
+    Layout = "~/Views/Shared/ClientNavbar.cshtml";
 }
 
-@section styles {
-    <style>
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background-color: white;
-            color: #1c1f1c;
-        }
-
-        .topbar {
-            background: rgb(16, 164, 236);
-            color: white;
-            padding: 20px 40px;
-            position: fixed;
-            top: 0;
-            left: 270px;
-            width: calc(100% - 270px);
-            z-index: 1000;
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-        }
-
-        .sidebar {
-            width: 270px;
-            background: rgb(16, 164, 236);
-            height: 100vh;
-            position: fixed;
-            top: 0;
-            left: 0;
-            padding: 30px 20px;
-            color: white;
-        }
-
-            .sidebar h2 {
-                font-size: 22px;
-                margin-bottom: 20px;
-            }
-
-            .sidebar ul {
-                list-style: none;
-                padding: 0;
-            }
-
-                .sidebar ul h3 {
-                    margin-top: 40px;
-                    font-size: 16px;
-                    border-bottom: 1px solid rgba(255,255,255,0.3);
-                    padding-bottom: 5px;
-                }
-
-                .sidebar ul li {
-                    margin: 10px 0;
-                }
-
-                    .sidebar ul li a {
-                        color: white;
-                        text-decoration: none;
-                        font-size: 14px;
-                        display: block;
-                    }
-
-        .main {
-            margin-left: 270px;
-            padding: 100px 40px 40px;
-        }
-
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-        }
-
-        .card, .card1 {
-            background: rgb(242, 243, 248);
-            padding: 20px;
-            border-radius: 15px;
-            color: #1c1f1c;
-        }
-
-        .card1 {
-            grid-column: span 2;
-        }
-
-        table {
-            width: 100%;
-            margin-top: 10px;
-            border-collapse: collapse;
-        }
-
-            table th, table td {
-                padding: 8px;
-                text-align: left;
-            }
-
-        .highlight {
-            font-weight: bold;
-            color: rgb(16, 164, 236);
-        }
-    </style>
-}
-
-<div class="topbar">
-    Consultant Name: <b class="ms-2">@Model.ConsultantName</b>
-</div>
-
-<div class="sidebar">
-    <div class="top-section">
-        <h2>@Model.ClientName</h2>
-        <h3>Menu</h3>
-        <ul>
-
-            <li><a href="#">Home</a></li>
-            <li><a href="#">Forms</a></li>
-            <li><a href="#">Documents</a></li>
-            <li><a href="#">Billing</a></li>
-        </ul>
-        <h3>Others</h3>
-        <ul>
-
-            <li><a href="#">Settings</a></li>
-            <li><a href="#">Logout</a></li>
-        </ul>
+<!-- Top Bar -->
+<div class="bg-white shadow-sm flex justify-between items-center px-6 py-4">
+    <div class="text-base text-gray-700">
+        Consultant Name: <strong>@Model.ConsultantName</strong>
+    </div>
+    <div class="flex items-center">
+        <i data-lucide="scale" class="h-6 w-6 text-sky-400"></i>
+        <span class="ml-2 text-lg font-semibold">NIW Solutions</span>
     </div>
 </div>
 
-<div class="main">
-    <div class="dashboard-grid">
-        <div class="card1">
-            <b>LOR Review Process</b>
-            <p><a href="#">Submit LOR</a></p>
-            <table>
-                <tr><th>Document</th><th>Status</th></tr>
-                @foreach (var lor in Model.LORs)
-                {
-                    <tr>
-                        <td>@System.IO.Path.GetFileName(lor.UploadPath)</td>
-                        <td class="highlight">@lor.StatusName</td>
-                    </tr>
-                }
-            </table>
+<!-- Page Content -->
+<main class="p-6 overflow-y-auto flex-1">
+    <!-- Top Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+
+        <!-- Quick Access to Forms -->
+        <div class="bg-gray-100 p-4 rounded-xl h-fit">
+            <b class="text-lg">Quick Access to Forms</b>
+            <ul class="list-disc pl-5 mt-3 space-y-2 text-sky-600 text-sm">
+                <li><a href="#">G-28 (Attorney Representation)</a></li>
+                <li><a href="#">G-1145 (Notification)</a></li>
+                <li><a href="#">I-140 (Registration)</a></li>
+                <li><a href="#">I-907 (Premium Registration - optional)</a></li>
+                <li><a href="#">ETA 750 Part B (Employment/Academic History)</a></li>
+            </ul>
         </div>
 
-        <div class="card">
-            <b>EIA Status:</b> <span class="highlight">@Model.EIAStatus</span>
-        </div>
+        <!-- LOR Review -->
+        <div class="bg-gray-100 p-4 rounded-xl h-fit lg:col-span-1">
+            <b class="text-lg">LOR Review Process</b>
+            <p class="mt-1"><a href="#" class="text-sky-600 underline">Submit LOR</a></p>
 
-        <div class="card">
-            <b>PESP Status:</b> <span class="highlight">@Model.PESPStatus</span>
-        </div>
-
-        <div class="card" style="grid-column: span 3;">
-            <b>Overall Bar Chart</b>
-            <canvas id="statusChart"></canvas>
-        </div>
-
-        <div class="card">📄 <b>Paid Invoices:</b> @Model.Paid</div>
-        <div class="card">💰 <b>Dues:</b> @Model.Due</div>
-        <div class="card">📊 <b>Total Fees:</b> @Model.TotalFees</div>
-    </div>
-</div>
-
-@section scripts {
-    
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        const ctx = document.getElementById('statusChart').getContext('2d');
-        const chart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: @Html.Raw(Json.Encode(Model.StatusSummary.Select(s => s.Status))),
-                datasets: [{
-                    label: 'Document Status',
-                    data: @Html.Raw(Json.Encode(Model.StatusSummary.Select(s => s.Count))),
-                    backgroundColor: 'rgba(16, 164, 236, 0.7)'
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: { beginAtZero: true }
-                }
+            @if (Model.LORs != null && Model.LORs.Any())
+            {
+                <table class="w-full mt-2 text-sm">
+                    <thead>
+                        <tr class="text-left">
+                            <th>Document</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var lor in Model.LORs)
+                        {
+                            <tr>
+                                <td>@System.IO.Path.GetFileName(lor.UploadPath)</td>
+                                <td class="text-sky-600 font-semibold">@lor.StatusName</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
             }
-        });
-    </script>
-}
+            else
+            {
+                <p class="mt-4 text-sm text-gray-700">No LOR document was uploaded.</p>
+            }
+        </div>
 
+        <!-- EIA + PESP -->
+        <div class="flex flex-col gap-4">
+            <!-- EIA Status -->
+            <div class="bg-gray-100 p-4 rounded-xl">
+                <b class="text-lg">EIA Status</b>
+                <div class="flex items-center gap-4 mt-3">
+                    <div class="flex items-center gap-2">
+                        <div class="w-4 h-4 rounded-full @(Model.EIAStatus == "In Progress" ? "bg-green-500" : "border border-gray-400")"></div>
+                        <span class="text-sm text-gray-700">In Progress</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="w-4 h-4 rounded-full @(Model.EIAStatus == "Completed" ? "bg-blue-500" : "border border-gray-400")"></div>
+                        <span class="text-sm text-gray-700">Completed</span>
+                    </div>
+                </div>
+            </div>
 
+            <!-- PESP Status -->
+            <div class="bg-gray-100 p-4 rounded-xl">
+                <b class="text-lg">PESP Status</b>
+                <div class="flex items-center gap-4 mt-3">
+                    <div class="flex items-center gap-2">
+                        <div class="w-4 h-4 rounded-full @(Model.PESPStatus == "In Progress" ? "bg-green-500" : "border border-gray-400")"></div>
+                        <span class="text-sm text-gray-700">In Progress</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="w-4 h-4 rounded-full @(Model.PESPStatus == "Completed" ? "bg-blue-500" : "border border-gray-400")"></div>
+                        <span class="text-sm text-gray-700">Completed</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bar Chart Section -->
+    <div class="bg-gray-100 p-4 rounded-xl mb-6">
+        <b class="text-lg">Overall Bar Chart</b>
+        <canvas id="statusChart" class="mt-4"></canvas>
+    </div>
+
+    <!-- Billing Info -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-gray-100 p-4 rounded-xl">📄 <b>Paid Invoices:</b> @Model.Paid</div>
+        <div class="bg-gray-100 p-4 rounded-xl">💰 <b>Dues:</b> @Model.Due</div>
+        <div class="bg-gray-100 p-4 rounded-xl">📊 <b>Total Fees:</b> @Model.TotalFees</div>
+    </div>
+</main>
+
+<!-- Chart.js Script -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    lucide.createIcons();
+
+    const ctx = document.getElementById('statusChart').getContext('2d');
+    const chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: @Html.Raw(Json.Encode(Model.StatusSummary.Select(s => s.Status))),
+            datasets: [{
+                label: 'Document Status',
+                data: @Html.Raw(Json.Encode(Model.StatusSummary.Select(s => s.Count))),
+                backgroundColor: 'rgba(16, 164, 236, 0.7)'
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+</script>
