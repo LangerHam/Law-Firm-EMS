@@ -1,8 +1,195 @@
-﻿
+﻿@model Law_Firm_EMS.ViewModels.HRDashboardViewModel
 @{
     ViewBag.Title = "Dashboard";
     Layout = "~/Views/Shared/HRnavbar.cshtml";
 }
 
-<h2>Dashboard</h2>
+<!-- Page Header -->
+<div class="mb-6">
+    <h1 class="text-3xl font-bold text-gray-800">Dashboard</h1>
+    <p class="text-gray-500">Welcome back, here's your overview for today.</p>
+</div>
 
+<!-- Main Dashboard Content -->
+<div class="flex flex-col gap-6">
+
+    <!-- Center Section: Attendance Tracker -->
+    <div class="bg-white p-6 rounded-lg shadow-md text-center">
+        <h3 class="font-semibold text-lg text-gray-800 mb-4">Attendance Tracker</h3>
+
+        <!-- Animation Container -->
+        <div class="relative w-48 h-48 mx-auto my-4 flex items-center justify-center">
+            <svg id="animation-svg" class="absolute inset-0 w-full h-full" viewBox="0 0 100 100">
+                <!-- Background Circle -->
+                <circle cx="50" cy="50" r="45" stroke="#e5e7eb" stroke-width="5" fill="none" />
+                <!-- Animated Progress Circle -->
+                <circle id="progress-circle" cx="50" cy="50" r="45" stroke="#10b981" stroke-width="5" fill="none" transform="rotate(-90 50 50)" stroke-linecap="round" />
+            </svg>
+            <!-- Timer Display -->
+            <div id="timer-display" class="text-4xl font-bold text-gray-800 z-10">00:00:00</div>
+        </div>
+
+        <p id="status-text" class="text-gray-500 mb-4">Not Checked In</p>
+
+        <button id="checkInBtn" class="w-full max-w-xs mx-auto px-6 py-3 text-lg font-semibold text-white bg-green-500 rounded-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-300">
+            <span class="flex items-center justify-center">
+                <i data-lucide="play-circle" class="h-6 w-6 mr-2"></i>
+                <span>Check In</span>
+            </span>
+        </button>
+        <p id="checkInTime" class="text-sm text-gray-500 mt-4 h-5"></p>
+    </div>
+
+    <!-- Bottom Section: Notification Boards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        <!-- New Client Requests Card -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <div class="flex items-center mb-4">
+                <div class="bg-sky-100 p-2 rounded-full">
+                    <i data-lucide="user-plus" class="h-6 w-6 text-sky-600"></i>
+                </div>
+                <h3 class="ml-3 font-semibold text-lg text-gray-800">New Consultant Requests</h3>
+            </div>
+            <div class="space-y-3 max-h-96 overflow-y-auto pr-2">
+                @if (Model.NewClientRequests.Any())
+                {
+                    foreach (var client in Model.NewClientRequests)
+                    {
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors">
+                            <div>
+                                <p class="font-medium text-gray-700">@client.FullName</p>
+                                <p class="text-sm text-gray-500">Requested: @client.User.CreatedAt.ToString("MMM dd, yyyy")</p>
+                            </div>
+                            <a href="@Url.Action("Details", "Clients", new { id = client.UserID })" class="text-sky-600 hover:text-sky-800">
+                                <i data-lucide="arrow-right-circle" class="h-5 w-5"></i>
+                            </a>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="text-center py-8 text-gray-500">
+                        <i data-lucide="check-circle-2" class="h-12 w-12 mx-auto mb-2 text-green-500"></i>
+                        <p>No new client requests at this time.</p>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Pending Leave Requests Card -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <div class="flex items-center mb-4">
+                <div class="bg-amber-100 p-2 rounded-full">
+                    <i data-lucide="calendar-clock" class="h-6 w-6 text-amber-600"></i>
+                </div>
+                <h3 class="ml-3 font-semibold text-lg text-gray-800">Pending Leave Requests</h3>
+            </div>
+            <div class="space-y-3 max-h-96 overflow-y-auto pr-2">
+                @if (Model.PendingLeaveRequests.Any())
+                {
+                    foreach (var leave in Model.PendingLeaveRequests)
+                    {
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors">
+                            <div>
+                                <p class="font-medium text-gray-700">@leave.RequestedByConsultant.Name</p>
+                                <p class="text-sm text-gray-500">@leave.FromDate.ToString("MMM dd") - @leave.ToDate.ToString("MMM dd, yyyy")</p>
+                            </div>
+                            <a href="@Url.Action("Details", "Leaves", new { id = leave.LeaveID })" class="text-amber-600 hover:text-amber-800">
+                                <i data-lucide="arrow-right-circle" class="h-5 w-5"></i>
+                            </a>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="text-center py-8 text-gray-500">
+                        <i data-lucide="check-circle-2" class="h-12 w-12 mx-auto mb-2 text-green-500"></i>
+                        <p>No pending leave requests.</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+</div>
+
+@section scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/gsap.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const checkInBtn = document.getElementById('checkInBtn');
+            const timerDisplay = document.getElementById('timer-display');
+            const checkInTimeDisplay = document.getElementById('checkInTime');
+            const statusText = document.getElementById('status-text');
+            const progressCircle = document.getElementById('progress-circle');
+
+            let isCheckedIn = false;
+            let timerInterval;
+            let startTime;
+
+            // --- GSAP Animation Setup ---
+            const circleLength = progressCircle.getTotalLength();
+            gsap.set(progressCircle, { strokeDasharray: circleLength, strokeDashoffset: circleLength });
+
+            function playCheckInAnimation() {
+                gsap.to(progressCircle, {
+                    strokeDashoffset: 0,
+                    duration: 1.5,
+                    ease: "power2.out"
+                });
+            }
+
+            function playCheckOutAnimation() {
+                gsap.to(progressCircle, {
+                    strokeDashoffset: circleLength,
+                    duration: 1,
+                    ease: "power1.in"
+                });
+            }
+
+            checkInBtn.addEventListener('click', function () {
+                isCheckedIn = !isCheckedIn;
+
+                if (isCheckedIn) {
+                    // --- Handle Check In ---
+                    this.classList.remove('bg-green-500', 'hover:bg-green-600');
+                    this.classList.add('bg-red-500', 'hover:bg-red-600');
+                    this.innerHTML = `<span class="flex items-center justify-center"><i data-lucide="stop-circle" class="h-6 w-6 mr-2"></i><span>Check Out</span></span>`;
+                    lucide.createIcons();
+
+                    startTime = new Date();
+                    statusText.textContent = "Checked In";
+                    checkInTimeDisplay.textContent = 'Checked in at: ' + startTime.toLocaleTimeString();
+
+                    playCheckInAnimation();
+                    timerInterval = setInterval(updateTimer, 1000);
+
+                } else {
+                    // --- Handle Check Out ---
+                    this.classList.remove('bg-red-500', 'hover:bg-red-600');
+                    this.classList.add('bg-green-500', 'hover:bg-green-600');
+                    this.innerHTML = `<span class="flex items-center justify-center"><i data-lucide="play-circle" class="h-6 w-6 mr-2"></i><span>Check In</span></span>`;
+                    lucide.createIcons();
+
+                    clearInterval(timerInterval);
+                    playCheckOutAnimation();
+                    const endTime = new Date();
+                    statusText.textContent = "Checked Out";
+                    checkInTimeDisplay.textContent += ' | Checked out at: ' + endTime.toLocaleTimeString();
+                    //A
+                }
+            });
+
+            function updateTimer() {
+                const now = new Date();
+                const elapsed = new Date(now - startTime);
+                const hours = String(elapsed.getUTCHours()).padStart(2, '0');
+                const minutes = String(elapsed.getUTCMinutes()).padStart(2, '0');
+                const seconds = String(elapsed.getUTCSeconds()).padStart(2, '0');
+                timerDisplay.textContent = `${hours}:${minutes}:${seconds}`;
+            }
+        });
+    </script>
+}
