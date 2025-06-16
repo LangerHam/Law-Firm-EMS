@@ -53,7 +53,7 @@ namespace Law_Firm_EMS.Controllers
             }
             catch (System.Exception ex)
             {
-                return RedirectToAction("LandingPagee");
+                return RedirectToAction("LandingPage");
             }
         }
 
