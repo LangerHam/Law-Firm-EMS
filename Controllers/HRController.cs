@@ -50,6 +50,8 @@ namespace Law_Firm_EMS.Controllers
             return View(viewModel);
         }
 
+        //---------CONSULTANT MANAGEMENT---------
+
         public ActionResult ManageConsultants()
         {
             if (Session["RoleID"] == null || (int)Session["RoleID"] != 1) return RedirectToAction("Login", "Login");
@@ -158,6 +160,169 @@ namespace Law_Firm_EMS.Controllers
                 db.SaveChanges();
             }
             return RedirectToAction("ManageConsultants");
+        }
+
+        //---------CLIENT MANAGEMENT---------
+
+        public ActionResult ManageClients(string searchTerm, string sortBy)
+        {
+            if (Session["RoleID"] == null || (int)Session["RoleID"] != 1) return RedirectToAction("Login", "Login");
+
+            var clients = db.ClientEntity.Include(c => c.User).Include(c => c.Status);
+
+            if (!string.IsNullOrEmpty(searchTerm))
+            {
+                clients = clients.Where(c => c.FullName.Contains(searchTerm) || c.User.Email.Contains(searchTerm));
+            }
+
+            ViewBag.SortByName = string.IsNullOrEmpty(sortBy) ? "name_desc" : "";
+            ViewBag.SortByDate = sortBy == "date" ? "date_desc" : "date";
+
+            switch (sortBy)
+            {
+                case "name_desc":
+                    clients = clients.OrderByDescending(c => c.FullName);
+                    break;
+                case "date":
+                    clients = clients.OrderBy(c => c.User.CreatedAt);
+                    break;
+                case "date_desc":
+                    clients = clients.OrderByDescending(c => c.User.CreatedAt);
+                    break;
+                default:
+                    clients = clients.OrderBy(c => c.FullName);
+                    break;
+            }
+            ViewBag.CurrentSearch = searchTerm;
+
+            return View(clients.ToList());
+        }
+
+        public PartialViewResult SearchClients(string searchTerm, string sortBy)
+        {
+            var clients = db.ClientEntity.Include(c => c.User).Include(c => c.Status);
+
+            if (!string.IsNullOrEmpty(searchTerm))
+            {
+                clients = clients.Where(c => c.FullName.Contains(searchTerm) || c.User.Email.Contains(searchTerm));
+            }
+
+            switch (sortBy)
+            {
+                case "name_desc":
+                    clients = clients.OrderByDescending(c => c.FullName);
+                    break;
+                case "date":
+                    clients = clients.OrderBy(c => c.User.CreatedAt);
+                    break;
+                case "date_desc":
+                    clients = clients.OrderByDescending(c => c.User.CreatedAt);
+                    break;
+                default:
+                    clients = clients.OrderBy(c => c.FullName);
+                    break;
+            }
+
+            return PartialView("_ClientListTable", clients.ToList());
+        }
+
+        // GET: HR/ClientDetails/{id}
+        public ActionResult ClientDetails(int? id)
+        {
+            if (Session["RoleID"] == null || (int)Session["RoleID"] != 1) return RedirectToAction("Login", "Login");
+            if (id == null) return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
+            Client client = db.ClientEntity
+                .Include(c => c.User)
+                .Include(c => c.Status)
+                .Include(c => c.AssignedConsultant.User) 
+                .FirstOrDefault(c => c.UserID == id);
+
+            if (client == null) return HttpNotFound();
+
+            if (client.Status.StatusName == "Accepted")
+            {
+                ViewBag.ConsultantList = new SelectList(db.ConsultantEntity.ToList(), "UserID", "Name", client.AssignedConsultantID);
+            }
+
+            return View(client);
+        }
+
+        // POST: HR/ClientDetails/{id}
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult ClientDetails(Client client, string newPassword)
+        {
+            if (Session["RoleID"] == null || (int)Session["RoleID"] != 1) return RedirectToAction("Login", "Login");
+
+            if (ModelState.IsValid)
+            {
+                var clientInDb = db.ClientEntity.Find(client.UserID);
+                if (clientInDb == null) return HttpNotFound();
+                var userInDb = db.UsersEntity.Find(client.UserID);
+                if (userInDb == null) return HttpNotFound();
+
+                clientInDb.FullName = client.FullName;
+                clientInDb.Phone = client.Phone;
+                clientInDb.CaseDetails = client.CaseDetails;
+                if (!string.IsNullOrWhiteSpace(newPassword))
+                {
+                    // Change with BCrpyt Later
+                    userInDb.PasswordHash = newPassword;
+                }
+
+                db.SaveChanges();
+                TempData["SuccessMessage"] = "Client details updated successfully!";
+                return RedirectToAction("ClientDetails", new { id = client.UserID });
+            }
+
+            client.User = db.UsersEntity.Find(client.UserID);
+            client.Status = db.StatusTypeEntity.Find(db.ClientEntity.AsNoTracking().FirstOrDefault(c => c.UserID == client.UserID).StatusID);
+            if (client.Status.StatusName == "Accepted")
+            {
+                ViewBag.ConsultantList = new SelectList(db.ConsultantEntity.ToList(), "UserID", "Name", client.AssignedConsultantID);
+            }
+            return View(client);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult ChangeClientStatus(int id, string newStatus)
+        {
+            if (Session["RoleID"] == null || (int)Session["RoleID"] != 1) return RedirectToAction("Login", "Login");
+
+            var client = db.ClientEntity.Find(id);
+            var status = db.StatusTypeEntity.FirstOrDefault(s => s.StatusName == newStatus);
+
+            if (client != null && status != null)
+            {
+                client.StatusID = status.StatusID;
+                db.SaveChanges();
+                TempData["SuccessMessage"] = $"Client status changed to {newStatus}.";
+            }
+
+            return RedirectToAction("ClientDetails", new { id = id });
+        }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult AssignConsultant(int clientId, int? consultantId)
+        {
+            if (Session["RoleID"] == null || (int)Session["RoleID"] != 1) return RedirectToAction("Login", "Login");
+
+            var client = db.ClientEntity.Find(clientId);
+            if (client != null && consultantId.HasValue)
+            {
+                client.AssignedConsultantID = consultantId.Value;
+                db.SaveChanges();
+                TempData["SuccessMessage"] = "Consultant assigned successfully.";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Please select a consultant to assign.";
+            }
+            return RedirectToAction("ClientDetails", new { id = clientId });
         }
     }
 }

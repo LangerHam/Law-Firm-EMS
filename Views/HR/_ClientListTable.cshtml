@@ -1,0 +1,42 @@
+﻿@model IEnumerable<Law_Firm_EMS.Models.Client>
+
+@if (!Model.Any())
+{
+    <tr>
+        <td colspan="4" class="text-center p-6 text-gray-500">
+            <i data-lucide="search-x" class="h-10 w-10 mx-auto mb-2"></i>
+            No clients found matching your criteria.
+        </td>
+    </tr>
+}
+else
+{
+    foreach (var item in Model)
+    {
+        <tr>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">@item.FullName</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">@item.User.Email</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                @if (item.Status.StatusName == "Pending")
+                {
+                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Pending</span>
+                }
+                else if (item.Status.StatusName == "Accepted")
+                {
+                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Accepted</span>
+                }
+                else if (item.Status.StatusName == "Rejected")
+                {
+                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Rejected</span>
+                }
+                else
+                {
+                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">@item.Status.StatusName</span>
+                }
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                <a href="@Url.Action("ClientDetails", "HR", new { id = item.UserID })" class="text-indigo-600 hover:text-indigo-900">View Details</a>
+            </td>
+        </tr>
+    }
+}

@@ -61,7 +61,7 @@
                                 <p class="font-medium text-gray-700">@client.FullName</p>
                                 <p class="text-sm text-gray-500">Requested: @client.User.CreatedAt.ToString("MMM dd, yyyy")</p>
                             </div>
-                            <a href="@Url.Action("Details", "Clients", new { id = client.UserID })" class="text-sky-600 hover:text-sky-800">
+                            <a href="@Url.Action("ClientDetails", "HR", new { id = client.UserID })" class="text-sky-600 hover:text-sky-800">
                                 <i data-lucide="arrow-right-circle" class="h-5 w-5"></i>
                             </a>
                         </div>

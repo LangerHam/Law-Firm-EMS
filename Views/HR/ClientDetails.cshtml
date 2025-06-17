@@ -1,0 +1,129 @@
+﻿@model Law_Firm_EMS.Models.Client
+@{
+    ViewBag.Title = "ClientDetails";
+    Layout = "~/Views/Shared/HRnavbar.cshtml";
+}
+
+<div class="bg-white p-8 rounded-lg shadow-md max-w-4xl mx-auto">
+
+    <div class="flex justify-between items-start mb-6 border-b pb-4">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-800">@Model.FullName</h1>
+            <p class="text-lg text-gray-500">Client Profile & Case Management</p>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6" role="alert">
+            <p class="font-bold">Success</p>
+            <p>@TempData["SuccessMessage"]</p>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6" role="alert">
+            <p class="font-bold">Error</p>
+            <p>@TempData["ErrorMessage"]</p>
+        </div>
+    }
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+        <div class="lg:col-span-1">
+            <div class="bg-gray-50 p-4 rounded-lg space-y-4">
+                <h3 class="font-bold text-lg text-gray-800">Actions</h3>
+
+                @if (Model.Status.StatusName == "Pending")
+                {
+                    using (Html.BeginForm("ChangeClientStatus", "HR", new { id = Model.UserID }, FormMethod.Post))
+                    {
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="newStatus" value="Accepted" />
+                        <button type="submit" class="w-full bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 flex items-center justify-center">
+                            <i data-lucide="check" class="h-4 w-4 mr-2"></i> Accept Client
+                        </button>
+                    }
+                    using (Html.BeginForm("ChangeClientStatus", "HR", new { id = Model.UserID }, FormMethod.Post))
+                    {
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="newStatus" value="Rejected" />
+                        <button type="submit" class="w-full bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 flex items-center justify-center mt-2">
+                            <i data-lucide="x" class="h-4 w-4 mr-2"></i> Reject Client
+                        </button>
+                    }
+                }
+
+                @if (Model.Status.StatusName == "Accepted")
+                {
+                    <div class="border-t pt-4">
+                        <h4 class="font-semibold text-gray-700 mb-2">Assign Consultant</h4>
+                        @using (Html.BeginForm("AssignConsultant", "HR", FormMethod.Post))
+                        {
+                            @Html.AntiForgeryToken()
+                            @Html.Hidden("clientId", Model.UserID)
+                            @Html.DropDownList("consultantId", (SelectList)ViewBag.ConsultantList, "Select a consultant...", new { @class = "w-full px-3 py-2 border border-gray-300 rounded-lg" })
+                            <button type="submit" class="w-full bg-sky-500 text-white px-4 py-2 rounded-lg hover:bg-sky-600 mt-2">
+                                Assign
+                            </button>
+                        }
+                        @if (Model.AssignedConsultant != null)
+                        {
+                            <p class="text-sm text-gray-600 mt-2">Currently assigned to: <strong class="font-medium">@Model.AssignedConsultant.Name</strong></p>
+                        }
+                    </div>
+                }
+
+                <p class="text-xs text-center text-gray-500 pt-2">Current Status: <strong>@Model.Status.StatusName</strong></p>
+            </div>
+        </div>
+
+        <div class="lg:col-span-2">
+            @using (Html.BeginForm("ClientDetails", "HR", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(model => model.UserID)
+                @Html.ValidationSummary(true, "", new { @class = "text-red-600 bg-red-50 p-3 rounded-md mb-6" })
+
+                <div class="space-y-6">
+                    <div>
+                        @Html.LabelFor(model => model.FullName, new { @class = "block text-sm font-medium text-gray-700" })
+                        @Html.EditorFor(model => model.FullName, new { htmlAttributes = new { @class = "mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg" } })
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Email (Read-only)</label>
+                        <input type="text" value="@Model.User.Email" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100" readonly />
+                    </div>
+                    <div>
+                        @Html.LabelFor(model => model.Phone, new { @class = "block text-sm font-medium text-gray-700" })
+                        @Html.EditorFor(model => model.Phone, new { htmlAttributes = new { @class = "mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg" } })
+                    </div>
+                    <div>
+                        @Html.LabelFor(model => model.CaseDetails, new { @class = "block text-sm font-medium text-gray-700" })
+                        @Html.TextAreaFor(model => model.CaseDetails, new { @rows = 8, @class = "mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg" })
+                    </div>
+
+                    <div>
+                        <label for="newPassword" class="block text-sm font-medium text-gray-700">Set New Password (Optional)</label>
+                        <input type="text" name="newPassword" id="newPassword" placeholder="Leave blank to keep current password" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg" />
+                        <p class="text-xs text-gray-500 mt-1">Enter a new password here only if you want to change it.</p>
+                    </div>
+
+                    <div class="text-right">
+                        <button type="submit" class="bg-indigo-500 text-white px-6 py-2 rounded-lg hover:bg-indigo-600">
+                            Save Changes
+                        </button>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="mt-8 pt-6 border-t">
+        <a href="@Url.Action("ManageClients", "HR")" class="text-sky-600 hover:text-sky-800 flex items-center">
+            <i data-lucide="arrow-left" class="h-4 w-4 mr-2"></i>
+            <span>Back to Client List</span>
+        </a>
+    </div>
+</div>
+

@@ -1,0 +1,92 @@
+﻿@model IEnumerable<Law_Firm_EMS.Models.Client>
+@{
+    ViewBag.Title = "ManageClients";
+    Layout = "~/Views/Shared/HRnavbar.cshtml";
+}
+
+<div class="bg-white p-6 rounded-lg shadow-md">
+    <!-- Header: Title and Search -->
+    <div class="flex flex-wrap justify-between items-center gap-4 mb-6">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800">Client Management</h1>
+            <p class="text-gray-500">View, manage, and assign clients.</p>
+        </div>
+        <div class="w-full sm:w-auto">
+            <form id="searchForm" action="@Url.Action("ManageClients", "HR")" method="get">
+                <div class="relative">
+                    <input type="text" id="searchInput" name="searchTerm" value="@ViewBag.CurrentSearch" placeholder="Search by name or email..." class="w-full sm:w-64 pl-10 pr-4 py-2 border rounded-lg" />
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i data-lucide="search" class="h-5 w-5 text-gray-400"></i>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Sorting Links -->
+    <div class="flex space-x-4 mb-4 pb-4 border-b">
+        <span class="font-semibold text-gray-600">Sort By:</span>
+        <a href="@Url.Action("ManageClients", new { sortBy = ViewBag.SortByName, searchTerm = ViewBag.CurrentSearch })" class="text-sky-600 hover:underline">Name</a>
+        <a href="@Url.Action("ManageClients", new { sortBy = ViewBag.SortByDate, searchTerm = ViewBag.CurrentSearch })" class="text-sky-600 hover:underline">Date Created</a>
+    </div>
+
+    <!-- Clients Table -->
+    <div class="overflow-x-auto">
+        <table class="min-w-full bg-white">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client Name</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="client-table-body" class="divide-y divide-gray-200">
+                @Html.Partial("_ClientListTable", Model)
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+    $(document).ready(function () {     
+        function performSearch() {
+            var searchTerm = $('#searchInput').val();
+            var sortBy = '@ViewBag.CurrentSort';
+
+            $('#client-table-body').html('<tr><td colspan="4" class="text-center p-6"><i data-lucide="loader-2" class="animate-spin h-8 w-8 text-sky-500 mx-auto"></i></td></tr>');
+            lucide.createIcons();
+
+            $.ajax({
+                url: '@Url.Action("SearchClients", "HR")',
+                type: 'GET',
+                data: {
+                    searchTerm: searchTerm,
+                    sortBy: sortBy
+                },
+                success: function (result) {
+                    $('#client-table-body').html(result);
+                    lucide.createIcons();
+                },
+                error: function () {
+                    $('#client-table-body').html('<tr><td colspan="4" class="text-center text-red-500 p-4">Error loading data. Please try again.</td></tr>');
+                }
+            });
+        }
+
+        // --- Event Listeners ---
+
+        let debounceTimer;
+        $('#searchInput').on('keyup', function () {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(performSearch, 350); 
+        });
+
+        $('#searchForm').on('submit', function(e) {
+            e.preventDefault();
+            performSearch();
+        });
+    });
+    </script>
+}
