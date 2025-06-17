@@ -95,7 +95,7 @@
                                 <p class="font-medium text-gray-700">@leave.RequestedByConsultant.Name</p>
                                 <p class="text-sm text-gray-500">@leave.FromDate.ToString("MMM dd") - @leave.ToDate.ToString("MMM dd, yyyy")</p>
                             </div>
-                            <a href="@Url.Action("Details", "Leaves", new { id = leave.LeaveID })" class="text-amber-600 hover:text-amber-800">
+                            <a href="@Url.Action("ManageLeaveRequests", "HR", new { id = leave.LeaveID })" class="text-amber-600 hover:text-amber-800">
                                 <i data-lucide="arrow-right-circle" class="h-5 w-5"></i>
                             </a>
                         </div>

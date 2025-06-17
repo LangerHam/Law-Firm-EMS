@@ -1,11 +1,13 @@
 ﻿using Law_Firm_EMS.Context;
 using Law_Firm_EMS.Models;
 using Law_Firm_EMS.ViewModels;
+using Law_Firm_EMS.ViewModels.HR;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 
@@ -96,7 +98,7 @@ namespace Law_Firm_EMS.Controllers
                 {
                     Name = viewModel.Name,
                     Phone = viewModel.Phone,
-                    //HRID = (int)Session["UserID"],
+                    HRID = (int)Session["UserID"],
                     User = user
                 };
 
@@ -304,7 +306,6 @@ namespace Law_Firm_EMS.Controllers
             return RedirectToAction("ClientDetails", new { id = id });
         }
 
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult AssignConsultant(int clientId, int? consultantId)
@@ -323,6 +324,220 @@ namespace Law_Firm_EMS.Controllers
                 TempData["ErrorMessage"] = "Please select a consultant to assign.";
             }
             return RedirectToAction("ClientDetails", new { id = clientId });
+        }
+
+        // --- TASK MANAGEMENT ACTIONS ---
+
+        public ActionResult ManageTasks()
+        {
+            if (Session["RoleID"] == null || (int)Session["RoleID"] != 1) return RedirectToAction("Login", "Login");
+
+            var createTaskForm = new TaskViewModel
+            {
+                ClientList = new SelectList(db.ClientEntity.ToList(), "UserID", "FullName"),
+                ConsultantList = new SelectList(db.ConsultantEntity.ToList(), "UserID", "Name"),
+                NewDocumentTypeList = new SelectList(db.DocumentTypeEntity.Where(dt => dt.TypeName == "EIA" || dt.TypeName == "PES").ToList(), "DocumentTypeID", "TypeName"),
+                UnassignedLoRList = new List<SelectListItem>()
+            };
+
+            var taskList = db.TasksEntity
+                .Include(t => t.Document.Client.User)
+                .Include(t => t.AssignedToConsultant.User)
+                .Include(t => t.Document.DocumentType)
+                .Include(t => t.Status)
+                .OrderByDescending(t => t.DocumentID)
+                .ToList();
+
+            var viewModel = new ManageTasksViewModel
+            {
+                TaskList = taskList,
+                CreateTaskForm = createTaskForm
+            };
+
+            return View(viewModel);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult CreateTask(ManageTasksViewModel viewModel)
+        {
+            var formModel = viewModel.CreateTaskForm;
+
+            if (Session["RoleID"] == null || (int)Session["RoleID"] != 1) return RedirectToAction("Login", "Login");
+
+            if (string.IsNullOrEmpty(formModel.TaskCreationType))
+            {
+                ModelState.AddModelError("CreateTaskForm.TaskCreationType", "Please select a task creation method.");
+            }
+            else if (formModel.TaskCreationType == "FromLoR" && !formModel.SelectedLoRDocumentID.HasValue)
+            {
+                ModelState.AddModelError("CreateTaskForm.SelectedLoRDocumentID", "You must select an LoR draft to assign.");
+            }
+            else if (formModel.TaskCreationType == "NewDocument")
+            {
+                if (!formModel.SelectedClientID.HasValue) ModelState.AddModelError("CreateTaskForm.SelectedClientID", "Please select a client.");
+                if (!formModel.NewDocumentTypeID.HasValue) ModelState.AddModelError("CreateTaskForm.NewDocumentTypeID", "Please select a document type.");
+            }
+
+            if (ModelState.IsValid)
+            {
+                Document documentToTask;
+                var hrUserId = (int)Session["UserID"];
+
+                var inProgressStatusId = db.StatusTypeEntity.FirstOrDefault(s => s.StatusName == "In Progress").StatusID;
+                var pendingStatusId = db.StatusTypeEntity.FirstOrDefault(s => s.StatusName == "Pending").StatusID;
+
+                if (formModel.TaskCreationType == "FromLoR")
+                {
+                    var originalDoc = db.DocumentEntity.Find(formModel.SelectedLoRDocumentID.Value);
+                    documentToTask = new Document
+                    {
+                        ClientID = originalDoc.ClientID,
+                        UploadedByUserID = hrUserId,
+                        DocumentTypeID = originalDoc.DocumentTypeID,
+                        StatusID = inProgressStatusId,
+                        ParentDocumentID = originalDoc.ParentDocumentID ?? originalDoc.DocumentID,
+                        UploadPath = "Awaiting upload..."
+                    };
+                }
+                else // NewDocument
+                {
+                    documentToTask = new Document
+                    {
+                        ClientID = formModel.SelectedClientID.Value,
+                        UploadedByUserID = hrUserId,
+                        DocumentTypeID = formModel.NewDocumentTypeID.Value,
+                        StatusID = inProgressStatusId,
+                        UploadPath = "Awaiting upload..."
+                    };
+                }
+
+                db.DocumentEntity.Add(documentToTask);
+
+                var newTask = new Tasks
+                {
+                    Document = documentToTask,
+                    AssignedToConsultantID = formModel.AssignedToConsultantID,
+                    AssignedByHRID = hrUserId,
+                    Instructions = formModel.Instructions,
+                    StatusID = pendingStatusId
+                };
+                db.TasksEntity.Add(newTask);
+
+                db.SaveChanges();
+
+                return RedirectToAction("ManageTasks");
+            }
+
+            var taskList = db.TasksEntity.Include(t => t.Document.Client.User)
+                                   .Include(t => t.AssignedToConsultant.User)
+                                   .Include(t => t.Document.DocumentType)
+                                   .Include(t => t.Status)
+                                   .OrderByDescending(t => t.DocumentID).ToList();
+
+            formModel.ClientList = new SelectList(db.ClientEntity.ToList(), "UserID", "FullName", formModel.SelectedClientID);
+            formModel.ConsultantList = new SelectList(db.ConsultantEntity.ToList(), "UserID", "Name", formModel.AssignedToConsultantID);
+            formModel.NewDocumentTypeList = new SelectList(db.DocumentTypeEntity.Where(dt => dt.TypeName == "EIA" || dt.TypeName == "PES").ToList(), "DocumentTypeID", "TypeName", formModel.NewDocumentTypeID);
+
+            if (formModel.SelectedClientID.HasValue)
+            {
+                int lorTypeId = db.DocumentTypeEntity.FirstOrDefault(dt => dt.TypeName == "LOR").DocumentTypeID;
+                var unassignedLoRs = db.DocumentEntity
+                    .Where(d => d.ClientID == formModel.SelectedClientID.Value && d.DocumentTypeID == lorTypeId && d.Task == null)
+                    .ToList();
+                formModel.UnassignedLoRList = new SelectList(unassignedLoRs, "DocumentID", "DocumentID", formModel.SelectedLoRDocumentID);
+            }
+            else
+            {
+                formModel.UnassignedLoRList = new List<SelectListItem>();
+            }
+
+            viewModel.TaskList = taskList;
+            viewModel.CreateTaskForm = formModel;
+
+            return View("ManageTasks", viewModel);
+        }
+
+        public JsonResult GetUnassignedLoRs(int clientId)
+        {
+            int lorTypeId = db.DocumentTypeEntity.FirstOrDefault(dt => dt.TypeName == "LOR").DocumentTypeID;
+
+            var unassignedLoRs = db.DocumentEntity
+                .Where(d => d.ClientID == clientId && d.DocumentTypeID == lorTypeId && d.Task == null)
+                .Select(d => new {
+                    Value = d.DocumentID,
+                    Text = "LoR Draft (ID: " + d.DocumentID + ") - Uploaded: " + d.UploadedByUser.CreatedAt
+                }).ToList();
+
+            return Json(unassignedLoRs, JsonRequestBehavior.AllowGet);
+        }
+
+        //-------LEAVE MANAGEMENT--------
+
+        public ActionResult ManageLeaveRequests()
+        {
+            if (Session["RoleID"] == null || (int)Session["RoleID"] != 1) return RedirectToAction("Login", "Login");
+
+            var pendingStatusId = db.StatusTypeEntity.FirstOrDefault(s => s.StatusName == "Pending")?.StatusID;
+
+            var viewModel = new LeaveManagementViewModel
+            {
+                PendingRequests = pendingStatusId.HasValue
+                    ? db.LeaveEntity
+                        .Where(l => l.StatusID == pendingStatusId.Value)
+                        .Include(l => l.RequestedByConsultant)
+                        .OrderBy(l => l.FromDate)
+                        .ToList()
+                    : new List<Leave>(),
+                CalendarDate = DateTime.Today
+            };
+
+            return View(viewModel);
+        }
+
+        public JsonResult GetLeaveEvents(int year, int month)
+        {
+            var startDate = new DateTime(year, month, 1);
+            var endDate = startDate.AddMonths(1);
+
+            var approvedStatusId = db.StatusTypeEntity.FirstOrDefault(s => s.StatusName == "Accepted").StatusID;
+
+            var events = db.LeaveEntity
+        .Where(l => l.StatusID == approvedStatusId && l.FromDate < endDate && l.ToDate >= startDate)
+        .Include(l => l.RequestedByConsultant)
+        .ToList()
+        .Select(l => new CalendarEvent
+        {
+            Title = $"{l.RequestedByConsultant.Name} ({l.Type})",
+            Start = l.FromDate,
+            End = l.ToDate.AddDays(1),
+            Type = l.Type
+        }).ToList();
+
+            return Json(events, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult UpdateLeaveStatus(int leaveId, string decision)
+        {
+            if (Session["RoleID"] == null || (int)Session["RoleID"] != 1) return RedirectToAction("Login", "Login");
+
+            var leave = db.LeaveEntity.Find(leaveId);
+            if (leave == null) return HttpNotFound();
+
+            string newStatusName = (decision.ToLower() == "accept") ? "Accepted" : "Rejected";
+            var newStatus = db.StatusTypeEntity.FirstOrDefault(s => s.StatusName == newStatusName);
+
+            if (newStatus != null)
+            {
+                leave.StatusID = newStatus.StatusID;
+                leave.ApprovedByHRID = (int)Session["UserID"]; 
+                db.SaveChanges();
+                TempData["SuccessMessage"] = $"Leave request has been {newStatusName.ToLower()}.";
+            }
+
+            return RedirectToAction("ManageLeaveRequests");
         }
     }
 }

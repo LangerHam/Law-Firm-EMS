@@ -174,6 +174,8 @@
     <Compile Include="ViewModels\ClientDashboardViewModel.cs" />
     <Compile Include="ViewModels\HR\ConsultantViewModel.cs" />
     <Compile Include="ViewModels\HR\HRDashboardViewModel.cs" />
+    <Compile Include="ViewModels\HR\LeaveManagementViewModel.cs" />
+    <Compile Include="ViewModels\HR\TaskViewModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap-grid.css" />
@@ -236,6 +238,8 @@
     <Content Include="Views\HR\ManageClients.cshtml" />
     <Content Include="Views\HR\_ClientListTable.cshtml" />
     <Content Include="Views\HR\ClientDetails.cshtml" />
+    <Content Include="Views\HR\ManageTasks.cshtml" />
+    <Content Include="Views\HR\ManageLeaveRequests.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

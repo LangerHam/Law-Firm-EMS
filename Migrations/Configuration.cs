@@ -1,5 +1,6 @@
 ﻿namespace Law_Firm_EMS.Migrations
 {
+    using Law_Firm_EMS.Models;
     using System;
     using System.Data.Entity;
     using System.Data.Entity.Migrations;
@@ -18,6 +19,12 @@
 
             //  You can use the DbSet<T>.AddOrUpdate() helper extension method
             //  to avoid creating duplicate seed data.
+
+            context.DocumentTypeEntity.AddOrUpdate(
+          s => s.TypeName, 
+          new DocumentType { TypeName = "LoR" },
+          new DocumentType { TypeName = "EIA" },
+          new DocumentType { TypeName = "PES" });
         }
     }
 }
