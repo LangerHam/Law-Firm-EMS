@@ -1,0 +1,83 @@
+﻿@model Law_Firm_EMS.ViewModels.HR.InvoiceViewModel
+@{
+    ViewBag.Title = "ManageInvoices";
+    Layout = "~/Views/Shared/HRnavbar.cshtml";
+}
+
+<div class="space-y-8">
+    <!-- Header -->
+    <div class="flex flex-wrap justify-between items-center gap-4">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-800">Financial Overview</h1>
+            <p class="text-gray-500">Summary for the month of @Model.ReportMonth.ToString("MMMM yyyy")</p>
+        </div>
+        <a href="@Url.Action("GenerateInvoicePdf", "HR")" target="_blank" class="bg-sky-500 text-white px-5 py-2 rounded-lg hover:bg-sky-600 transition-colors flex items-center shadow-sm">
+            <i data-lucide="download" class="h-5 w-5 mr-2"></i>
+            <span>Generate PDF Invoice</span>
+        </a>
+    </div>
+
+    <!-- Financial Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Total Income -->
+        <div class="bg-green-500 text-white p-6 rounded-lg shadow-lg">
+            <div class="flex justify-between items-center">
+                <h3 class="text-lg font-semibold">Total Income</h3>
+                <i data-lucide="arrow-up-right" class="h-8 w-8 opacity-50"></i>
+            </div>
+            <p class="text-4xl font-bold mt-2">৳@Model.TotalIncome.ToString("N2")</p>
+        </div>
+
+        <!-- Total Expenses -->
+        <div class="bg-red-500 text-white p-6 rounded-lg shadow-lg">
+            <div class="flex justify-between items-center">
+                <h3 class="text-lg font-semibold">Total Expenses</h3>
+                <i data-lucide="arrow-down-left" class="h-8 w-8 opacity-50"></i>
+            </div>
+            <p class="text-4xl font-bold mt-2">৳@Model.TotalExpenses.ToString("N2")</p>
+            <p class="text-sm opacity-80 mt-1">Salaries: @Model.ConsultantSalaries.ToString("N0") + Misc: @Model.MiscExpenses.ToString("N0")</p>
+        </div>
+
+        <!-- Net Profit / Loss -->
+        <div class="@(Model.Profit >= 0 ? "bg-indigo-500" : "bg-gray-700") text-white p-6 rounded-lg shadow-lg">
+            <div class="flex justify-between items-center">
+                <h3 class="text-lg font-semibold">Net @(Model.Profit >= 0 ? "Profit" : "Loss")</h3>
+                <i data-lucide="scale" class="h-8 w-8 opacity-50"></i>
+            </div>
+            <p class="text-4xl font-bold mt-2">৳@Model.Profit.ToString("N2")</p>
+        </div>
+    </div>
+
+    <!-- Recent Transactions List -->
+    <div class="bg-white p-6 rounded-lg shadow-md">
+        <h3 class="text-xl font-bold text-gray-800 mb-4">Income Transactions This Month</h3>
+        <div class="overflow-x-auto">
+            <table class="min-w-full bg-white">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Payment Date</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">From Client</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Amount</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    @foreach (var item in Model.IncomeTransactions)
+                    {
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">@item.PaymentDate.ToString("yyyy-MM-dd")</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">@item.Billing.Client.FullName</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium text-green-600">৳@item.Amount.ToString("N2")</td>
+                        </tr>
+                    }
+                    @if (!Model.IncomeTransactions.Any())
+                    {
+                        <tr>
+                            <td colspan="3" class="text-center p-6 text-gray-500">No income transactions recorded this month.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+

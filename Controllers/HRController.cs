@@ -10,6 +10,7 @@ using System.Net;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
+using Rotativa;
 
 namespace Law_Firm_EMS.Controllers
 {
@@ -538,6 +539,136 @@ namespace Law_Firm_EMS.Controllers
             }
 
             return RedirectToAction("ManageLeaveRequests");
+        }
+
+        //-------EVALUATION MANAGEMENT--------
+
+        public ActionResult ManageEvaluations()
+        {
+            if (Session["RoleID"] == null || (int)Session["RoleID"] != 1) return RedirectToAction("Login", "Login");
+
+            var evaluations = db.EvaluationEntity
+                .Include(e => e.Consultant.User)
+                .Include(e => e.EvaluatedByHR.User)
+                .OrderByDescending(e => e.DateGiven)
+                .ToList();
+
+            return View(evaluations);
+        }
+
+        public ActionResult CreateEvaluation()
+        {
+            if (Session["RoleID"] == null || (int)Session["RoleID"] != 1) return RedirectToAction("Login", "Login");
+
+            var viewModel = new EvaluationViewModel
+            {
+                ConsultantList = new SelectList(db.ConsultantEntity.ToList(), "UserID", "Name")
+            };
+
+            return View(viewModel);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult CreateEvaluation(EvaluationViewModel viewModel)
+        {
+            if (Session["RoleID"] == null || (int)Session["RoleID"] != 1) return RedirectToAction("Login", "Login");
+
+            if (ModelState.IsValid)
+            {
+                var newEvaluation = new Evaluation
+                {
+                    Title = viewModel.Title,
+                    ConsultantID = viewModel.ConsultantID,
+                    Details = viewModel.Details,
+                    DateGiven = System.DateTime.UtcNow,
+                    EvaluatedByHRID = (int)Session["UserID"]
+                };
+
+                db.EvaluationEntity.Add(newEvaluation);
+                db.SaveChanges();
+
+                TempData["SuccessMessage"] = "Evaluation has been saved successfully.";
+                return RedirectToAction("ManageEvaluations");
+            }
+
+            viewModel.ConsultantList = new SelectList(db.ConsultantEntity.ToList(), "UserID", "Name", viewModel.ConsultantID);
+            return View(viewModel);
+        }
+
+        //---------INVOICE MANAGEMENT---------
+
+        public ActionResult ManageInvoices()
+        {
+            if (Session["RoleID"] == null || (int)Session["RoleID"] != 1) return RedirectToAction("Login", "Login");
+
+            var today = DateTime.UtcNow;
+            var startDate = new DateTime(today.Year, today.Month, 1);
+            var endDate = startDate.AddMonths(1);
+
+            int consultantCount = db.ConsultantEntity.Count();
+            decimal consultantSalaries = consultantCount * 40000;
+            decimal miscExpenses = consultantSalaries * 0.10m; // 10% for misc expenses
+            decimal totalExpenses = consultantSalaries + miscExpenses;
+
+            var transactionsThisMonth = db.TransactionEntity
+                .Where(t => t.PaymentDate >= startDate && t.PaymentDate < endDate)
+                .Include(t => t.Billing.Client)
+                .ToList();
+            decimal totalIncome = transactionsThisMonth.Sum(t => t.Amount);
+
+            decimal profit = totalIncome - totalExpenses;
+
+            var viewModel = new InvoiceViewModel
+            {
+                TotalIncome = totalIncome,
+                TotalExpenses = totalExpenses,
+                Profit = profit,
+                ConsultantCount = consultantCount,
+                ConsultantSalaries = consultantSalaries,
+                MiscExpenses = miscExpenses,
+                ReportMonth = today,
+                IncomeTransactions = transactionsThisMonth
+            };
+
+            return View(viewModel);
+        }
+
+        public ActionResult GenerateInvoicePdf()
+        {
+            if (Session["RoleID"] == null || (int)Session["RoleID"] != 1) return RedirectToAction("Login", "Login");
+
+            var today = DateTime.UtcNow;
+            var startDate = new DateTime(today.Year, today.Month, 1);
+            var endDate = startDate.AddMonths(1);
+
+            int consultantCount = db.ConsultantEntity.Count();
+            decimal consultantSalaries = consultantCount * 40000;
+            decimal miscExpenses = consultantSalaries * 0.10m;
+            decimal totalExpenses = consultantSalaries + miscExpenses;
+            decimal totalIncome = db.TransactionEntity.Where(t => t.PaymentDate >= startDate && t.PaymentDate < endDate).Sum(t => (decimal?)t.Amount) ?? 0;
+            decimal profit = totalIncome - totalExpenses;
+
+            var viewModel = new InvoiceViewModel
+            {
+                TotalIncome = totalIncome,
+                TotalExpenses = totalExpenses,
+                Profit = profit,
+                ConsultantCount = consultantCount,
+                ConsultantSalaries = consultantSalaries,
+                MiscExpenses = miscExpenses,
+                ReportMonth = today,
+            };
+
+            ViewBag.GeneratedBy = Session["Email"]?.ToString() ?? "HR Admin";
+            string logoPath = Url.Content("~/Resources/Images/Logo.png");
+            string absoluteLogoUrl = string.Format("{0}://{1}{2}", Request.Url.Scheme, Request.Url.Authority, logoPath);
+            ViewBag.LogoUrl = absoluteLogoUrl;
+
+            return new ViewAsPdf("InvoicePdf", viewModel)
+            {
+                FileName = $"Monthly_Invoice_{today.ToString("MMMM_yyyy")}.pdf"
+            };
         }
     }
 }

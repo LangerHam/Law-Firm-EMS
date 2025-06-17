@@ -1,0 +1,136 @@
+﻿@model Law_Firm_EMS.ViewModels.HR.EvaluationViewModel
+@{
+    ViewBag.Title = "CreateEvaluation";
+    Layout = "~/Views/Shared/HRnavbar.cshtml";
+}
+
+<div class="bg-white p-8 rounded-lg shadow-md max-w-4xl mx-auto">
+    <h2 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-4">New Performance Evaluation</h2>
+
+    @using (Html.BeginForm("CreateEvaluation", "HR", FormMethod.Post))
+    {
+        @Html.AntiForgeryToken()
+        @Html.ValidationSummary(true, "", new { @class = "text-red-600 bg-red-50 p-3 rounded-md mb-6" })
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div>
+                @Html.LabelFor(m => m.Title, htmlAttributes: new { @class = "block text-sm font-medium text-gray-700 mb-1" })
+                @Html.EditorFor(m => m.Title, new { htmlAttributes = new { @class = "w-full px-4 py-2 border border-gray-300 rounded-lg" } })
+                @Html.ValidationMessageFor(m => m.Title, "", new { @class = "text-red-600 text-xs mt-1" })
+            </div>
+            <div>
+                @Html.LabelFor(m => m.ConsultantID, htmlAttributes: new { @class = "block text-sm font-medium text-gray-700 mb-1" })
+                @Html.DropDownListFor(m => m.ConsultantID, Model.ConsultantList, "--- Select a Consultant ---", new { @class = "w-full px-4 py-2 border border-gray-300 rounded-lg" })
+                @Html.ValidationMessageFor(m => m.ConsultantID, "", new { @class = "text-red-600 text-xs mt-1" })
+            </div>
+        </div>
+
+        <div class="space-y-8 mt-8">
+            <!-- Question 1 -->
+            <fieldset id="q1_group">
+                <legend class="text-base font-medium text-gray-900">@Html.DisplayNameFor(m => m.Q1_Answer)</legend>
+                <div class="mt-4 flex flex-wrap gap-x-8 gap-y-2">
+                    @foreach (var rating in new[] { "Excellent", "Good", "Average", "Fair", "Poor" })
+                    {
+                        <label class="flex items-center">
+                            @Html.RadioButtonFor(m => m.Q1_Answer, rating, new { @class = "h-4 w-4 text-sky-600 border-gray-300 focus:ring-sky-500" })
+                            <span class="ml-2 text-sm text-gray-700">@rating</span>
+                        </label>
+                    }
+                </div>
+                @Html.ValidationMessageFor(m => m.Q1_Answer, "", new { @class = "text-red-600 text-xs mt-1" })
+            </fieldset>
+
+            <!-- Question 2 -->
+            <fieldset id="q2_group">
+                <legend class="text-base font-medium text-gray-900">@Html.DisplayNameFor(m => m.Q2_Answer)</legend>
+                <div class="mt-4 flex flex-wrap gap-x-8 gap-y-2">
+                    @foreach (var rating in new[] { "Excellent", "Good", "Average", "Fair", "Poor" })
+                    {
+                        <label class="flex items-center">
+                            @Html.RadioButtonFor(m => m.Q2_Answer, rating, new { @class = "h-4 w-4 text-sky-600 border-gray-300 focus:ring-sky-500" })
+                            <span class="ml-2 text-sm text-gray-700">@rating</span>
+                        </label>
+                    }
+                </div>
+                @Html.ValidationMessageFor(m => m.Q2_Answer, "", new { @class = "text-red-600 text-xs mt-1" })
+            </fieldset>
+
+            <!-- Question 3 -->
+            <fieldset id="q3_group">
+                <legend class="text-base font-medium text-gray-900">@Html.DisplayNameFor(m => m.Q3_Answer)</legend>
+                <div class="mt-4 flex flex-wrap gap-x-8 gap-y-2">
+                    @foreach (var rating in new[] { "Excellent", "Good", "Average", "Fair", "Poor" })
+                    {
+                        <label class="flex items-center">
+                            @Html.RadioButtonFor(m => m.Q3_Answer, rating, new { @class = "h-4 w-4 text-sky-600 border-gray-300 focus:ring-sky-500" })
+                            <span class="ml-2 text-sm text-gray-700">@rating</span>
+                        </label>
+                    }
+                </div>
+                @Html.ValidationMessageFor(m => m.Q3_Answer, "", new { @class = "text-red-600 text-xs mt-1" })
+            </fieldset>
+        </div>
+
+        <div class="mt-8">
+            @Html.LabelFor(m => m.Details, htmlAttributes: new { @class = "block text-sm font-medium text-gray-700 mb-1" })
+            @Html.TextAreaFor(m => m.Details, new { @rows = 10, @class = "w-full px-4 py-2 border border-gray-300 rounded-lg", @placeholder = "Rating summary will appear here. Add any additional remarks below." })
+        </div>
+
+        <div class="flex items-center justify-end space-x-4 pt-6">
+            <a href="@Url.Action("ManageEvaluations")" class="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-300">Cancel</a>
+            <input type="submit" value="Save Evaluation" class="bg-sky-500 text-white px-6 py-2 rounded-lg hover:bg-sky-600 cursor-pointer" />
+        </div>
+    }
+</div>
+
+@section scripts {
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const q1Radios = document.querySelectorAll('input[name="Q1_Answer"]');
+        const q2Radios = document.querySelectorAll('input[name="Q2_Answer"]');
+        const q3Radios = document.querySelectorAll('input[name="Q3_Answer"]');
+        const detailsTextArea = document.getElementById('Details');
+
+        let remarks = "";
+        const remarksMarker = "\n\n--- Additional Remarks ---\n";
+
+        function updateDetails() {
+            const q1Answer = document.querySelector('input[name="Q1_Answer"]:checked')?.value || 'Not Rated';
+            const q2Answer = document.querySelector('input[name="Q2_Answer"]:checked')?.value || 'Not Rated';
+            const q3Answer = document.querySelector('input[name="Q3_Answer"]:checked')?.value || 'Not Rated';
+
+            const q1Text = document.getElementById('q1_group').querySelector('legend').textContent.trim();
+            const q2Text = document.getElementById('q2_group').querySelector('legend').textContent.trim();
+            const q3Text = document.getElementById('q3_group').querySelector('legend').textContent.trim();
+
+            const summary =
+                `${q1Text}: ${q1Answer}\n` +
+                `${q2Text}: ${q2Answer}\n` +
+                `${q3Text}: ${q3Answer}`;
+
+            detailsTextArea.value = summary + remarks;
+        }
+
+        detailsTextArea.addEventListener('input', function() {
+            const currentValue = this.value;
+            const summaryIndex = currentValue.indexOf(remarksMarker);
+
+            if(summaryIndex !== -1) {
+                remarks = currentValue.substring(summaryIndex);
+            } else {
+                const parts = currentValue.split('\n');
+                if (parts.length > 3) {
+                    remarks = "\n" + parts.slice(3).join('\n');
+                } else {
+                    remarks = "";
+                }
+            }
+        });
+
+        [...q1Radios, ...q2Radios, ...q3Radios].forEach(radio => {
+            radio.addEventListener('change', updateDetails);
+        });
+    });
+    </script>
+}

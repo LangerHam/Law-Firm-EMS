@@ -1,6 +1,4 @@
-﻿@model Law_Firm_EMS.ViewModels.ClientDashboardViewModel
-
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -37,12 +35,12 @@
             <div>
                 <div class="text-center p-4 mt-4">
                     <div class="text-sm text-gray-200">Welcome</div>
-                    <div class="text-lg font-semibold">@Model.ClientName 🖐🏻</div>
+                    <div class="text-lg font-semibold">@ViewBag.ClientName 🖐🏻</div>
                 </div>
                 <nav class="px-4 py-2 sidebar-scroll mt-6">
                     <ul class="space-y-3">
                         <li><a href="@Url.Action("Dashboard", "Client")" class="text-sm flex items-center space-x-3 text-white hover:bg-sky-500 px-3 py-2 rounded-md"><i class="bi bi-house-door"></i><span>Home</span></a></li>
-                        <li><a href="#" class="text-sm flex items-center space-x-3 text-white hover:bg-sky-500 px-3 py-2 rounded-md"><i class="bi bi-ui-checks"></i><span>Forms</span></a></li>
+                        <li><a href="@Url.Action("Forms", "Client")" class="text-sm flex items-center space-x-3 text-white hover:bg-sky-500 px-3 py-2 rounded-md"><i class="bi bi-ui-checks"></i><span>Forms</span></a></li>
                         <li><a href="#" class="text-sm flex items-center space-x-3 text-white hover:bg-sky-500 px-3 py-2 rounded-md"><i class="bi bi-folder"></i><span>Documents</span></a></li>
                         <li><a href="#" class="text-sm flex items-center space-x-3 text-white hover:bg-sky-500 px-3 py-2 rounded-md"><i class="bi bi-wallet2"></i><span>Billing</span></a></li>
                     </ul>

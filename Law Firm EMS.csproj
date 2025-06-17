@@ -53,6 +53,9 @@
       <HintPath>packages\EntityFramework.6.5.1\lib\net45\EntityFramework.SqlServer.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Rotativa, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\Rotativa.1.7.3\lib\net461\Rotativa.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
@@ -173,7 +176,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ViewModels\ClientDashboardViewModel.cs" />
     <Compile Include="ViewModels\HR\ConsultantViewModel.cs" />
+    <Compile Include="ViewModels\HR\EvaluationViewModel.cs" />
     <Compile Include="ViewModels\HR\HRDashboardViewModel.cs" />
+    <Compile Include="ViewModels\HR\InvoiceViewModel.cs" />
     <Compile Include="ViewModels\HR\LeaveManagementViewModel.cs" />
     <Compile Include="ViewModels\HR\TaskViewModel.cs" />
   </ItemGroup>
@@ -197,12 +202,17 @@
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
     <Content Include="Content\Site.css" />
+    <Content Include="Rotativa\help-wkhtmltoimage.txt" />
+    <Content Include="Rotativa\help-wkhtmltopdf.txt" />
+    <Content Include="Rotativa\wkhtmltoimage.exe" />
+    <Content Include="Rotativa\wkhtmltopdf.exe" />
     <Content Include="Scripts\bootstrap.bundle.js" />
     <Content Include="Scripts\bootstrap.bundle.min.js" />
     <Content Include="Scripts\bootstrap.esm.js" />
     <Content Include="Scripts\bootstrap.esm.min.js" />
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
+    <Content Include="App_Browsers\qt.browser" />
     <None Include="Scripts\jquery-3.7.0.intellisense.js" />
     <Content Include="Scripts\jquery-3.7.0.js" />
     <Content Include="Scripts\jquery-3.7.0.min.js" />
@@ -240,9 +250,14 @@
     <Content Include="Views\HR\ClientDetails.cshtml" />
     <Content Include="Views\HR\ManageTasks.cshtml" />
     <Content Include="Views\HR\ManageLeaveRequests.cshtml" />
+    <Content Include="Views\HR\ManageEvaluations.cshtml" />
+    <Content Include="Views\HR\CreateEvaluation.cshtml" />
+    <Content Include="Views\HR\ManageInvoices.cshtml" />
+    <Content Include="Views\HR\InvoicePdf.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
+    <Folder Include="Resources\Images\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap.rtl.min.css.map" />
