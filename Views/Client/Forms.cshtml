@@ -1,0 +1,139 @@
+﻿@model Law_Firm_EMS.ViewModels.ClientFormsViewModel
+
+@{
+    ViewBag.Title = "Forms";
+    Layout = "~/Views/Shared/ClientNavbar.cshtml";
+}
+
+<div class="p-6">
+    <h1 class="text-3xl font-bold text-gray-800 mb-2">My Forms & Documents</h1>
+    <p class="text-gray-500 mb-6">Download templates and upload your completed forms here.</p>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6" role="alert">
+            <p>@TempData["SuccessMessage"]</p>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6" role="alert">
+            <p>@TempData["ErrorMessage"]</p>
+        </div>
+    }
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <!-- Left Column: List of Forms -->
+        <div class="md:col-span-1">
+            <div class="bg-white p-4 rounded-lg shadow-md">
+                <h2 class="text-lg font-semibold text-gray-700 border-b pb-2 mb-2">Required Forms</h2>
+                <div class="space-y-1">
+                    @foreach (var formItem in Model.AvailableForms)
+                    {
+                        <button onclick="showFormDetails(@formItem.FormTypeID)" class="form-select-btn w-full text-left p-3 rounded-md hover:bg-sky-50 transition-colors flex justify-between items-center">
+                            <div>
+                                <span>@formItem.FormTypeName</span>
+                                @if (formItem.IsOptional)
+                                {
+                                    <span class="ml-2 text-xs text-gray-400 font-normal">(Optional)</span>
+                                }
+                            </div>
+                            @if (formItem.Status == "Submitted")
+                            {
+                                <i data-lucide="check-circle-2" class="h-5 w-5 text-green-500 flex-shrink-0"></i>
+                            }
+                            else
+                            {
+                                <i data-lucide="circle-dashed" class="h-5 w-5 text-gray-400 flex-shrink-0"></i>
+                            }
+                        </button>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Details and Upload Area -->
+        <div class="md:col-span-2">
+            @foreach (var formItem in Model.AvailableForms)
+            {
+                <div id="form-details-@formItem.FormTypeID" class="form-details-panel bg-white p-6 rounded-lg shadow-md hidden">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-2">@formItem.FormTypeName</h3>
+                    <p class="text-gray-600 mb-6">@formItem.FormTypeDescription</p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <!-- Download Template Section -->
+                        @if (!string.IsNullOrEmpty(formItem.TemplatePath))
+                        {
+                            <a href="@Url.Action("DownloadTemplate", "Client", new { formTypeId = formItem.FormTypeID })" class="bg-sky-500 text-white p-4 rounded-lg flex flex-col items-center justify-center text-center hover:bg-sky-600 transition">
+                                <i data-lucide="download-cloud" class="h-8 w-8 mb-2"></i>
+                                <span class="font-semibold">Download Template</span>
+                            </a>
+                        }
+
+                        <!-- Upload Form Section -->
+                        @using (Html.BeginForm("UploadForm", "Client", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                        {
+                            @Html.AntiForgeryToken()
+                            @Html.Hidden("formTypeId", formItem.FormTypeID)
+                            <div class="bg-gray-50 border-2 border-dashed border-gray-300 p-4 rounded-lg flex flex-col items-center justify-center text-center">
+                                <i data-lucide="upload-cloud" class="h-8 w-8 mb-2 text-gray-400"></i>
+                                <label for="file-upload-@formItem.FormTypeID" class="font-semibold text-sky-600 cursor-pointer hover:underline">
+                                    Upload Completed Form
+                                </label>
+                                <input id="file-upload-@formItem.FormTypeID" name="file" type="file" class="sr-only" onchange="this.form.submit()">
+                                <p class="text-xs text-gray-500 mt-1">PDF, DOCX, JPG, PNG</p>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Status Display -->
+                    <div class="mt-6 border-t pt-4">
+                        <h4 class="font-semibold text-gray-700">Submission Status</h4>
+                        @if (formItem.Status == "Submitted")
+                        {
+                            <div class="flex items-center text-green-600 mt-2">
+                                <i data-lucide="check-circle" class="h-5 w-5 mr-2"></i>
+                                <span>Submitted @(formItem.SubmittedDate.HasValue ? "on " + formItem.SubmittedDate.Value.ToString("MMMM dd, yyyy") : "")</span>
+                                <a href="@Url.Content(formItem.UploadPath)" target="_blank" class="ml-4 text-sky-600 text-sm hover:underline">(View Uploaded File)</a>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="flex items-center text-gray-500 mt-2">
+                                <i data-lucide="clock" class="h-5 w-5 mr-2"></i>
+                                <span>Not yet submitted.</span>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+            <!-- Default placeholder -->
+            <div id="form-placeholder" class="text-center p-12 bg-white rounded-lg shadow-md text-gray-500">
+                <i data-lucide="arrow-left" class="h-10 w-10 mx-auto mb-2"></i>
+                <p>Select a form from the left to view its details.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        function showFormDetails(formTypeId) {
+            document.querySelectorAll('.form-details-panel').forEach(panel => {
+                panel.classList.add('hidden');
+            });
+            document.getElementById('form-placeholder').classList.add('hidden');
+
+            const selectedPanel = document.getElementById('form-details-' + formTypeId);
+            if (selectedPanel) {
+                selectedPanel.classList.remove('hidden');
+            }
+
+            document.querySelectorAll('.form-select-btn').forEach(btn => {
+                btn.classList.remove('bg-sky-100', 'text-sky-700', 'font-semibold');
+            });
+            const selectedButton = event.currentTarget;
+            selectedButton.classList.add('bg-sky-100', 'text-sky-700', 'font-semibold');
+        }
+    </script>
+}

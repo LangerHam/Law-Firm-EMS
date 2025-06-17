@@ -25,6 +25,24 @@
           new DocumentType { TypeName = "LoR" },
           new DocumentType { TypeName = "EIA" },
           new DocumentType { TypeName = "PES" });
+
+            context.FormTypeEntity.AddOrUpdate(
+                s => s.TypeName,
+                new FormType { TypeName = "G-28", TemplatePath = "~/Resources/Forms/G-28.pdf" },
+                new FormType { TypeName = "G-1145", TemplatePath = "~/Resources/Forms/G-1145.pdf" },
+                new FormType { TypeName = "I-140", TemplatePath = "~/Resources/Forms/I-140.pdf" },
+                new FormType { TypeName = "I-907", TemplatePath = "~/Resources/Forms/I-907.pdf" },
+                new FormType { TypeName = "ETA 750 Part B", TemplatePath = "~/Resources/Forms/ETA750B.pdf" });
+
+            context.StatusTypeEntity.AddOrUpdate(
+                s => s.StatusName,
+                new StatusType { StatusName = "Pending" },
+                new StatusType { StatusName = "Approved" },
+                new StatusType { StatusName = "Rejected" },
+                new StatusType { StatusName = "In Progress" },
+                new StatusType { StatusName = "Completed" },
+                new StatusType { StatusName = "Submitted"},
+                new StatusType { StatusName = "Not Submitted"});
         }
     }
 }

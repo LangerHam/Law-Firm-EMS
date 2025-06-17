@@ -1,7 +1,7 @@
 ﻿@model Law_Firm_EMS.ViewModels.ClientDashboardViewModel
 
 @{
-    ViewBag.Title = "Dashboard";
+    ViewBag.Title = "Forms";
     Layout = "~/Views/Shared/ClientNavbar.cshtml";
 }
 
@@ -25,11 +25,11 @@
         <div class="bg-gray-100 p-4 rounded-xl h-fit">
             <b class="text-lg">Quick Access to Forms</b>
             <ul class="list-disc pl-5 mt-3 space-y-2 text-sky-600 text-sm">
-                <li><a href="#">G-28 (Attorney Representation)</a></li>
-                <li><a href="#">G-1145 (Notification)</a></li>
-                <li><a href="#">I-140 (Registration)</a></li>
-                <li><a href="#">I-907 (Premium Registration - optional)</a></li>
-                <li><a href="#">ETA 750 Part B (Employment/Academic History)</a></li>
+                <li><a href="@Url.Action("Forms", "Client")">G-28 (Attorney Representation)</a></li>
+                <li><a href="@Url.Action("Forms", "Client")">G-1145 (Notification)</a></li>
+                <li><a href="@Url.Action("Forms", "Client")">I-140 (Registration)</a></li>
+                <li><a href="@Url.Action("Forms", "Client")">I-907 (Premium Registration - optional)</a></li>
+                <li><a href="@Url.Action("Forms", "Client")">ETA 750 Part B (Employment/Academic History)</a></li>
             </ul>
         </div>
 

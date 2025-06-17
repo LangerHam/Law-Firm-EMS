@@ -30,6 +30,21 @@ namespace Law_Firm_EMS.ViewModels
         public string StatusName { get; set; }
     }
 
-   
+    public class ClientFormsViewModel
+    {
+        public List<FormDisplayItem> AvailableForms { get; set; }
+    }
+
+    public class FormDisplayItem
+    {
+        public int FormTypeID { get; set; }
+        public string FormTypeName { get; set; }
+        public string FormTypeDescription { get; set; }
+        public bool IsOptional { get; set; } 
+        public string TemplatePath { get; set; }
+        public string Status { get; set; }
+        public string UploadPath { get; set; }
+        public DateTime? SubmittedDate { get; set; }
+    }
 
 }

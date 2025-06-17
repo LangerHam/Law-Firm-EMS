@@ -174,7 +174,7 @@
     <Compile Include="Models\Transaction.cs" />
     <Compile Include="Models\Users.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ViewModels\ClientDashboardViewModel.cs" />
+    <Compile Include="ViewModels\Client\ClientDashboardViewModel.cs" />
     <Compile Include="ViewModels\HR\ConsultantViewModel.cs" />
     <Compile Include="ViewModels\HR\EvaluationViewModel.cs" />
     <Compile Include="ViewModels\HR\HRDashboardViewModel.cs" />
@@ -213,6 +213,11 @@
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
     <Content Include="App_Browsers\qt.browser" />
+    <Content Include="Resources\Forms\ETA750B.pdf" />
+    <Content Include="Resources\Forms\G-1145.pdf" />
+    <Content Include="Resources\Forms\G-28.pdf" />
+    <Content Include="Resources\Forms\I-140.pdf" />
+    <Content Include="Resources\Forms\I-907.pdf" />
     <None Include="Scripts\jquery-3.7.0.intellisense.js" />
     <Content Include="Scripts\jquery-3.7.0.js" />
     <Content Include="Scripts\jquery-3.7.0.min.js" />
@@ -254,10 +259,12 @@
     <Content Include="Views\HR\CreateEvaluation.cshtml" />
     <Content Include="Views\HR\ManageInvoices.cshtml" />
     <Content Include="Views\HR\InvoicePdf.cshtml" />
+    <Content Include="Views\Client\Forms.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
     <Folder Include="Resources\Images\" />
+    <Folder Include="Resources\UploadedClientForms\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap.rtl.min.css.map" />
