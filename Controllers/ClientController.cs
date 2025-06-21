@@ -289,7 +289,7 @@ namespace Law_Firm_EMS.Controllers
 
             try
             {
-                string uploadsFolder = Server.MapPath("~/Uploads/ClientDocuments/");
+                string uploadsFolder = Server.MapPath("~/Resources/ClientDocuments/");
                 if (!Directory.Exists(uploadsFolder))
                 {
                     Directory.CreateDirectory(uploadsFolder);
