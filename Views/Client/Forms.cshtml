@@ -6,7 +6,7 @@
 }
 
 <div class="p-6">
-    <h1 class="text-3xl font-bold text-gray-800 mb-2">My Forms & Documents</h1>
+    <h1 class="text-3xl font-bold text-gray-800 mb-2">My Forms</h1>
     <p class="text-gray-500 mb-6">Download templates and upload your completed forms here.</p>
 
     @if (TempData["SuccessMessage"] != null)
@@ -94,7 +94,8 @@
                             <div class="flex items-center text-green-600 mt-2">
                                 <i data-lucide="check-circle" class="h-5 w-5 mr-2"></i>
                                 <span>Submitted @(formItem.SubmittedDate.HasValue ? "on " + formItem.SubmittedDate.Value.ToString("MMMM dd, yyyy") : "")</span>
-                                <a href="@Url.Content(formItem.UploadPath)" target="_blank" class="ml-4 text-sky-600 text-sm hover:underline">(View Uploaded File)</a>
+                                <a href="@Url.Action("DownloadUploadedForm", "Client", new { formTypeId = formItem.FormTypeID })" class="ml-4 text-sky-600 text-sm hover:underline">(Download Uploaded File)</a>
+
                             </div>
                         }
                         else

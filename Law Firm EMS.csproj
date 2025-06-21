@@ -265,6 +265,7 @@
     <Content Include="Views\Client\Forms.cshtml" />
     <Content Include="Views\Consultant\Dashboard.cshtml" />
     <Content Include="Views\Shared\ConsultantNavbar.cshtml" />
+    <Content Include="Views\Client\Documents.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

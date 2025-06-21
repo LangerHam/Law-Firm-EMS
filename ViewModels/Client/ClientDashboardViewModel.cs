@@ -47,4 +47,19 @@ namespace Law_Firm_EMS.ViewModels
         public DateTime? SubmittedDate { get; set; }
     }
 
+    public class ClientDocumentsViewModel
+    {
+        public List<DocumentItemVM> LORDocuments { get; set; }
+        public List<DocumentItemVM> MiscDocuments { get; set; }
+    }
+
+    public class DocumentItemVM
+    {
+        public int DocumentID { get; set; }
+        public string FileName { get; set; }
+        public string UploadPath { get; set; }
+        public string StatusName { get; set; }
+        public DateTime? UploadedDate { get; set; }
+    }
+
 }

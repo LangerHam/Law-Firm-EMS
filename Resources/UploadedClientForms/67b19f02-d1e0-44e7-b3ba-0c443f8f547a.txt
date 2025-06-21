@@ -1,0 +1,84 @@
+library(rvest)
+
+# Read the business news page
+webpage = read_html("https://www.thedailystar.net/business")
+
+# Scrape titles
+title_nodes = html_nodes(webpage, ".card-content a")
+titles = html_text(title_nodes)
+print(head(titles))
+
+# Scrape news links
+link_nodes = html_nodes(webpage, ".card-content a")
+news_links = html_attr(link_nodes, "href")
+news_links = paste0("https://www.thedailystar.net", news_links)
+print(head(news_links))
+
+# Limit number of items to avoid mismatch
+n = min(length(titles), length(news_links))
+titles = titles[1:n]
+news_links = news_links[1:n]
+
+# Function to get description from news page
+get_description = function(link) {
+  tryCatch({
+    news_page = read_html(link)
+    para = html_nodes(news_page, ".clearfix p")
+    para_text = html_text(para)
+    if (length(para_text) == 0) {
+      return(NA)
+    }
+    return(para_text[1])
+  }, error = function(e) NA)
+}
+
+# Function to get category
+get_category = function(link) {
+  tryCatch({
+    news_page = read_html(link)
+    cat_node = html_nodes(news_page, ".author-name a")
+    cat_text = html_text(cat_node)
+    if (length(cat_text) == 0) {
+      return(NA)
+    }
+    return(cat_text[1])
+  }, error = function(e) NA)
+}
+
+# Function to get published or updated time
+get_time <- function(link) {
+  tryCatch({
+    page <- read_html(link)
+    times <- page %>% html_nodes(".color-iron") %>% html_text(trim = TRUE)
+    
+    # Look for text containing "Last update" or "Published on"
+    full_time <- times[grepl("Last update on:|Published on:", times)][1]
+    
+    # Fallback to first available non-empty time if pattern not matched
+    if (is.na(full_time) || full_time == "") {
+      full_time <- times[times != ""][1]
+    }
+    
+    return(full_time)
+  }, error = function(e) NA)
+}
+
+
+# Apply functions to each news link
+descriptions = sapply(news_links, get_description)
+categories = sapply(news_links, get_category)
+times = sapply(news_links, get_time)
+
+# Create final data frame
+news_data = data.frame(
+  news_link = news_links,
+  title = titles,
+  category = categories,
+  description = descriptions,
+  time = times,
+  stringsAsFactors = FALSE
+)
+
+# Save to CSV
+write.csv(news_data, "alsonews2.csv", row.names = FALSE)
+print("Data saved to 'news.csv'")

@@ -8,6 +8,7 @@ using System.Data.Entity;
 using Law_Firm_EMS.Models;
 using Law_Firm_EMS.ViewModels;
 using System.IO;
+using System.Data.Entity.Validation;
 
 namespace Law_Firm_EMS.Controllers
 {
@@ -77,7 +78,7 @@ namespace Law_Firm_EMS.Controllers
                 return RedirectToAction("Login", "Login");
 
             int userId = (int)Session["UserID"];
-            var client = db.ClientEntity                
+            var client = db.ClientEntity
                 .FirstOrDefault(c => c.UserID == userId);
 
             ViewBag.ClientName = client.FullName;
@@ -181,5 +182,313 @@ namespace Law_Firm_EMS.Controllers
             byte[] fileBytes = System.IO.File.ReadAllBytes(physicalPath);
             return File(fileBytes, System.Net.Mime.MediaTypeNames.Application.Octet, Path.GetFileName(physicalPath));
         }
+
+        public ActionResult DownloadUploadedForm(int formTypeId)
+        {
+            if (Session["UserID"] == null)
+                return RedirectToAction("Login", "Login");
+
+            int userId = (int)Session["UserID"];
+
+            var form = db.FormEntity
+                .FirstOrDefault(f => f.ClientID == userId && f.FormTypeID == formTypeId);
+
+            if (form == null || string.IsNullOrEmpty(form.UploadPath))
+            {
+                TempData["ErrorMessage"] = "Uploaded form not found.";
+                return RedirectToAction("Forms");
+            }
+
+            string physicalPath = Server.MapPath(form.UploadPath);
+            if (!System.IO.File.Exists(physicalPath))
+            {
+                TempData["ErrorMessage"] = "File not found on server.";
+                return RedirectToAction("Forms");
+            }
+
+            byte[] fileBytes = System.IO.File.ReadAllBytes(physicalPath);
+            string fileName = Path.GetFileName(physicalPath);
+
+            return File(fileBytes, System.Net.Mime.MediaTypeNames.Application.Octet, fileName);
+        }
+
+        public ActionResult Documents()
+        {
+            if (Session["UserID"] == null)
+                return RedirectToAction("Login", "Login");
+
+            int userId = (int)Session["UserID"];
+            var client = db.ClientEntity
+                .FirstOrDefault(c => c.UserID == userId);
+
+            if (client == null)
+            {
+                TempData["ErrorMessage"] = "Client profile not found.";
+                return RedirectToAction("Dashboard");
+            }
+
+            ViewBag.ClientName = client.FullName;
+
+            var clientDocuments = db.DocumentEntity
+                
+                .Where(d => d.ClientID == userId)
+                .Include(d => d.DocumentType)
+                .Include(d => d.Status)
+                .ToList();
+            
+
+            var lorDocuments = clientDocuments
+                .Where(d => d.DocumentType?.TypeName == "LoR")
+                .Select(d => new DocumentItemVM 
+                {
+                    DocumentID = d.DocumentID,
+                    FileName = Path.GetFileName(d.UploadPath),
+                    UploadPath = d.UploadPath
+                })
+                .ToList();
+
+            var miscDocuments = clientDocuments
+                .Where(d => d.DocumentType?.TypeName == "MISC") 
+                .Select(d => new DocumentItemVM 
+                {
+                    DocumentID = d.DocumentID,
+                    FileName = Path.GetFileName(d.UploadPath),
+                    UploadPath = d.UploadPath
+                })
+                .ToList();
+
+            var viewModel = new ClientDocumentsViewModel
+            {
+                LORDocuments = lorDocuments,
+                MiscDocuments = miscDocuments
+            };
+
+            return View(viewModel);
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult UploadDocument(HttpPostedFileBase file, string documentCategory)
+        {
+            if (Session["UserID"] == null)
+                return RedirectToAction("Login", "Login");
+
+            int loggedInUserId = (int)Session["UserID"];
+            var client = db.ClientEntity.FirstOrDefault(c => c.UserID == loggedInUserId);
+
+            if (client == null)
+            {
+                TempData["ErrorMessage"] = "Client profile not found. Unable to upload document.";
+                return RedirectToAction("Documents");
+            }
+
+            if (file == null || file.ContentLength == 0)
+            {
+                TempData["ErrorMessage"] = "Please select a file to upload.";
+                return RedirectToAction("Documents");
+            }
+
+            try
+            {
+                string uploadsFolder = Server.MapPath("~/Uploads/ClientDocuments/");
+                if (!Directory.Exists(uploadsFolder))
+                {
+                    Directory.CreateDirectory(uploadsFolder);
+                }
+
+                string fileName = Path.GetFileName(file.FileName);
+                string uniqueFileName = Guid.NewGuid().ToString() + "_" + fileName;
+                string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+                string dbFilePath = "~/Resources/ClientDocuments/" + uniqueFileName;
+
+                file.SaveAs(filePath);
+
+                // Get DocumentTypeID based on category
+                int documentTypeID;
+                if (documentCategory == "LoR")
+                {
+                    documentTypeID = db.DocumentTypeEntity.FirstOrDefault(dt => dt.TypeName == "LoR")?.DocumentTypeID ?? 0;
+                    if (documentTypeID == 0)
+                    {
+                        TempData["ErrorMessage"] = "LoR document type not found in database. Please contact admin.";
+                        return RedirectToAction("Documents");
+                    }
+                }
+                else if (documentCategory == "MISC")
+                {
+                    documentTypeID = db.DocumentTypeEntity.FirstOrDefault(dt => dt.TypeName == "MISC")?.DocumentTypeID ?? 0;
+                    if (documentTypeID == 0)
+                    {
+                        TempData["ErrorMessage"] = "Miscellaneous document type not found in database. Please contact admin.";
+                        return RedirectToAction("Documents");
+                    }
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Invalid document category selected.";
+                    return RedirectToAction("Documents");
+                }
+
+                // Get StatusID for "Submitted" (matching forms)
+                int submittedStatusID = db.StatusTypeEntity.FirstOrDefault(s => s.StatusName == "Submitted")?.StatusID ?? 0;
+                if (submittedStatusID == 0)
+                {
+                    TempData["ErrorMessage"] = "Default status 'Submitted' not found. Please contact admin.";
+                    return RedirectToAction("Documents");
+                }
+
+                // Find existing document for this client and document type
+                var existingDocument = db.DocumentEntity.FirstOrDefault(d => d.ClientID == client.UserID && d.DocumentTypeID == documentTypeID);
+
+                Document newDocument; 
+                if (existingDocument == null)
+                {
+                    // Create new document if it doesn't exist
+                    newDocument = new Document
+                    {
+                        UploadPath = dbFilePath,
+                        ClientID = client.UserID,
+                        UploadedByUserID = loggedInUserId,
+                        DocumentTypeID = documentTypeID,
+                        StatusID = submittedStatusID,
+                        ParentDocumentID = null // Or set this if applicable
+                    };
+                    db.DocumentEntity.Add(newDocument);
+                }
+                else
+                {
+                    // Update existing document
+                    newDocument = existingDocument; // Use the existing document instance
+                    newDocument.UploadPath = dbFilePath;
+                    newDocument.StatusID = submittedStatusID;
+                    newDocument.UploadedByUserID = loggedInUserId; // Update who last uploaded
+                   
+                }
+
+                
+                db.SaveChanges();
+
+                // If LoR, create a task for HR
+                if (documentCategory == "LoR")
+                {
+                    var hrUserInUsers = db.UsersEntity.FirstOrDefault(u => u.RoleID == 1); 
+                    var hrEntity = hrUserInUsers != null ? db.HREntity.FirstOrDefault(h => h.UserID == hrUserInUsers.UserID) : null;
+
+                    Consultant assignedConsultant = null;
+                    if (client.AssignedConsultantID.HasValue)
+                    {
+                        assignedConsultant = db.ConsultantEntity.FirstOrDefault(c => c.UserID == client.AssignedConsultantID.Value);
+                    }
+
+                    if (hrEntity != null && assignedConsultant != null)
+                    {
+                        var newTask = new Tasks
+                        {
+                            DocumentID = newDocument.DocumentID, // Link to the newly created/updated document
+                            Instructions = $"Review new LoR document uploaded by client {client.FullName}. (Document ID: {newDocument.DocumentID})",
+                            AssignedToConsultantID = assignedConsultant.UserID,
+                            AssignedByHRID = hrEntity.UserID,
+                            StatusID = submittedStatusID 
+                        };
+                        db.TasksEntity.Add(newTask);
+
+                        
+                        try
+                        {
+                            db.SaveChanges(); // This is where the Task validation error occurs
+                            TempData["SuccessMessage"] = (TempData["SuccessMessage"] ?? "") + " and task created!";
+                        }
+                        catch (DbEntityValidationException taskEx)
+                        {
+                            var taskErrorMessages = taskEx.EntityValidationErrors
+                                .SelectMany(x => x.ValidationErrors)
+                                .Select(x => x.PropertyName + ": " + x.ErrorMessage);
+
+                            var fullTaskErrorMessage = string.Join("; ", taskErrorMessages);
+                            TempData["WarningMessage"] = (TempData["WarningMessage"] ?? "") + $"<br>LoR uploaded, but **Task creation failed**: {fullTaskErrorMessage}";
+                            System.Diagnostics.Debug.WriteLine($"Task Creation Validation Error: {fullTaskErrorMessage}");
+                           
+                        }
+                        catch (Exception taskGeneralEx)
+                        {
+                            TempData["WarningMessage"] = (TempData["WarningMessage"] ?? "") + $"<br>LoR uploaded, but **Task creation failed**: {taskGeneralEx.Message}";
+                            System.Diagnostics.Debug.WriteLine($"Task Creation General Error: {taskGeneralEx.Message} - StackTrace: {taskGeneralEx.StackTrace}");
+                           
+                        }
+                       
+
+                    }
+                    else
+                    {
+                        string warningMessage = "LoR uploaded, but could not create a task for HR.";
+                        if (hrEntity == null) warningMessage += " No HR user found with RoleID 1 or corresponding HR entity.";
+                        if (assignedConsultant == null) warningMessage += " Client's assigned consultant not found.";
+                        TempData["WarningMessage"] = warningMessage;
+                    }
+                }
+
+                if (string.IsNullOrEmpty(TempData["WarningMessage"] as string))
+                {
+                    TempData["SuccessMessage"] = "Document uploaded successfully!";
+                }
+
+                return RedirectToAction("Documents");
+            }
+            catch (DbEntityValidationException ex) // Catch validation for the initial document save or other entities
+            {
+                var errorMessages = ex.EntityValidationErrors
+                    .SelectMany(x => x.ValidationErrors)
+                    .Select(x => x.PropertyName + ": " + x.ErrorMessage);
+                var fullErrorMessage = string.Join("; ", errorMessages);
+                TempData["ErrorMessage"] = $"Validation errors uploading document: {fullErrorMessage}";
+                System.Diagnostics.Debug.WriteLine($"Document Upload Validation Error (Main): {fullErrorMessage}");
+                return RedirectToAction("Documents");
+            }
+            catch (Exception ex) // Catch any other unexpected exceptions
+            {
+                TempData["ErrorMessage"] = $"An unexpected error occurred uploading document: {ex.Message}";
+                System.Diagnostics.Debug.WriteLine($"Document Upload Error (Main): {ex.Message} - StackTrace: {ex.StackTrace}");
+                return RedirectToAction("Documents");
+            }
+        }
+
+        public ActionResult DownloadDocument(int id)
+        {
+            if (Session["UserID"] == null)
+                return RedirectToAction("Login", "Login");
+
+            int userId = (int)Session["UserID"];
+            var client = db.ClientEntity.FirstOrDefault(c => c.UserID == userId);
+
+            if (client == null)
+            {
+                TempData["ErrorMessage"] = "Client profile not found.";
+                return RedirectToAction("Dashboard");
+            }
+
+            // Ensure client can only download their own documents
+            var document = db.DocumentEntity
+                .FirstOrDefault(d => d.DocumentID == id && d.ClientID == client.UserID); 
+
+            if (document == null || string.IsNullOrEmpty(document.UploadPath))
+            {
+                TempData["ErrorMessage"] = "Document not found or you do not have permission to download it.";
+                return RedirectToAction("Documents");
+            }
+
+            string physicalPath = Server.MapPath(document.UploadPath);
+            if (!System.IO.File.Exists(physicalPath))
+            {
+                TempData["ErrorMessage"] = "File not found on server.";
+                return RedirectToAction("Documents");
+            }
+
+            byte[] fileBytes = System.IO.File.ReadAllBytes(physicalPath);
+            string fileName = Path.GetFileName(physicalPath);
+
+            return File(fileBytes, System.Net.Mime.MediaTypeNames.Application.Octet, fileName);
+        }
+
+
+
     }
 }

@@ -24,7 +24,8 @@
           s => s.TypeName, 
           new DocumentType { TypeName = "LoR" },
           new DocumentType { TypeName = "EIA" },
-          new DocumentType { TypeName = "PES" });
+          new DocumentType { TypeName = "PES" },
+          new DocumentType { TypeName = "MISC" });
 
             context.FormTypeEntity.AddOrUpdate(
                 s => s.TypeName,

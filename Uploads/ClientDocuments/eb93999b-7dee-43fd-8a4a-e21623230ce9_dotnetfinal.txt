@@ -1,0 +1,13 @@
+10 project demonstration from the marks of 50 of project
+core requirements:
+-multiple user type(min 2 type of user)
+-mvc framework
+-entity framework
+-authentication
+-must have crud operations
+-exception handling
+-landing page
+-using bootstrap,razor
+-invoice generator
+-at least api or rest api crud operation (one)
+-2nf database

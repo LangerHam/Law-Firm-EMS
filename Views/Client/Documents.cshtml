@@ -1,0 +1,74 @@
+﻿@model Law_Firm_EMS.ViewModels.ClientDocumentsViewModel
+
+@{
+    ViewBag.Title = "Documents";
+    Layout = "~/Views/Shared/ClientNavbar.cshtml";
+}
+
+<div class="p-6">
+    <h1 class="text-3xl font-bold text-gray-800 mb-2">My Documents</h1>
+    <p class="text-gray-500 mb-6">Upload and download your LoR and Miscellaneous documents.</p>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6">@TempData["SuccessMessage"]</div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6">@TempData["ErrorMessage"]</div>
+    }
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- Upload Section -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-lg font-semibold mb-4">Upload Document</h2>
+            @using (Html.BeginForm("UploadDocument", "Client", FormMethod.Post, new { enctype = "multipart/form-data" }))
+            {
+                @Html.AntiForgeryToken()
+                <label class="block mb-2 text-sm font-medium">Choose Category:</label>
+                <select name="documentCategory" class="w-full p-2 border rounded-md mb-4">
+                    <option value="LoR">Letter of Recommendation</option>
+                    <option value="MISC">Miscellaneous</option>
+                </select>
+
+                <input type="file" name="file" class="block w-full text-sm text-gray-700 mb-4" />
+                <button type="submit" class="bg-sky-600 hover:bg-sky-700 text-white px-4 py-2 rounded">Upload</button>
+            }
+        </div>
+
+        <!-- List Section -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-lg font-semibold mb-4">Uploaded Documents</h2>
+
+            <b class="text-sm">LoR Documents:</b>
+            <ul class="mb-4">
+                @foreach (var doc in Model.LORDocuments)
+                {
+                    <li class="text-sm flex justify-between items-center border-b py-1">
+                        <span>@doc.FileName</span>
+                        <a href="@Url.Action("DownloadDocument", "Client", new { id = doc.DocumentID })" class="text-sky-600 text-xs hover:underline">Download</a>
+                    </li>
+                }
+                @if (!Model.LORDocuments.Any())
+                {
+                    <li class="text-sm text-gray-500">None uploaded.</li>
+}
+            </ul>
+
+            <b class="text-sm">Miscellaneous Documents:</b>
+            <ul>
+                @foreach (var doc in Model.MiscDocuments)
+                {
+                    <li class="text-sm flex justify-between items-center border-b py-1">
+                        <span>@doc.FileName</span>
+                        <a href="@Url.Action("DownloadDocument", "Client", new { id = doc.DocumentID })" class="text-sky-600 text-xs hover:underline">Download</a>
+                    </li>
+                }
+                @if (!Model.MiscDocuments.Any())
+                {
+                    <li class="text-sm text-gray-500">None uploaded.</li>
+}
+            </ul>
+        </div>
+    </div>
+</div>
