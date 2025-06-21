@@ -59,7 +59,7 @@
                 "dbo.Tasks",
                 c => new
                     {
-                        DocumentID = c.Int(nullable: false, identity: true),
+                        DocumentID = c.Int(nullable: false),
                         Instructions = c.String(),
                         AssignedToConsultantID = c.Int(nullable: false),
                         AssignedByHRID = c.Int(nullable: false),
@@ -68,7 +68,9 @@
                 .PrimaryKey(t => t.DocumentID)
                 .ForeignKey("dbo.HRs", t => t.AssignedByHRID)
                 .ForeignKey("dbo.Consultants", t => t.AssignedToConsultantID)
+                .ForeignKey("dbo.Documents", t => t.DocumentID)
                 .ForeignKey("dbo.StatusTypes", t => t.StatusID)
+                .Index(t => t.DocumentID)
                 .Index(t => t.AssignedToConsultantID)
                 .Index(t => t.AssignedByHRID)
                 .Index(t => t.StatusID);
@@ -194,8 +196,6 @@
                 .ForeignKey("dbo.Documents", t => t.ParentDocumentID)
                 .ForeignKey("dbo.StatusTypes", t => t.StatusID)
                 .ForeignKey("dbo.Users", t => t.UploadedByUserID)
-                .ForeignKey("dbo.Tasks", t => t.DocumentID)
-                .Index(t => t.DocumentID)
                 .Index(t => t.ClientID)
                 .Index(t => t.UploadedByUserID)
                 .Index(t => t.DocumentTypeID)
@@ -266,8 +266,8 @@
             DropForeignKey("dbo.Forms", "ClientID", "dbo.Clients");
             DropForeignKey("dbo.Consultants", "UserID", "dbo.Users");
             DropForeignKey("dbo.Tasks", "StatusID", "dbo.StatusTypes");
-            DropForeignKey("dbo.Documents", "DocumentID", "dbo.Tasks");
             DropForeignKey("dbo.Documents", "UploadedByUserID", "dbo.Users");
+            DropForeignKey("dbo.Tasks", "DocumentID", "dbo.Documents");
             DropForeignKey("dbo.Documents", "StatusID", "dbo.StatusTypes");
             DropForeignKey("dbo.Documents", "ParentDocumentID", "dbo.Documents");
             DropForeignKey("dbo.Documents", "DocumentTypeID", "dbo.DocumentTypes");
@@ -295,7 +295,6 @@
             DropIndex("dbo.Documents", new[] { "DocumentTypeID" });
             DropIndex("dbo.Documents", new[] { "UploadedByUserID" });
             DropIndex("dbo.Documents", new[] { "ClientID" });
-            DropIndex("dbo.Documents", new[] { "DocumentID" });
             DropIndex("dbo.Users", new[] { "RoleID" });
             DropIndex("dbo.Users", new[] { "Email" });
             DropIndex("dbo.Invoices", new[] { "GeneratedByHRID" });
@@ -310,6 +309,7 @@
             DropIndex("dbo.Tasks", new[] { "StatusID" });
             DropIndex("dbo.Tasks", new[] { "AssignedByHRID" });
             DropIndex("dbo.Tasks", new[] { "AssignedToConsultantID" });
+            DropIndex("dbo.Tasks", new[] { "DocumentID" });
             DropIndex("dbo.Consultants", new[] { "HRID" });
             DropIndex("dbo.Consultants", new[] { "UserID" });
             DropIndex("dbo.Clients", new[] { "AssignedConsultantID" });

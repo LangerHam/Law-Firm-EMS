@@ -44,10 +44,9 @@ namespace Law_Firm_EMS.Context
         {
             modelBuilder.Conventions.Remove<OneToManyCascadeDeleteConvention>();
             modelBuilder.Conventions.Remove<ManyToManyCascadeDeleteConvention>();
-
-            modelBuilder.Entity<Tasks>()
-                .HasRequired(t => t.Document)
-                .WithRequiredPrincipal(d => d.Task);
+            modelBuilder.Entity<Document>()
+                        .HasOptional(d => d.Task)
+                        .WithRequired(t => t.Document);
 
             base.OnModelCreating(modelBuilder);
         }

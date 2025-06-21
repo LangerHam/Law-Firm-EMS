@@ -20,11 +20,11 @@
             //  You can use the DbSet<T>.AddOrUpdate() helper extension method
             //  to avoid creating duplicate seed data.
             context.DocumentTypeEntity.AddOrUpdate(
-         s => s.TypeName,
-         new DocumentType { TypeName = "LoR" },
-         new DocumentType { TypeName = "EIA" },
-         new DocumentType { TypeName = "PES" },
-         new DocumentType { TypeName = "MISC" });
+                s => s.TypeName,
+                new DocumentType { TypeName = "LoR" },
+                new DocumentType { TypeName = "EIA" },
+                new DocumentType { TypeName = "PES" },
+                new DocumentType { TypeName = "MISC" });
 
             context.FormTypeEntity.AddOrUpdate(
                 s => s.TypeName,
