@@ -46,7 +46,7 @@
 
             context.RoleEntity.AddOrUpdate(
                 s => s.RoleName,
-                new Role { RoleName = "Admin" },
+                new Role { RoleName = "HR" },
                 new Role { RoleName = "Client" },
                 new Role { RoleName = "Consultant" });
         }
