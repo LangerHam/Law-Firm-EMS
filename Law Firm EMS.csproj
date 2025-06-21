@@ -146,7 +146,9 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Context\LawContextDb.cs" />
+    <Compile Include="Controllers\Api\ConsultantApiController.cs" />
     <Compile Include="Controllers\ClientController.cs" />
+    <Compile Include="Controllers\ConsultantController.cs" />
     <Compile Include="Controllers\HRController.cs" />
     <Compile Include="Controllers\LoginController.cs" />
     <Compile Include="Global.asax.cs">
@@ -162,6 +164,7 @@
     <Compile Include="Models\Consultant.cs" />
     <Compile Include="Models\Document.cs" />
     <Compile Include="Models\DocumentType.cs" />
+    <Compile Include="Models\DTO\ConsultantDTO.cs" />
     <Compile Include="Models\Evaluation.cs" />
     <Compile Include="Models\Form.cs" />
     <Compile Include="Models\FormType.cs" />
@@ -260,6 +263,8 @@
     <Content Include="Views\HR\ManageInvoices.cshtml" />
     <Content Include="Views\HR\InvoicePdf.cshtml" />
     <Content Include="Views\Client\Forms.cshtml" />
+    <Content Include="Views\Consultant\Dashboard.cshtml" />
+    <Content Include="Views\Shared\ConsultantNavbar.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

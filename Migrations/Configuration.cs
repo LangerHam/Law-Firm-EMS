@@ -43,6 +43,12 @@
                 new StatusType { StatusName = "Completed" },
                 new StatusType { StatusName = "Submitted"},
                 new StatusType { StatusName = "Not Submitted"});
+
+            context.RoleEntity.AddOrUpdate(
+                s => s.RoleName,
+                new Role { RoleName = "Admin" },
+                new Role { RoleName = "Client" },
+                new Role { RoleName = "Consultant" });
         }
     }
 }

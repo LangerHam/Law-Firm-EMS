@@ -79,7 +79,10 @@ namespace Law_Firm_EMS.Controllers
                 {
                     case 1: return RedirectToAction("Dashboard", "HR");
                     case 2: return RedirectToAction("Dashboard", "Client");
-                    case 3: return RedirectToAction("Dashboard", "Consultant");
+                    case 3:
+                        var consultantProfile = db.ConsultantEntity.Find(user.UserID);
+                        Session["ProfilePhotoPath"] = consultantProfile?.ProfilePhotoPath;
+                        return RedirectToAction("Dashboard", "Consultant");
                     default: return RedirectToAction("Login");
                 }
             }
