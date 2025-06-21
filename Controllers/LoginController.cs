@@ -32,7 +32,7 @@ namespace Law_Firm_EMS.Controllers
                     var newUser = new Users
                     {
                         Email = email,
-                        PasswordHash = "temporary_password",
+                        PasswordHash = "12345",
                         RoleID = 2, 
                         CreatedAt = System.DateTime.UtcNow
                     };

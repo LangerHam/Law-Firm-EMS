@@ -11,6 +11,7 @@ namespace Law_Firm_EMS.Models
 	public class Document
 	{
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int DocumentID { get; set; }
         [Required]
         public string UploadPath { get; set; }
@@ -30,8 +31,8 @@ namespace Law_Firm_EMS.Models
         [ForeignKey("ParentDocumentID")]
         public virtual Document ParentDocument { get; set; }
         public virtual ICollection<Document> Revisions { get; set; }
-        [Required]
-        [InverseProperty("Document")]
+        //[Required]
+        //[InverseProperty("Document")]
         public virtual Tasks Task { get; set; }
 
     }
