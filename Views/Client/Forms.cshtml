@@ -1,10 +1,10 @@
 ﻿@model Law_Firm_EMS.ViewModels.ClientFormsViewModel
 
 @{
-    ViewBag.Title = "Client Forms"; // More descriptive title
-    Layout = "~/Views/Shared/ClientNavbar.cshtml"; // Your layout file
+    ViewBag.Title = "Client Forms"; 
+    Layout = "~/Views/Shared/ClientNavbar.cshtml"; 
 
-    // Define consistent card styles
+    
     var cardClass = "bg-white p-8 rounded-2xl shadow-xl border border-gray-50 transform hover:scale-[1.01] transition-all duration-300 ease-in-out";
 }
 
@@ -12,7 +12,7 @@
     <h1 class="text-5xl font-extrabold text-gray-900 mb-4 tracking-tight leading-tight">Your Essential Forms</h1>
     <p class="text-xl text-gray-700 mb-10 max-w-2xl">Effortlessly manage your legal documentation. Download templates and upload completed forms with ease.</p>
 
-    @* Alert Messages with enhanced design *@
+   
     @if (TempData["SuccessMessage"] != null)
     {
         <div class="bg-green-50 border-l-4 border-green-400 text-green-800 p-5 mb-8 rounded-lg shadow-md flex items-center animate-fade-in-down" role="alert">
@@ -138,7 +138,7 @@
 @section scripts {
     <script src="https://unpkg.com/lucide@latest"></script>
     <script>
-        // Initialize Lucide icons on page load
+        
         lucide.createIcons();
 
         document.addEventListener('DOMContentLoaded', function () {
@@ -151,74 +151,74 @@
                 if (button) {
                     showFormDetails(parseInt(preSelectedFormId), button);
                 } else if (formSelectButtons.length > 0) {
-                    // Fallback to selecting the first form if pre-selected isn't found
+                   
                     const firstFormButton = formSelectButtons[0];
                     const match = firstFormButton.onclick.toString().match(/\((\d+)/);
                     if (match && match[1]) {
                         showFormDetails(parseInt(match[1]), firstFormButton);
                     }
                 } else {
-                    // No forms available, show placeholder
+                    
                     document.getElementById('form-placeholder').classList.remove('hidden');
                 }
             } else if (formSelectButtons.length > 0) {
-                // No pre-selection, select the first form by default
+                
                 const firstFormButton = formSelectButtons[0];
                 const match = firstFormButton.onclick.toString().match(/\((\d+)/);
                 if (match && match[1]) {
                     showFormDetails(parseInt(match[1]), firstFormButton);
                 }
             } else {
-                // No forms available at all, show placeholder
+                
                 document.getElementById('form-placeholder').classList.remove('hidden');
             }
         });
 
         function showFormDetails(formTypeId, clickedButton) {
-            // Hide all detail panels and the placeholder
+           
             document.querySelectorAll('.form-details-panel').forEach(panel => {
                 panel.classList.add('hidden');
             });
             document.getElementById('form-placeholder').classList.add('hidden');
 
-            // Show the selected form's detail panel
+            
             const selectedPanel = document.getElementById('form-details-' + formTypeId);
             if (selectedPanel) {
                 selectedPanel.classList.remove('hidden');
             }
 
-            // Remove active state from all form selection buttons
+            
             document.querySelectorAll('.form-select-btn').forEach(btn => {
-                btn.classList.remove('bg-indigo-100', 'text-indigo-800', 'font-bold'); // Updated active state classes
+                btn.classList.remove('bg-indigo-100', 'text-indigo-800', 'font-bold'); 
             });
 
-            // Add active state to the currently clicked button
+            
             if (clickedButton) {
-                clickedButton.classList.add('bg-indigo-100', 'text-indigo-800', 'font-bold'); // Updated active state classes
+                clickedButton.classList.add('bg-indigo-100', 'text-indigo-800', 'font-bold'); 
             }
         }
     </script>
     <style>
-        /* Custom scrollbar for webkit browsers (Chrome, Safari) */
+        
         .custom-scrollbar::-webkit-scrollbar {
             width: 8px;
         }
 
         .custom-scrollbar::-webkit-scrollbar-track {
-            background: #f0f4f8; /* Light blue-gray background */
+            background: #f0f4f8; 
             border-radius: 10px;
         }
 
         .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #a7b7cd; /* Medium blue-gray thumb */
+            background: #a7b7cd; 
             border-radius: 10px;
         }
 
             .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-                background: #8096b7; /* Darker blue-gray on hover */
+                background: #8096b7; 
             }
 
-        /* Basic fade-in animation for alerts */
+       
         @@keyframes fade-in-down {
             from {
                 opacity: 0;

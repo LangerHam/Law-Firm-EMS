@@ -440,7 +440,7 @@ namespace Law_Firm_EMS.Controllers
 
             var client = db.ClientEntity
                 .Include(c => c.AssignedConsultant)
-                .Include(c => c.Billing.Transactions) // Eager load transactions
+                .Include(c => c.Billing.Transactions) 
                 .FirstOrDefault(c => c.UserID == userId);
 
             ViewBag.ClientName = client.FullName;
@@ -448,7 +448,7 @@ namespace Law_Firm_EMS.Controllers
             if (client == null)
             {
                 TempData["ErrorMessage"] = "Client profile not found. Please contact admin.";
-                return RedirectToAction("Dashboard"); // Or an error page
+                return RedirectToAction("Dashboard"); /
             }
 
             var billingData = client.Billing;
@@ -461,10 +461,10 @@ namespace Law_Firm_EMS.Controllers
                 {
                     TotalFees = billingData?.TotalFees ?? 0M,
                     PaidAmount = billingData?.PaidAmount ?? 0M,
-                    DueAmount = (billingData?.TotalFees ?? 0M) - (billingData?.PaidAmount ?? 0M) // Calculate Due
+                    DueAmount = (billingData?.TotalFees ?? 0M) - (billingData?.PaidAmount ?? 0M) 
                 },
                 Transactions = billingData?.Transactions
-                                .OrderByDescending(t => t.PaymentDate) // Order by latest transaction
+                                .OrderByDescending(t => t.PaymentDate) 
                                 .Select(t => new TransactionViewModel
                                 {
                                     TransactionID = t.TransactionID,
@@ -482,11 +482,11 @@ namespace Law_Firm_EMS.Controllers
         public ActionResult ProcessPayment(ProcessPaymentViewModel paymentModel)
         {
             if (Session["UserID"] == null)
-                return Json(new { success = false, message = "Authentication required." }); // Return JSON for AJAX
+                return Json(new { success = false, message = "Authentication required." }); 
 
             if (!ModelState.IsValid)
             {
-                // Return model state errors as JSON
+               
                 var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
                 return Json(new { success = false, message = "Invalid payment amount.", errors = errors });
             }
@@ -499,11 +499,11 @@ namespace Law_Firm_EMS.Controllers
 
             if (billing == null)
             {
-                // Create a new billing entry if it doesn't exist (e.g., initial setup)
+                
                 billing = new Billing
                 {
                     ClientID = userId,
-                    TotalFees = 0M, // Or a default initial fee
+                    TotalFees = 0M, 
                     PaidAmount = 0M,
                     Transactions = new List<Transaction>()
                 };
@@ -515,8 +515,7 @@ namespace Law_Firm_EMS.Controllers
                 return Json(new { success = false, message = "Payment amount must be greater than zero." });
             }
 
-            // Prevent overpaying more than total fees (if RemainingAmount is tracked as computed property)
-            // Or, if TotalFees can be 0, allow any payment up to the due amount.
+            
             decimal currentDue = billing.TotalFees - billing.PaidAmount;
             if (paymentModel.AmountToPay > currentDue && currentDue > 0)
             {
@@ -532,13 +531,13 @@ namespace Law_Firm_EMS.Controllers
                 {
                     Amount = paymentModel.AmountToPay,
                     PaymentDate = DateTime.Now,
-                    BillingID = billing.ClientID // BillingID is ClientID in your model
+                    BillingID = billing.ClientID 
                 };
                 db.TransactionEntity.Add(newTransaction);
 
                 db.SaveChanges();
 
-                // Recalculate summary for updated display
+                
                 var updatedSummary = new BillingSummaryViewModel
                 {
                     TotalFees = billing.TotalFees,
@@ -546,7 +545,7 @@ namespace Law_Firm_EMS.Controllers
                     DueAmount = billing.TotalFees - billing.PaidAmount
                 };
 
-                // Get updated transaction list
+                
                 var updatedTransactions = billing.Transactions
                                             .OrderByDescending(t => t.PaymentDate)
                                             .Select(t => new TransactionViewModel
@@ -568,7 +567,7 @@ namespace Law_Firm_EMS.Controllers
             }
             catch (Exception ex)
             {
-                // Log the exception (e.g., to ELMAH, Serilog, or console during dev)
+                
                 System.Diagnostics.Debug.WriteLine($"Error processing payment: {ex.Message}");
                 return Json(new { success = false, message = "An error occurred while processing your payment. Please try again." });
             }
@@ -601,8 +600,7 @@ namespace Law_Firm_EMS.Controllers
             ViewBag.ClientName = client.FullName;
             ViewBag.CurrentDate = DateTime.Now.ToString("MMMM dd, yyyy");
 
-            // Return a partial view or a dedicated view for printing
-            // This view should be designed for print/PDF conversion
+           
             return View("_TransactionHistoryPrintable", transactions);
         }
     }

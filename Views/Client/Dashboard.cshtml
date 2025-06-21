@@ -1,9 +1,9 @@
 ﻿@model Law_Firm_EMS.ViewModels.ClientDashboardViewModel
 
 @{
-    ViewBag.Title = "Client Dashboard"; // Added a clear page title
+    ViewBag.Title = "Client Dashboard"; 
     Layout = "~/Views/Shared/ClientNavbar.cshtml";
-    // Define a common card class for consistent styling
+    
     var cardClass = "bg-white p-6 rounded-xl shadow-md border border-gray-200";
 }
 
@@ -19,7 +19,7 @@
 
 <main class="p-6 overflow-y-auto flex-1 bg-gray-50">
 
-    <h1 class="text-2xl font-bold text-gray-800 mb-6">Client Dashboard</h1> @* Main Dashboard Title *@
+    <h1 class="text-2xl font-bold text-gray-800 mb-6">Client Dashboard</h1> 
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
 
@@ -126,7 +126,7 @@
 
     <div class="@cardClass mb-6">
         <h2 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-            <i data-lucide="donut" class="w-5 h-5 mr-2 text-teal-500"></i> @* Icon changed to 'donut' *@
+            <i data-lucide="donut" class="w-5 h-5 mr-2 text-teal-500"></i> 
             Overall Document Status Breakdown
         </h2>
         <div style="width: 100%; max-width: 800px; margin: auto; height: 400px;">
@@ -172,7 +172,7 @@
         const backgroundColors = statusData.map(s => s.Color);
 
         const chart = new Chart(ctx, {
-            type: 'pie', // Type remains 'pie' for donut charts
+            type: 'pie', 
             data: {
                 labels: labels,
                 datasets: [{
@@ -190,7 +190,7 @@
                     animateScale: true,
                     animateRotate: true
                 },
-                cutout: '70%', // This creates the donut hole. Adjust percentage as desired (e.g., '50%', '60%')
+                cutout: '70%', 
                 plugins: {
                     title: {
                         display: true,
