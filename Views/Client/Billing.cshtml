@@ -1,0 +1,527 @@
+﻿@model Law_Firm_EMS.ViewModels.ClientBillingViewModel
+
+@{
+    ViewBag.Title = "My Billing";
+    Layout = "~/Views/Shared/ClientNavbar.cshtml";
+
+    // Reusing the consistent card class from the dashboard
+    var cardClass = "bg-white p-6 rounded-xl shadow-md border border-gray-200";
+}
+
+<main class="p-6 overflow-y-auto flex-1 bg-gray-50">
+
+    <h1 class="text-2xl font-bold text-gray-800 mb-4">Billing & Payments</h1>
+    <p class="text-md text-gray-700 mb-8 max-w-2xl">Manage your service fees, view payment history, and make payments securely.</p>
+
+    @* Alert Messages (Success/Error) *@
+    <div id="alertContainer" class="mb-6">
+        @* Dynamic alerts will be inserted here by JavaScript *@
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="bg-green-50 border-l-4 border-green-400 text-green-800 p-5 rounded-lg shadow-md flex items-center animate-fade-in-down" role="alert">
+                <i data-lucide="check-circle" class="w-6 h-6 mr-3 text-green-500"></i>
+                <p class="font-semibold">@TempData["SuccessMessage"]</p>
+            </div>
+        }
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="bg-red-50 border-l-4 border-red-400 text-red-800 p-5 rounded-lg shadow-md flex items-center animate-fade-in-down" role="alert">
+                <i data-lucide="alert-triangle" class="w-6 h-6 mr-3 text-red-500"></i>
+                <p class="font-semibold">@TempData["ErrorMessage"]</p>
+            </div>
+        }
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <div class="@cardClass flex flex-col justify-between">
+            <div>
+                <h2 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                    <i data-lucide="wallet" class="w-5 h-5 mr-2 text-green-600"></i>
+                    Billing Overview
+                </h2>
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                        <span class="text-base text-gray-600 font-medium">Service Fees:</span>
+                        <span class="text-xl font-bold text-gray-900" id="totalFeesDisplay">@Model.BillingSummary.TotalFees.ToString("C", new System.Globalization.CultureInfo("en-BD"))</span>
+                    </div>
+                    <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                        <span class="text-base text-gray-600 font-medium">Paid:</span>
+                        <span class="text-xl font-bold text-green-600" id="paidAmountDisplay">@Model.BillingSummary.PaidAmount.ToString("C", new System.Globalization.CultureInfo("en-BD"))</span>
+                    </div>
+                    <div class="flex justify-between items-center py-2">
+                        <span class="text-lg text-gray-700 font-bold">Amount Due:</span>
+                        <span class="text-2xl font-extrabold text-red-600" id="dueAmountDisplay">@Model.BillingSummary.DueAmount.ToString("C", new System.Globalization.CultureInfo("en-BD"))</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="@cardClass lg:col-span-2 flex flex-col">
+            <h2 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                <i data-lucide="credit-card" class="w-5 h-5 mr-2 text-blue-600"></i>
+                Make a Payment
+            </h2>
+            <p class="text-gray-600 mb-6 text-sm">Choose a payment option below and fill out the appropriate information.</p>
+
+            <div class="flex space-x-4 mb-8 border-b border-gray-200 pb-4">
+                <button type="button" class="payment-tab flex items-center justify-center flex-1 py-3 px-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors duration-200 border border-transparent data-[state=active]:border-blue-500 data-[state=active]:text-blue-600 data-[state=active]:shadow data-[state=active]:bg-blue-50" data-tab="creditCard">
+                    <i data-lucide="credit-card" class="w-6 h-6 mr-2 text-sky-500 data-[state=active]:text-blue-600"></i> Credit Card
+                </button>
+                <button type="button" class="payment-tab flex items-center justify-center flex-1 py-3 px-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors duration-200 border border-transparent data-[state=active]:border-blue-500 data-[state=active]:text-blue-600 data-[state=active]:shadow data-[state=active]:bg-blue-50" data-tab="giftCard">
+                    <i data-lucide="gift" class="w-6 h-6 mr-2 text-orange-500 data-[state=active]:text-blue-600"></i> Gift Card
+                </button>
+                <button type="button" class="payment-tab flex items-center justify-center flex-1 py-3 px-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors duration-200 border border-transparent data-[state=active]:border-blue-500 data-[state=active]:text-blue-600 data-[state=active]:shadow data-[state=active]:bg-blue-50" data-tab="paypal">
+                    <i data-lucide="paypal" class="w-6 h-6 mr-2 text-blue-700 data-[state=active]:text-blue-600"></i> PayPal
+                </button>
+            </div>
+
+            <div id="paymentContent">
+                <div id="creditCardTab" class="payment-tab-content space-y-8">
+                    <form id="paymentForm" class="space-y-6">
+                        @Html.AntiForgeryToken()
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="space-y-4">
+                                <h3 class="text-base font-semibold text-gray-800 flex items-center mb-2">
+                                    <i data-lucide="map-pin" class="w-4 h-4 mr-2 text-gray-500"></i> Billing Address
+                                </h3>
+                                <div>
+                                    <label for="fullName" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                                    <input type="text" id="fullName" name="FullName"
+                                           class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="John Doe">
+                                </div>
+                                <div>
+                                    <label for="address1" class="block text-sm font-medium text-gray-700 mb-1">Address 1</label>
+                                    <input type="text" id="address1" name="Address1"
+                                           class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="123 Main St">
+                                </div>
+                                <div>
+                                    <label for="address2" class="block text-sm font-medium text-gray-700 mb-1">Address 2 (Optional)</label>
+                                    <input type="text" id="address2" name="Address2"
+                                           class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="Apartment, suite, unit, etc.">
+                                </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="city" class="block text-sm font-medium text-gray-700 mb-1">City</label>
+                                        <input type="text" id="city" name="City"
+                                               class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="New York">
+                                    </div>
+                                    <div>
+                                        <label for="state" class="block text-sm font-medium text-gray-700 mb-1">State</label>
+                                        <select id="state" name="State" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                            <option value="">Select State</option>
+                                            <option value="NY">New York</option>
+                                            <option value="CA">California</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label for="zipCode" class="block text-sm font-medium text-gray-700 mb-1">Zip Code</label>
+                                    <input type="text" id="zipCode" name="ZipCode"
+                                           class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="10001">
+                                </div>
+                            </div>
+
+                            <div class="space-y-4">
+                                <h3 class="text-base font-semibold text-gray-800 flex items-center mb-2">
+                                    <i data-lucide="credit-card" class="w-4 h-4 mr-2 text-gray-500"></i> Credit Card Info
+                                </h3>
+                                <div>
+                                    <label for="nameOnCard" class="block text-sm font-medium text-gray-700 mb-1">Name on Card</label>
+                                    <input type="text" id="nameOnCard" name="NameOnCard"
+                                           class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="JOHN DOE">
+                                </div>
+                                <div>
+                                    <label for="cardNumber" class="block text-sm font-medium text-gray-700 mb-1">Card Number</label>
+                                    <input type="text" id="cardNumber" name="CardNumber"
+                                           class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="0000 0000 0000 0000">
+                                </div>
+                                <div class="grid grid-cols-3 gap-4">
+                                    <div>
+                                        <label for="cvv" class="block text-sm font-medium text-gray-700 mb-1">CVV</label>
+                                        <input type="text" id="cvv" name="CVV"
+                                               class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="123">
+                                    </div>
+                                    <div>
+                                        <label for="expMonth" class="block text-sm font-medium text-gray-700 mb-1">Exp. Month</label>
+                                        <select id="expMonth" name="ExpMonth" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                            <option value="">Month</option>
+                                            @for (int i = 1; i <= 12; i++)
+                                            {
+                                                <option value="@i.ToString("00")">@i.ToString("00")</option>
+                                            }
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label for="expYear" class="block text-sm font-medium text-gray-700 mb-1">Exp. Year</label>
+                                        <select id="expYear" name="ExpYear" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                            <option value="">Year</option>
+                                            @for (int i = DateTime.Now.Year; i <= DateTime.Now.Year + 10; i++)
+                                            {
+                                                <option value="@i">@i</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="relative pt-4">
+                                    @* Added pt-4 for spacing *@
+                                    <label for="amountToPay" class="block text-sm font-medium text-gray-700 mb-2">Amount to Pay</label>
+                                    <div class="mt-1 relative rounded-md shadow-sm">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <span class="text-gray-500 sm:text-sm">৳</span>
+                                        </div>
+                                        <input type="number" id="amountToPay" name="AmountToPay" step="0.01" min="0.01" value="@(Model.BillingSummary.DueAmount > 0 ? Model.BillingSummary.DueAmount : 0)"
+                                               class="focus:ring-blue-500 focus:border-blue-500 block w-full pl-7 pr-12 sm:text-base border-gray-300 rounded-md p-3"
+                                               placeholder="0.00" aria-describedby="price-currency">
+                                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                            <span class="text-gray-500 sm:text-sm" id="price-currency">BDT</span>
+                                        </div>
+                                    </div>
+                                    <p id="amountError" class="mt-2 text-sm text-red-600 hidden"></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" id="payNowBtn"
+                                class="w-full bg-indigo-600 text-white py-3 px-5 rounded-lg text-lg font-semibold
+                                hover:bg-indigo-700 transition-colors duration-300 ease-in-out shadow-md hover:shadow-lg
+                                transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-indigo-300">
+                            <i data-lucide="arrow-right" class="w-5 h-5 mr-2 inline-block"></i> Continue @* Changed icon and text to "Continue" *@
+                        </button>
+                    </form>
+                </div>
+
+                <div id="giftCardTab" class="payment-tab-content hidden text-center py-10 text-gray-500">
+                    <i data-lucide="gift" class="w-16 h-16 mx-auto mb-4 text-orange-300"></i>
+                    <p class="text-lg font-medium mb-2">Gift Card payments are not currently supported.</p>
+                    <p class="text-sm">Please check back later or use another payment method.</p>
+                </div>
+
+                <div id="paypalTab" class="payment-tab-content hidden text-center py-10 text-gray-500">
+                    <i data-lucide="paypal" class="w-16 h-16 mx-auto mb-4 text-blue-400"></i>
+                    <p class="text-lg font-medium mb-2">PayPal integration is coming soon!</p>
+                    <p class="text-sm">For now, please use the Credit Card option to proceed with your payment.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="@cardClass">
+        <h2 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+            <i data-lucide="history" class="w-5 h-5 mr-2 text-teal-600"></i>
+            Transaction History
+            <button id="generatePdfBtn" class="ml-auto bg-gray-200 text-gray-700 py-2 px-5 rounded-lg text-sm font-semibold
+                                          hover:bg-gray-300 transition-colors duration-200 ease-in-out
+                                          focus:outline-none focus:ring-2 focus:ring-gray-400">
+                <i data-lucide="file-text" class="w-4 h-4 mr-1 inline-block"></i> Generate PDF
+            </button>
+        </h2>
+
+        @if (Model.Transactions != null && Model.Transactions.Any())
+        {
+            <div class="overflow-x-auto border border-gray-200 rounded-lg">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Transaction ID</th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-100" id="transactionTableBody">
+                        @foreach (var transaction in Model.Transactions)
+                        {
+                            <tr>
+                                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">#@transaction.TransactionID</td>
+                                <td class="px-4 py-3 whitespace-nowrap text-base text-green-600 font-semibold">@transaction.Amount.ToString("C", new System.Globalization.CultureInfo("en-BD"))</td>
+                                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">@transaction.PaymentDate.ToString("yyyy-MM-dd hh:mm tt")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-8 text-gray-500">
+                <i data-lucide="piggy-bank" class="w-14 h-14 mx-auto mb-3 text-gray-300"></i>
+                <p class="text-md font-medium">No transactions recorded yet.</p>
+            </div>
+        }
+    </div>
+</main>
+
+@section scripts {
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        lucide.createIcons(); // Initialize Lucide Icons
+
+        // Function to display alerts
+        function showAlert(message, type = 'success') {
+            const alertContainer = document.getElementById('alertContainer');
+            const bgColor = type === 'success' ? 'bg-green-50' : 'bg-red-50';
+            const borderColor = type === 'success' ? 'border-green-400' : 'border-red-400';
+            const textColor = type === 'success' ? 'text-green-800' : 'text-red-800';
+            const icon = type === 'success' ? 'check-circle' : 'alert-triangle';
+
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `${bgColor} border-l-4 ${borderColor} ${textColor} p-5 rounded-lg shadow-md flex items-center animate-fade-in-down mb-4`;
+            alertDiv.innerHTML = `
+                <i data-lucide="${icon}" class="w-6 h-6 mr-3 ${type === 'success' ? 'text-green-500' : 'text-red-500'}"></i>
+                <p class="font-semibold">${message}</p>
+            `;
+            alertContainer.prepend(alertDiv);
+
+            lucide.createIcons(); // Re-render Lucide icons for the new alert
+
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
+        }
+
+        // --- Tab Switching Logic ---
+        document.addEventListener('DOMContentLoaded', function () {
+            const tabs = document.querySelectorAll('.payment-tab');
+            const tabContents = document.querySelectorAll('.payment-tab-content');
+
+            // Function to activate a tab
+            function activateTab(tabId) {
+                tabs.forEach(tab => {
+                    if (tab.dataset.tab === tabId) {
+                        tab.setAttribute('data-state', 'active');
+                    } else {
+                        tab.removeAttribute('data-state');
+                    }
+                });
+
+                tabContents.forEach(content => {
+                    if (content.id === `${tabId}Tab`) {
+                        content.classList.remove('hidden');
+                    } else {
+                        content.classList.add('hidden');
+                    }
+                });
+
+                lucide.createIcons(); // Re-render icons after changing tab content
+            }
+
+            // Add click listeners to tabs
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    activateTab(tab.dataset.tab);
+                });
+            });
+
+            // Activate the first tab (Credit Card) by default on load
+            activateTab('creditCard');
+
+            // --- Initial state for Amount to Pay input and button ---
+            const amountInput = document.getElementById('amountToPay');
+            const payNowBtn = document.getElementById('payNowBtn');
+            const dueAmount = parseFloat(document.getElementById('dueAmountDisplay').textContent.replace(/[^0-9.]/g, '')); // Clean up currency symbol for parsing
+
+            if (dueAmount <= 0) {
+                amountInput.value = 0;
+                amountInput.disabled = true;
+                payNowBtn.disabled = true;
+                payNowBtn.innerHTML = 'No Amount Due';
+                payNowBtn.classList.add('opacity-50', 'cursor-not-allowed'); // Add visual disabled state
+            } else {
+                amountInput.value = dueAmount;
+            }
+        });
+
+
+        // --- Payment Form Submission ---
+        document.getElementById('paymentForm').addEventListener('submit', async function (event) {
+            event.preventDefault(); // Prevent default form submission
+
+            const amountInput = document.getElementById('amountToPay');
+            const amountError = document.getElementById('amountError');
+            const payNowBtn = document.getElementById('payNowBtn');
+
+            // Reset error display
+            amountError.classList.add('hidden');
+            amountInput.classList.remove('border-red-500', 'focus:border-red-500', 'focus:ring-red-500');
+            payNowBtn.disabled = true; // Disable button to prevent multiple submissions
+            payNowBtn.innerHTML = '<i data-lucide="loader" class="w-5 h-5 mr-2 inline-block animate-spin"></i> Processing...';
+            lucide.createIcons(); // Re-render loader icon
+
+            const formData = new FormData(this); // Get form data
+            const amountToPay = parseFloat(amountInput.value);
+
+            // Client-side validation for non-positive or non-numeric amount
+            if (isNaN(amountToPay) || amountToPay <= 0) {
+                amountError.textContent = "Please enter a valid amount greater than zero.";
+                amountError.classList.remove('hidden');
+                amountInput.classList.add('border-red-500', 'focus:border-red-500', 'focus:ring-red-500');
+                payNowBtn.disabled = false;
+                payNowBtn.innerHTML = '<i data-lucide="arrow-right" class="w-5 h-5 mr-2 inline-block"></i> Continue'; // Adjusted icon size
+                lucide.createIcons();
+                return;
+            }
+
+            try {
+                const response = await fetch('@Url.Action("ProcessPayment", "Client")', {
+                    method: 'POST',
+                    headers: {
+                        'RequestVerificationToken': formData.get('__RequestVerificationToken')
+                    },
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showAlert(result.message, 'success');
+                    // Update UI with new billing summary
+                    document.getElementById('totalFeesDisplay').textContent = formatCurrency(result.summary.TotalFees, 'BDT');
+                    document.getElementById('paidAmountDisplay').textContent = formatCurrency(result.summary.PaidAmount, 'BDT');
+                    document.getElementById('dueAmountDisplay').textContent = formatCurrency(result.summary.DueAmount, 'BDT');
+
+                    // Update transaction history table
+                    const transactionTableBody = document.getElementById('transactionTableBody');
+                    transactionTableBody.innerHTML = ''; // Clear existing rows
+                    if (result.transactions && result.transactions.length > 0) {
+                        result.transactions.forEach(tx => {
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">#${tx.TransactionID}</td>
+                                <td class="px-4 py-3 whitespace-nowrap text-base text-green-600 font-semibold">${formatCurrency(tx.Amount, 'BDT')}</td>
+                                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">${formatDate(tx.PaymentDate)}</td>
+                            `;
+                            transactionTableBody.appendChild(row);
+                        });
+                        // Remove "No transactions" message if it exists
+                         const noTransactionsDiv = document.querySelector('.text-center.py-8.text-gray-500');
+                         if (noTransactionsDiv && noTransactionsDiv.closest('table') === null) { // Ensure it's not part of the table body placeholder
+                            noTransactionsDiv.remove();
+                         }
+                    } else {
+                        // If no transactions after update, display message (or re-display if all removed)
+                        // This assumes the initial empty state div is removed by the loop
+                        if (!document.querySelector('.text-center.py-8.text-gray-500')) { // Only add if not already present
+                             const emptyStateRow = document.createElement('tr');
+                             emptyStateRow.innerHTML = `
+                                <td colspan="3">
+                                    <div class="text-center py-8 text-gray-500">
+                                        <i data-lucide="piggy-bank" class="w-14 h-14 mx-auto mb-3 text-gray-300"></i>
+                                        <p class="text-md font-medium">No transactions recorded yet.</p>
+                                    </div>
+                                </td>
+                            `;
+                            transactionTableBody.appendChild(emptyStateRow);
+                            lucide.createIcons(); // Re-render icon
+                        }
+                    }
+
+
+                    // Reset form field and button state based on new due amount
+                    const updatedDueAmount = parseFloat(document.getElementById('dueAmountDisplay').textContent.replace(/[^0-9.]/g, ''));
+                    if (updatedDueAmount <= 0) {
+                        amountInput.value = 0;
+                        amountInput.disabled = true;
+                        payNowBtn.disabled = true;
+                        payNowBtn.innerHTML = 'No Amount Due';
+                        payNowBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                    } else {
+                        amountInput.value = updatedDueAmount;
+                        amountInput.disabled = false;
+                        payNowBtn.disabled = false;
+                        payNowBtn.innerHTML = '<i data-lucide="arrow-right" class="w-5 h-5 mr-2 inline-block"></i> Continue';
+                        payNowBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    }
+
+
+                } else {
+                    showAlert(result.message, 'error');
+                    if (result.errors) {
+                        amountError.textContent = result.errors.join(', ');
+                        amountError.classList.remove('hidden');
+                        amountInput.classList.add('border-red-500', 'focus:border-red-500', 'focus:ring-red-500');
+                    }
+                }
+            } catch (error) {
+                console.error('Fetch error:', error);
+                showAlert('An unexpected error occurred. Please try again.', 'error');
+            } finally {
+                // Ensure button state is correctly set after operation
+                const finalDueAmount = parseFloat(document.getElementById('dueAmountDisplay').textContent.replace(/[^0-9.]/g, ''));
+                if (finalDueAmount <= 0) {
+                     payNowBtn.innerHTML = 'No Amount Due';
+                     payNowBtn.disabled = true;
+                     amountInput.disabled = true;
+                     payNowBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                } else {
+                     payNowBtn.innerHTML = '<i data-lucide="arrow-right" class="w-5 h-5 mr-2 inline-block"></i> Continue';
+                     payNowBtn.disabled = false;
+                     amountInput.disabled = false;
+                     payNowBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
+                lucide.createIcons();
+            }
+        });
+
+        // --- PDF Generation ---
+        document.getElementById('generatePdfBtn').addEventListener('click', function () {
+            const printWindow = window.open('@Url.Action("GenerateTransactionPdf", "Client")', '_blank');
+            if (printWindow) {
+                printWindow.focus();
+            } else {
+                showAlert('Please allow pop-ups for PDF generation.', 'error');
+            }
+        });
+
+        // --- Utility Functions ---
+        function formatCurrency(amount, currencyCode = 'BDT') { // Default to BDT
+            return new Intl.NumberFormat('en-BD', { style: 'currency', currency: currencyCode }).format(amount);
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) {
+                return dateString;
+            }
+            const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true };
+            return date.toLocaleDateString('en-BD', options);
+        }
+    </script>
+    <style>
+        /* Custom scrollbar for webkit browsers (Chrome, Safari) */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f0f4f8; /* Light blue-gray background */
+            border-radius: 10px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #a7b7cd; /* Medium blue-gray thumb */
+            border-radius: 10px;
+        }
+
+            .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+                background: #8096b7; /* Darker blue-gray on hover */
+            }
+
+        /* Basic fade-in-down animation for alerts */
+        @@keyframes fade-in-down {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fade-in-down {
+            animation: fade-in-down 0.5s ease-out forwards;
+        }
+    </style>
+}

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Web;
 
@@ -64,6 +65,57 @@ namespace Law_Firm_EMS.ViewModels
         public string UploadPath { get; set; }
         public string StatusName { get; set; }
         public DateTime? UploadedDate { get; set; }
+    }
+
+    public class ClientBillingViewModel
+    {
+        public string ClientName { get; set; }
+        public string ConsultantName { get; set; }
+
+        public BillingSummaryViewModel BillingSummary { get; set; }
+        public List<TransactionViewModel> Transactions { get; set; }
+
+        public ClientBillingViewModel()
+        {
+            BillingSummary = new BillingSummaryViewModel();
+            Transactions = new List<TransactionViewModel>();
+        }
+    }
+
+    public class BillingSummaryViewModel
+    {
+        [Display(Name = "Service Fees")]
+        [DisplayFormat(DataFormatString = "{0:C}")] // Currency format
+        public decimal TotalFees { get; set; }
+
+        [Display(Name = "Paid")]
+        [DisplayFormat(DataFormatString = "{0:C}")]
+        public decimal PaidAmount { get; set; }
+
+        [Display(Name = "Due")]
+        [DisplayFormat(DataFormatString = "{0:C}")]
+        public decimal DueAmount { get; set; }
+    }
+
+    public class TransactionViewModel
+    {
+        public int TransactionID { get; set; }
+
+        [Display(Name = "Amount Paid")]
+        [DisplayFormat(DataFormatString = "{0:C}")] // Currency format
+        public decimal Amount { get; set; }
+
+        [Display(Name = "Payment Date")]
+        [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd HH:mm}")] // Date and time format
+        public DateTime PaymentDate { get; set; }
+    }
+
+    // ViewModel for payment input (optional, can also use raw properties in action)
+    public class ProcessPaymentViewModel
+    {
+        [Required(ErrorMessage = "Amount is required.")]
+        [Range(0.01, (double)decimal.MaxValue, ErrorMessage = "Amount must be greater than zero.")]
+        public decimal AmountToPay { get; set; }
     }
 
 }

@@ -1,0 +1,131 @@
+﻿@model IEnumerable<Law_Firm_EMS.ViewModels.TransactionViewModel>
+
+@{
+    Layout = null; // No layout for printable version
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaction History - @ViewBag.ClientName</title>
+    <!-- Tailwind CSS (optional, if you want some basic print styles from Tailwind) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif; /* Or any preferred print-friendly font */
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        h1, h2 {
+            color: #1a202c;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .text-green {
+            color: #28a745;
+        }
+
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 0.9em;
+            color: #777;
+        }
+
+        @@media print {
+            body {
+                background-color: #fff;
+                padding: 0;
+            }
+
+            .container {
+                box-shadow: none;
+                border: none;
+                margin: 0;
+                padding: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-3xl font-bold text-gray-900">Transaction History</h1>
+            <span class="text-gray-600">Generated: @ViewBag.CurrentDate</span>
+        </div>
+        <h2 class="text-xl font-semibold text-gray-800 mb-4">Client: @ViewBag.ClientName</h2>
+
+        @if (Model != null && Model.Any())
+        {
+            <table>
+                <thead>
+                    <tr>
+                        <th>Transaction ID</th>
+                        <th>Amount Paid</th>
+                        <th>Payment Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var transaction in Model)
+                    {
+                        <tr>
+                            <td>#@transaction.TransactionID</td>
+                            <td class="text-green">@transaction.Amount.ToString("C")</td>
+                            <td>@transaction.PaymentDate.ToString("yyyy-MM-dd hh:mm tt")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <p class="text-center text-gray-500 mt-10">No transactions to display.</p>
+        }
+
+        <div class="footer">
+            <p>NIW Solutions Billing Statement</p>
+            <p>This is a system-generated document and does not require a signature.</p>
+        </div>
+    </div>
+
+    <script>
+        // Trigger print dialog automatically when the window opens
+        window.onload = function() {
+            window.print();
+        };
+    </script>
+</body>
+</html>

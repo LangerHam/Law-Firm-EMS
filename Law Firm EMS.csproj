@@ -266,6 +266,8 @@
     <Content Include="Views\Consultant\Dashboard.cshtml" />
     <Content Include="Views\Shared\ConsultantNavbar.cshtml" />
     <Content Include="Views\Client\Documents.cshtml" />
+    <Content Include="Views\Client\Billing.cshtml" />
+    <Content Include="Views\Client\_TransactionHistoryPrintable.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

@@ -50,10 +50,10 @@ namespace Law_Firm_EMS.Controllers
                 Paid = client.Billing?.PaidAmount ?? 0,
                 Due = (client.Billing?.TotalFees ?? 0) - (client.Billing?.PaidAmount ?? 0),
                 LORs = client.Documents?
-                    .Where(d => d.DocumentType?.TypeName == "LoR") // Corrected for exact match as discussed
+                    .Where(d => d.DocumentType?.TypeName == "LoR")
                     .Select(d => new LORStatusVM
                     {
-                        DocumentID = d.DocumentID, // ADDED DocumentID HERE for clickable links
+                        DocumentID = d.DocumentID,
                         UploadPath = d.UploadPath,
                         StatusName = d.Status?.StatusName ?? "N/A"
                     }).ToList() ?? new List<LORStatusVM>(),
@@ -67,28 +67,28 @@ namespace Law_Firm_EMS.Controllers
                     {
                         Status = g.Key,
                         Count = g.Count(),
-                        Color = GetStatusColor(g.Key) // <--- ASSIGN COLOR HERE
+                        Color = GetStatusColor(g.Key)
                     }).ToList() ?? new List<StatusSummaryVM>()
             };
 
             return View(viewModel);
         }
 
-        // MODIFIED GetStatusColor METHOD
+
         public string GetStatusColor(string statusName)
         {
-            switch (statusName.ToLower()) // Use ToLower() for case-insensitive comparison
+            switch (statusName.ToLower())
             {
                 case "pending":
-                    return "#FECACA"; // Red
+                    return "#FECACA";
                 case "completed":
-                    return "#008000"; // Green
+                    return "#008000";
                 case "reviewing":
-                    return "#FFA500"; // Orange
+                    return "#FFA500";
                 case "submitted":
-                    return "#0000FF"; // Blue (or a distinct color for submitted)
+                    return "#0000FF";
                 default:
-                    return "#808080"; // Grey for Unknown/N/A or any other status
+                    return "#808080";
             }
         }
 
@@ -346,7 +346,7 @@ namespace Law_Firm_EMS.Controllers
                     return RedirectToAction("Documents");
                 }
 
-                // Get StatusID for "Pending" (for newly uploaded documents)
+
                 int pendingStatusID = db.StatusTypeEntity.FirstOrDefault(s => s.StatusName == "Pending")?.StatusID ?? 0;
                 if (pendingStatusID == 0)
                 {
@@ -354,7 +354,7 @@ namespace Law_Firm_EMS.Controllers
                     return RedirectToAction("Documents");
                 }
 
-                // --- REMOVE THE 'EXISTING DOCUMENT' CHECK AND ALWAYS CREATE A NEW DOCUMENT ---
+
                 Document newDocument = new Document
                 {
                     UploadPath = dbFilePath,
@@ -362,12 +362,12 @@ namespace Law_Firm_EMS.Controllers
                     UploadedByUserID = loggedInUserId,
                     DocumentTypeID = documentTypeID,
                     StatusID = pendingStatusID,
-                    ParentDocumentID = null // Or set this if applicable
+                    ParentDocumentID = null
                 };
                 db.DocumentEntity.Add(newDocument);
-                // --- END OF MODIFICATION ---
 
-                // Save the new document to the database
+
+
                 db.SaveChanges();
 
                 TempData["SuccessMessage"] = "Document uploaded successfully!";
@@ -428,5 +428,183 @@ namespace Law_Firm_EMS.Controllers
 
             return File(fileBytes, System.Net.Mime.MediaTypeNames.Application.Octet, fileName);
         }
+
+        public ActionResult Billing()
+        {
+            if (Session["UserID"] == null)
+                return RedirectToAction("Login", "Login");
+
+            if (Session["RoleID"] == null || (int)Session["RoleID"] != 2) return RedirectToAction("Login", "Login");
+
+            int userId = (int)Session["UserID"];
+
+            var client = db.ClientEntity
+                .Include(c => c.AssignedConsultant)
+                .Include(c => c.Billing.Transactions) // Eager load transactions
+                .FirstOrDefault(c => c.UserID == userId);
+
+            ViewBag.ClientName = client.FullName;
+
+            if (client == null)
+            {
+                TempData["ErrorMessage"] = "Client profile not found. Please contact admin.";
+                return RedirectToAction("Dashboard"); // Or an error page
+            }
+
+            var billingData = client.Billing;
+
+            var viewModel = new ClientBillingViewModel
+            {
+                ClientName = client.FullName,
+                ConsultantName = client.AssignedConsultant?.Name ?? "Not Assigned",
+                BillingSummary = new BillingSummaryViewModel
+                {
+                    TotalFees = billingData?.TotalFees ?? 0M,
+                    PaidAmount = billingData?.PaidAmount ?? 0M,
+                    DueAmount = (billingData?.TotalFees ?? 0M) - (billingData?.PaidAmount ?? 0M) // Calculate Due
+                },
+                Transactions = billingData?.Transactions
+                                .OrderByDescending(t => t.PaymentDate) // Order by latest transaction
+                                .Select(t => new TransactionViewModel
+                                {
+                                    TransactionID = t.TransactionID,
+                                    Amount = t.Amount,
+                                    PaymentDate = t.PaymentDate
+                                }).ToList() ?? new List<TransactionViewModel>()
+            };
+
+            return View(viewModel);
+        }
+
+        // POST: Client/ProcessPayment
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult ProcessPayment(ProcessPaymentViewModel paymentModel)
+        {
+            if (Session["UserID"] == null)
+                return Json(new { success = false, message = "Authentication required." }); // Return JSON for AJAX
+
+            if (!ModelState.IsValid)
+            {
+                // Return model state errors as JSON
+                var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
+                return Json(new { success = false, message = "Invalid payment amount.", errors = errors });
+            }
+
+            int userId = (int)Session["UserID"];
+
+            var billing = db.BillingEntity
+                            .Include(b => b.Transactions)
+                            .FirstOrDefault(b => b.ClientID == userId);
+
+            if (billing == null)
+            {
+                // Create a new billing entry if it doesn't exist (e.g., initial setup)
+                billing = new Billing
+                {
+                    ClientID = userId,
+                    TotalFees = 0M, // Or a default initial fee
+                    PaidAmount = 0M,
+                    Transactions = new List<Transaction>()
+                };
+                db.BillingEntity.Add(billing);
+            }
+
+            if (paymentModel.AmountToPay <= 0)
+            {
+                return Json(new { success = false, message = "Payment amount must be greater than zero." });
+            }
+
+            // Prevent overpaying more than total fees (if RemainingAmount is tracked as computed property)
+            // Or, if TotalFees can be 0, allow any payment up to the due amount.
+            decimal currentDue = billing.TotalFees - billing.PaidAmount;
+            if (paymentModel.AmountToPay > currentDue && currentDue > 0)
+            {
+                return Json(new { success = false, message = $"Payment amount (${paymentModel.AmountToPay:N2}) exceeds remaining due (${currentDue:N2}). Please adjust the amount." });
+            }
+
+
+            try
+            {
+                billing.PaidAmount += paymentModel.AmountToPay;
+
+                var newTransaction = new Transaction
+                {
+                    Amount = paymentModel.AmountToPay,
+                    PaymentDate = DateTime.Now,
+                    BillingID = billing.ClientID // BillingID is ClientID in your model
+                };
+                db.TransactionEntity.Add(newTransaction);
+
+                db.SaveChanges();
+
+                // Recalculate summary for updated display
+                var updatedSummary = new BillingSummaryViewModel
+                {
+                    TotalFees = billing.TotalFees,
+                    PaidAmount = billing.PaidAmount,
+                    DueAmount = billing.TotalFees - billing.PaidAmount
+                };
+
+                // Get updated transaction list
+                var updatedTransactions = billing.Transactions
+                                            .OrderByDescending(t => t.PaymentDate)
+                                            .Select(t => new TransactionViewModel
+                                            {
+                                                TransactionID = t.TransactionID,
+                                                Amount = t.Amount,
+                                                PaymentDate = t.PaymentDate
+                                            }).ToList();
+
+                return Json(new { success = true, message = "Payment processed successfully!", summary = updatedSummary, transactions = updatedTransactions });
+            }
+            catch (DbEntityValidationException ex)
+            {
+                var errorMessages = ex.EntityValidationErrors
+                    .SelectMany(x => x.ValidationErrors)
+                    .Select(x => x.PropertyName + ": " + x.ErrorMessage);
+                var fullErrorMessage = string.Join("; ", errorMessages);
+                return Json(new { success = false, message = $"Validation error: {fullErrorMessage}" });
+            }
+            catch (Exception ex)
+            {
+                // Log the exception (e.g., to ELMAH, Serilog, or console during dev)
+                System.Diagnostics.Debug.WriteLine($"Error processing payment: {ex.Message}");
+                return Json(new { success = false, message = "An error occurred while processing your payment. Please try again." });
+            }
+        }
+
+        // GET: Client/GenerateTransactionPdf (actually HTML for printing)
+        public ActionResult GenerateTransactionPdf()
+        {
+            if (Session["UserID"] == null)
+                return new HttpStatusCodeResult(401, "Unauthorized");
+
+            int userId = (int)Session["UserID"];
+
+            var client = db.ClientEntity
+                .Include(c => c.Billing.Transactions)
+                .FirstOrDefault(c => c.UserID == userId);
+
+            if (client == null)
+                return new HttpStatusCodeResult(404, "Client not found");
+
+            var transactions = client.Billing?.Transactions
+                                .OrderByDescending(t => t.PaymentDate)
+                                .Select(t => new TransactionViewModel
+                                {
+                                    TransactionID = t.TransactionID,
+                                    Amount = t.Amount,
+                                    PaymentDate = t.PaymentDate
+                                }).ToList() ?? new List<TransactionViewModel>();
+
+            ViewBag.ClientName = client.FullName;
+            ViewBag.CurrentDate = DateTime.Now.ToString("MMMM dd, yyyy");
+
+            // Return a partial view or a dedicated view for printing
+            // This view should be designed for print/PDF conversion
+            return View("_TransactionHistoryPrintable", transactions);
+        }
     }
 }
+    
