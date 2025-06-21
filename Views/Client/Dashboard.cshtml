@@ -5,7 +5,6 @@
     Layout = "~/Views/Shared/ClientNavbar.cshtml";
 }
 
-<!-- Top Bar -->
 <div class="bg-white shadow-sm flex justify-between items-center px-6 py-4">
     <div class="text-base text-gray-700">
         Consultant Name: <strong>@Model.ConsultantName</strong>
@@ -16,12 +15,9 @@
     </div>
 </div>
 
-<!-- Page Content -->
 <main class="p-6 overflow-y-auto flex-1">
-    <!-- Top Section -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
 
-        <!-- Quick Access to Forms -->
         <div class="bg-gray-100 p-4 rounded-xl h-fit">
             <b class="text-lg">Quick Access to Forms</b>
             <ul class="list-disc pl-5 mt-3 space-y-2 text-sky-600 text-sm">
@@ -33,30 +29,33 @@
             </ul>
         </div>
 
-        <!-- LOR Review -->
         <div class="bg-gray-100 p-4 rounded-xl h-fit lg:col-span-1">
             <b class="text-lg">LOR Review Process</b>
-            <p class="mt-1"><a href="#" class="text-sky-600 underline">Submit LOR</a></p>
+            <p class="mt-1"><a href="@Url.Action("Documents", "Client")" class="text-sky-600 underline">Submit/View LORs</a></p>
 
             @if (Model.LORs != null && Model.LORs.Any())
             {
-                <table class="w-full mt-2 text-sm">
-                    <thead>
-                        <tr class="text-left">
-                            <th>Document</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var lor in Model.LORs)
-                        {
-                            <tr>
-                                <td>@System.IO.Path.GetFileName(lor.UploadPath)</td>
-                                <td class="text-sky-600 font-semibold">@lor.StatusName</td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
+                @* Changed <table> to <ol> as requested for LOR documents *@
+                <ol class="w-full mt-2 text-sm list-decimal pl-5">
+                    @* Added list-decimal and pl-5 for numbering *@
+                    @foreach (var lor in Model.LORs)
+                    {
+                        <li>
+                            @* Each LOR now becomes an <li> item *@
+                            <div class="flex justify-between items-center">
+                                @* Use a div to keep content on one line *@
+                                <a href="@Url.Action("DownloadDocument", new { id = lor.DocumentID })" target="_blank" class="text-sky-600 hover:underline">
+                                    @System.IO.Path.GetFileName(lor.UploadPath)
+                                </a>
+                                <span class="font-semibold @(lor.StatusName == "Pending" ? "text-red-200" :
+                                                                lor.StatusName == "Completed" ? "text-green-500" :
+                                                                lor.StatusName == "Reviewing" ? "text-orange-500" :
+                                                                lor.StatusName == "Submitted" ? "text-blue-500" :
+                                                                "text-gray-500")">@lor.StatusName</span>
+                                                            </div>
+                                                        </li>
+                                                    }
+                </ol>
             }
             else
             {
@@ -64,9 +63,7 @@
             }
         </div>
 
-        <!-- EIA + PESP -->
         <div class="flex flex-col gap-4">
-            <!-- EIA Status -->
             <div class="bg-gray-100 p-4 rounded-xl">
                 <b class="text-lg">EIA Status</b>
                 <div class="flex items-center gap-4 mt-3">
@@ -81,7 +78,6 @@
                 </div>
             </div>
 
-            <!-- PESP Status -->
             <div class="bg-gray-100 p-4 rounded-xl">
                 <b class="text-lg">PESP Status</b>
                 <div class="flex items-center gap-4 mt-3">
@@ -98,41 +94,78 @@
         </div>
     </div>
 
-    <!-- Bar Chart Section -->
     <div class="bg-gray-100 p-4 rounded-xl mb-6">
-        <b class="text-lg">Overall Bar Chart</b>
-        <canvas id="statusChart" class="mt-4"></canvas>
+        <b class="text-lg">Overall Document Status Breakdown</b>
+        <div style="width: 100%; max-width: 800px; margin: auto; height: 400px;">
+            <canvas id="statusChart" class="mt-4"></canvas>
+        </div>
     </div>
 
-    <!-- Billing Info -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="bg-gray-100 p-4 rounded-xl">📄 <b>Paid Invoices:</b> @Model.Paid</div>
-        <div class="bg-gray-100 p-4 rounded-xl">💰 <b>Dues:</b> @Model.Due</div>
-        <div class="bg-gray-100 p-4 rounded-xl">📊 <b>Total Fees:</b> @Model.TotalFees</div>
+        <div class="bg-gray-100 p-4 rounded-xl">📄 <b>Paid Invoices:</b> @Model.Paid.ToString("C")</div>
+        <div class="bg-gray-100 p-4 rounded-xl">💰 <b>Dues:</b> @Model.Due.ToString("C")</div>
+        <div class="bg-gray-100 p-4 rounded-xl">📊 <b>Total Fees:</b> @Model.TotalFees.ToString("C")</div>
     </div>
 </main>
 
-<!-- Chart.js Script -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     lucide.createIcons();
 
-    const ctx = document.getElementById('statusChart').getContext('2d');
-    const chart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: @Html.Raw(Json.Encode(Model.StatusSummary.Select(s => s.Status))),
-            datasets: [{
-                label: 'Document Status',
-                data: @Html.Raw(Json.Encode(Model.StatusSummary.Select(s => s.Count))),
-                backgroundColor: 'rgba(16, 164, 236, 0.7)'
-            }]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                y: { beginAtZero: true }
+    document.addEventListener('DOMContentLoaded', function () {
+        const ctx = document.getElementById('statusChart').getContext('2d');
+        const statusData = @Html.Raw(Json.Encode(Model.StatusSummary));
+
+        const labels = statusData.map(s => s.Status);
+        const dataCounts = statusData.map(s => s.Count);
+        const backgroundColors = statusData.map(s => s.Color);
+
+        const chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Number of Documents',
+                    data: dataCounts,
+                    backgroundColor: backgroundColors,
+                    borderColor: backgroundColors,
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0
+                        }
+                    }
+                },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Overall Document Status Breakdown'
+                    },
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                label += context.parsed.y;
+                                return label;
+                            }
+                        }
+                    }
+                }
             }
-        }
+        });
     });
 </script>

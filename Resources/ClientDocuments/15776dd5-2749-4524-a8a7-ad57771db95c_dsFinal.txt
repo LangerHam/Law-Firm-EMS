@@ -1,0 +1,5 @@
+Data science final -
+quiz(individual):
+dataset select
+it be categorical and numerical it has to be labeled dataset (min 4,5 attribute without target column)
+diagram apply which is needed for which data which diagram is apply able

@@ -22,12 +22,16 @@ namespace Law_Firm_EMS.ViewModels
     {
         public string Status { get; set; }
         public int Count { get; set; }
+
+        public string Color { get; set; }
     }
 
     public class LORStatusVM
     {
+        public int DocumentID { get; set; }
         public string UploadPath { get; set; }
         public string StatusName { get; set; }
+        
     }
 
     public class ClientFormsViewModel

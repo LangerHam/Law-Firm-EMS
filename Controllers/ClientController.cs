@@ -50,9 +50,10 @@ namespace Law_Firm_EMS.Controllers
                 Paid = client.Billing?.PaidAmount ?? 0,
                 Due = (client.Billing?.TotalFees ?? 0) - (client.Billing?.PaidAmount ?? 0),
                 LORs = client.Documents?
-                    .Where(d => d.DocumentType?.TypeName != null && d.DocumentType.TypeName.Contains("LOR"))
+                    .Where(d => d.DocumentType?.TypeName == "LoR") // Corrected for exact match as discussed
                     .Select(d => new LORStatusVM
                     {
+                        DocumentID = d.DocumentID, // ADDED DocumentID HERE for clickable links
                         UploadPath = d.UploadPath,
                         StatusName = d.Status?.StatusName ?? "N/A"
                     }).ToList() ?? new List<LORStatusVM>(),
@@ -65,11 +66,30 @@ namespace Law_Firm_EMS.Controllers
                     .Select(g => new StatusSummaryVM
                     {
                         Status = g.Key,
-                        Count = g.Count()
+                        Count = g.Count(),
+                        Color = GetStatusColor(g.Key) // <--- ASSIGN COLOR HERE
                     }).ToList() ?? new List<StatusSummaryVM>()
             };
 
             return View(viewModel);
+        }
+
+        // MODIFIED GetStatusColor METHOD
+        public string GetStatusColor(string statusName)
+        {
+            switch (statusName.ToLower()) // Use ToLower() for case-insensitive comparison
+            {
+                case "pending":
+                    return "#FECACA"; // Red
+                case "completed":
+                    return "#008000"; // Green
+                case "reviewing":
+                    return "#FFA500"; // Orange
+                case "submitted":
+                    return "#0000FF"; // Blue (or a distinct color for submitted)
+                default:
+                    return "#808080"; // Grey for Unknown/N/A or any other status
+            }
         }
 
         public ActionResult Forms()
@@ -84,13 +104,13 @@ namespace Law_Firm_EMS.Controllers
             ViewBag.ClientName = client.FullName;
 
             var requiredFormTypes = new List<FormDisplayItem>
-        {
-            new FormDisplayItem { FormTypeID = 1, FormTypeName = "G-28", FormTypeDescription = "Notice of Entry of Appearance as Attorney or Accredited Representative." },
-            new FormDisplayItem { FormTypeID = 2, FormTypeName = "G-1145", FormTypeDescription = "E-Notification of Application/Petition Acceptance." },
-            new FormDisplayItem { FormTypeID = 3, FormTypeName = "I-140", FormTypeDescription = "Immigrant Petition for Alien Workers." },
-            new FormDisplayItem { FormTypeID = 4, FormTypeName = "I-907", FormTypeDescription = "Request for Premium Processing Service. This is optional.", IsOptional = true },
-            new FormDisplayItem { FormTypeID = 5, FormTypeName = "ETA 750 Part B", FormTypeDescription = "Application for Alien Employment Certification." }
-        };
+            {
+                new FormDisplayItem { FormTypeID = 1, FormTypeName = "G-28", FormTypeDescription = "Notice of Entry of Appearance as Attorney or Accredited Representative." },
+                new FormDisplayItem { FormTypeID = 2, FormTypeName = "G-1145", FormTypeDescription = "E-Notification of Application/Petition Acceptance." },
+                new FormDisplayItem { FormTypeID = 3, FormTypeName = "I-140", FormTypeDescription = "Immigrant Petition for Alien Workers." },
+                new FormDisplayItem { FormTypeID = 4, FormTypeName = "I-907", FormTypeDescription = "Request for Premium Processing Service. This is optional.", IsOptional = true },
+                new FormDisplayItem { FormTypeID = 5, FormTypeName = "ETA 750 Part B", FormTypeDescription = "Application for Alien Employment Certification." }
+            };
 
             var clientSubmittedForms = db.FormEntity
                 .Where(f => f.ClientID == userId)
@@ -230,16 +250,14 @@ namespace Law_Firm_EMS.Controllers
             ViewBag.ClientName = client.FullName;
 
             var clientDocuments = db.DocumentEntity
-                
                 .Where(d => d.ClientID == userId)
                 .Include(d => d.DocumentType)
                 .Include(d => d.Status)
                 .ToList();
-            
 
             var lorDocuments = clientDocuments
                 .Where(d => d.DocumentType?.TypeName == "LoR")
-                .Select(d => new DocumentItemVM 
+                .Select(d => new DocumentItemVM
                 {
                     DocumentID = d.DocumentID,
                     FileName = Path.GetFileName(d.UploadPath),
@@ -248,8 +266,8 @@ namespace Law_Firm_EMS.Controllers
                 .ToList();
 
             var miscDocuments = clientDocuments
-                .Where(d => d.DocumentType?.TypeName == "MISC") 
-                .Select(d => new DocumentItemVM 
+                .Where(d => d.DocumentType?.TypeName == "MISC")
+                .Select(d => new DocumentItemVM
                 {
                     DocumentID = d.DocumentID,
                     FileName = Path.GetFileName(d.UploadPath),
@@ -298,12 +316,11 @@ namespace Law_Firm_EMS.Controllers
                 string fileName = Path.GetFileName(file.FileName);
                 string uniqueFileName = Guid.NewGuid().ToString() + "_" + fileName;
                 string filePath = Path.Combine(uploadsFolder, uniqueFileName);
-                
+
                 string dbFilePath = "~/Resources/ClientDocuments/" + uniqueFileName;
 
                 file.SaveAs(filePath);
 
-                
                 int documentTypeID;
                 if (documentCategory == "LoR")
                 {
@@ -329,46 +346,29 @@ namespace Law_Firm_EMS.Controllers
                     return RedirectToAction("Documents");
                 }
 
-                // Get StatusID for "Submitted"
-                int submittedStatusID = db.StatusTypeEntity.FirstOrDefault(s => s.StatusName == "Submitted")?.StatusID ?? 0;
-                if (submittedStatusID == 0)
+                // Get StatusID for "Pending" (for newly uploaded documents)
+                int pendingStatusID = db.StatusTypeEntity.FirstOrDefault(s => s.StatusName == "Pending")?.StatusID ?? 0;
+                if (pendingStatusID == 0)
                 {
-                    TempData["ErrorMessage"] = "Default status 'Submitted' not found. Please contact admin.";
+                    TempData["ErrorMessage"] = "Default status 'Pending' not found. Please contact admin.";
                     return RedirectToAction("Documents");
                 }
 
-                // Find existing document for this client and document type
-                var existingDocument = db.DocumentEntity.FirstOrDefault(d => d.ClientID == client.UserID && d.DocumentTypeID == documentTypeID);
-
-                Document newDocument;
-                if (existingDocument == null)
+                // --- REMOVE THE 'EXISTING DOCUMENT' CHECK AND ALWAYS CREATE A NEW DOCUMENT ---
+                Document newDocument = new Document
                 {
-                    // Create new document if it doesn't exist
-                    newDocument = new Document
-                    {
-                        UploadPath = dbFilePath,
-                        ClientID = client.UserID,
-                        UploadedByUserID = loggedInUserId,
-                        DocumentTypeID = documentTypeID,
-                        StatusID = submittedStatusID,
-                        ParentDocumentID = null // Or set this if applicable
-                    };
-                    db.DocumentEntity.Add(newDocument);
-                }
-                else
-                {
-                    // Update existing document
-                    newDocument = existingDocument;
-                    newDocument.UploadPath = dbFilePath;
-                    newDocument.StatusID = submittedStatusID;
-                    newDocument.UploadedByUserID = loggedInUserId;
-                }
+                    UploadPath = dbFilePath,
+                    ClientID = client.UserID,
+                    UploadedByUserID = loggedInUserId,
+                    DocumentTypeID = documentTypeID,
+                    StatusID = pendingStatusID,
+                    ParentDocumentID = null // Or set this if applicable
+                };
+                db.DocumentEntity.Add(newDocument);
+                // --- END OF MODIFICATION ---
 
-                // Save the document (new or updated) to the database
+                // Save the new document to the database
                 db.SaveChanges();
-
-                // Removed the entire "if (documentCategory == "LoR") { ... task creation ... }" block
-                // as per your requirement to not create tasks for uploads.
 
                 TempData["SuccessMessage"] = "Document uploaded successfully!";
 
@@ -408,7 +408,7 @@ namespace Law_Firm_EMS.Controllers
 
             // Ensure client can only download their own documents
             var document = db.DocumentEntity
-                .FirstOrDefault(d => d.DocumentID == id && d.ClientID == client.UserID); 
+                .FirstOrDefault(d => d.DocumentID == id && d.ClientID == client.UserID);
 
             if (document == null || string.IsNullOrEmpty(document.UploadPath))
             {
@@ -428,8 +428,5 @@ namespace Law_Firm_EMS.Controllers
 
             return File(fileBytes, System.Net.Mime.MediaTypeNames.Application.Octet, fileName);
         }
-
-
-
     }
 }
