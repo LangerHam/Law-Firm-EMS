@@ -298,11 +298,12 @@ namespace Law_Firm_EMS.Controllers
                 string fileName = Path.GetFileName(file.FileName);
                 string uniqueFileName = Guid.NewGuid().ToString() + "_" + fileName;
                 string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+                
                 string dbFilePath = "~/Resources/ClientDocuments/" + uniqueFileName;
 
                 file.SaveAs(filePath);
 
-                // Get DocumentTypeID based on category
+                
                 int documentTypeID;
                 if (documentCategory == "LoR")
                 {
@@ -328,7 +329,7 @@ namespace Law_Firm_EMS.Controllers
                     return RedirectToAction("Documents");
                 }
 
-                // Get StatusID for "Submitted" (matching forms)
+                // Get StatusID for "Submitted"
                 int submittedStatusID = db.StatusTypeEntity.FirstOrDefault(s => s.StatusName == "Submitted")?.StatusID ?? 0;
                 if (submittedStatusID == 0)
                 {
@@ -339,7 +340,7 @@ namespace Law_Firm_EMS.Controllers
                 // Find existing document for this client and document type
                 var existingDocument = db.DocumentEntity.FirstOrDefault(d => d.ClientID == client.UserID && d.DocumentTypeID == documentTypeID);
 
-                Document newDocument; 
+                Document newDocument;
                 if (existingDocument == null)
                 {
                     // Create new document if it doesn't exist
@@ -357,83 +358,23 @@ namespace Law_Firm_EMS.Controllers
                 else
                 {
                     // Update existing document
-                    newDocument = existingDocument; // Use the existing document instance
+                    newDocument = existingDocument;
                     newDocument.UploadPath = dbFilePath;
                     newDocument.StatusID = submittedStatusID;
-                    newDocument.UploadedByUserID = loggedInUserId; // Update who last uploaded
-                   
+                    newDocument.UploadedByUserID = loggedInUserId;
                 }
 
-                
+                // Save the document (new or updated) to the database
                 db.SaveChanges();
 
-                // If LoR, create a task for HR
-                if (documentCategory == "LoR")
-                {
-                    var hrUserInUsers = db.UsersEntity.FirstOrDefault(u => u.RoleID == 1); 
-                    var hrEntity = hrUserInUsers != null ? db.HREntity.FirstOrDefault(h => h.UserID == hrUserInUsers.UserID) : null;
+                // Removed the entire "if (documentCategory == "LoR") { ... task creation ... }" block
+                // as per your requirement to not create tasks for uploads.
 
-                    Consultant assignedConsultant = null;
-                    if (client.AssignedConsultantID.HasValue)
-                    {
-                        assignedConsultant = db.ConsultantEntity.FirstOrDefault(c => c.UserID == client.AssignedConsultantID.Value);
-                    }
-
-                    if (hrEntity != null && assignedConsultant != null)
-                    {
-                        var newTask = new Tasks
-                        {
-                            DocumentID = newDocument.DocumentID, // Link to the newly created/updated document
-                            Instructions = $"Review new LoR document uploaded by client {client.FullName}. (Document ID: {newDocument.DocumentID})",
-                            AssignedToConsultantID = assignedConsultant.UserID,
-                            AssignedByHRID = hrEntity.UserID,
-                            StatusID = submittedStatusID 
-                        };
-                        db.TasksEntity.Add(newTask);
-
-                        
-                        try
-                        {
-                            db.SaveChanges(); // This is where the Task validation error occurs
-                            TempData["SuccessMessage"] = (TempData["SuccessMessage"] ?? "") + " and task created!";
-                        }
-                        catch (DbEntityValidationException taskEx)
-                        {
-                            var taskErrorMessages = taskEx.EntityValidationErrors
-                                .SelectMany(x => x.ValidationErrors)
-                                .Select(x => x.PropertyName + ": " + x.ErrorMessage);
-
-                            var fullTaskErrorMessage = string.Join("; ", taskErrorMessages);
-                            TempData["WarningMessage"] = (TempData["WarningMessage"] ?? "") + $"<br>LoR uploaded, but **Task creation failed**: {fullTaskErrorMessage}";
-                            System.Diagnostics.Debug.WriteLine($"Task Creation Validation Error: {fullTaskErrorMessage}");
-                           
-                        }
-                        catch (Exception taskGeneralEx)
-                        {
-                            TempData["WarningMessage"] = (TempData["WarningMessage"] ?? "") + $"<br>LoR uploaded, but **Task creation failed**: {taskGeneralEx.Message}";
-                            System.Diagnostics.Debug.WriteLine($"Task Creation General Error: {taskGeneralEx.Message} - StackTrace: {taskGeneralEx.StackTrace}");
-                           
-                        }
-                       
-
-                    }
-                    else
-                    {
-                        string warningMessage = "LoR uploaded, but could not create a task for HR.";
-                        if (hrEntity == null) warningMessage += " No HR user found with RoleID 1 or corresponding HR entity.";
-                        if (assignedConsultant == null) warningMessage += " Client's assigned consultant not found.";
-                        TempData["WarningMessage"] = warningMessage;
-                    }
-                }
-
-                if (string.IsNullOrEmpty(TempData["WarningMessage"] as string))
-                {
-                    TempData["SuccessMessage"] = "Document uploaded successfully!";
-                }
+                TempData["SuccessMessage"] = "Document uploaded successfully!";
 
                 return RedirectToAction("Documents");
             }
-            catch (DbEntityValidationException ex) // Catch validation for the initial document save or other entities
+            catch (DbEntityValidationException ex)
             {
                 var errorMessages = ex.EntityValidationErrors
                     .SelectMany(x => x.ValidationErrors)
@@ -443,7 +384,7 @@ namespace Law_Firm_EMS.Controllers
                 System.Diagnostics.Debug.WriteLine($"Document Upload Validation Error (Main): {fullErrorMessage}");
                 return RedirectToAction("Documents");
             }
-            catch (Exception ex) // Catch any other unexpected exceptions
+            catch (Exception ex)
             {
                 TempData["ErrorMessage"] = $"An unexpected error occurred uploading document: {ex.Message}";
                 System.Diagnostics.Debug.WriteLine($"Document Upload Error (Main): {ex.Message} - StackTrace: {ex.StackTrace}");
