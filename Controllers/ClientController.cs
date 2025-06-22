@@ -448,7 +448,7 @@ namespace Law_Firm_EMS.Controllers
             if (client == null)
             {
                 TempData["ErrorMessage"] = "Client profile not found. Please contact admin.";
-                return RedirectToAction("Dashboard"); /
+                return RedirectToAction("Dashboard"); 
             }
 
             var billingData = client.Billing;

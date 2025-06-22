@@ -37,7 +37,7 @@
             context.StatusTypeEntity.AddOrUpdate(
                 s => s.StatusName,
                 new StatusType { StatusName = "Pending" },
-                new StatusType { StatusName = "Approved" },
+                new StatusType { StatusName = "Accepted" },
                 new StatusType { StatusName = "Rejected" },
                 new StatusType { StatusName = "In Progress" },
                 new StatusType { StatusName = "Completed" },

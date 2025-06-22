@@ -300,6 +300,20 @@ namespace Law_Firm_EMS.Controllers
             if (client != null && status != null)
             {
                 client.StatusID = status.StatusID;
+                if(status.StatusName == "Accpted")
+                {
+                    var existingbilling = db.BillingEntity.FirstOrDefault(b => b.ClientID == client.UserID);
+                    if (existingbilling == null)
+                    {
+                        var billing = new Billing
+                        {
+                            ClientID = id,
+                            TotalFees = 50000,
+                            PaidAmount = 0,
+                        };
+                        db.BillingEntity.Add(billing);
+                    }                    
+                }
                 db.SaveChanges();
                 TempData["SuccessMessage"] = $"Client status changed to {newStatus}.";
             }
