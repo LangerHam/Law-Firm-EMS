@@ -300,7 +300,7 @@ namespace Law_Firm_EMS.Controllers
             if (client != null && status != null)
             {
                 client.StatusID = status.StatusID;
-                if(status.StatusName == "Accpted")
+                if(status.StatusName == "Accepted")
                 {
                     var existingbilling = db.BillingEntity.FirstOrDefault(b => b.ClientID == client.UserID);
                     if (existingbilling == null)
@@ -310,6 +310,7 @@ namespace Law_Firm_EMS.Controllers
                             ClientID = id,
                             TotalFees = 50000,
                             PaidAmount = 0,
+                            //RemainingAmount = 50000
                         };
                         db.BillingEntity.Add(billing);
                     }                    

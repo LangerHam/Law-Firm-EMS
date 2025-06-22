@@ -158,6 +158,10 @@
     <Compile Include="Migrations\202506211254473_CreateFirst.Designer.cs">
       <DependentUpon>202506211254473_CreateFirst.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202506221707216_FixBillingComputedColumn.cs" />
+    <Compile Include="Migrations\202506221707216_FixBillingComputedColumn.Designer.cs">
+      <DependentUpon>202506221707216_FixBillingComputedColumn.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\Billing.cs" />
     <Compile Include="Models\Client.cs" />
@@ -304,6 +308,9 @@
   <ItemGroup>
     <EmbeddedResource Include="Migrations\202506211254473_CreateFirst.resx">
       <DependentUpon>202506211254473_CreateFirst.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202506221707216_FixBillingComputedColumn.resx">
+      <DependentUpon>202506221707216_FixBillingComputedColumn.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

@@ -78,7 +78,22 @@ namespace Law_Firm_EMS.Controllers
                 switch (user.RoleID)
                 {
                     case 1: return RedirectToAction("Dashboard", "HR");
-                    case 2: return RedirectToAction("Dashboard", "Client");
+                    case 2:
+                        var clientProfile = db.ClientEntity
+                                      .Include("Status")
+                                      .FirstOrDefault(c => c.UserID == user.UserID);                        
+                        Session["ClientName"] = clientProfile?.FullName;
+
+                        if (clientProfile != null && clientProfile.Status.StatusName == "Accepted")
+                        {                            
+                            return RedirectToAction("Dashboard", "Client");
+                        }
+                        else
+                        {                            
+                            Session.Clear();
+                            ViewBag.Error = "Your account is not yet active. Please wait for approval from an administrator.";
+                            return View(model);
+                        }
                     case 3:
                         var consultantProfile = db.ConsultantEntity.Find(user.UserID);
                         Session["ProfilePhotoPath"] = consultantProfile?.ProfilePhotoPath;

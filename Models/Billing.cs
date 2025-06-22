@@ -14,7 +14,7 @@ namespace Law_Firm_EMS.Models
         public decimal TotalFees { get; set; }
         public decimal PaidAmount { get; set; }
         [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
-        public decimal RemainingAmount { get { return TotalFees - PaidAmount; } private set { } }
+        public decimal RemainingAmount { get; private set; }
         public virtual Client Client { get; set; }
         public virtual ICollection<Transaction> Transactions { get; set; }
     }
