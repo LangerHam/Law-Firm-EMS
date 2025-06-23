@@ -99,7 +99,7 @@ namespace Law_Firm_EMS.Controllers
                 {
                     Name = viewModel.Name,
                     Phone = viewModel.Phone,
-                    HRID = (int)Session["UserID"],
+                   // HRID = (int)Session["UserID"],
                     User = user
                 };
 

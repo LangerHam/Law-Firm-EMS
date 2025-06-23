@@ -118,4 +118,41 @@ namespace Law_Firm_EMS.ViewModels
         public decimal AmountToPay { get; set; }
     }
 
+    public class ClientSettingsViewModel
+    {
+        public int UserID { get; set; } // The ID of the associated User record (and Client record)
+
+        [Required(ErrorMessage = "Full Name is required.")]
+        [StringLength(100, ErrorMessage = "Name cannot exceed 100 characters.")]
+        [Display(Name = "Full Name")]
+        public string Name { get; set; }
+
+        [Required(ErrorMessage = "Phone Number is required.")]
+        [Phone(ErrorMessage = "Invalid phone number format.")]
+        [StringLength(20, ErrorMessage = "Phone cannot exceed 20 characters.")]
+        [Display(Name = "Phone Number")]
+        public string Phone { get; set; }
+
+        [Required(ErrorMessage = "Email Address is required.")]
+        [EmailAddress(ErrorMessage = "Invalid email address format.")]
+        [StringLength(100, ErrorMessage = "Email cannot exceed 100 characters.")]
+        [Display(Name = "Email Address")]
+        public string Email { get; set; } // Now editable
+
+        // For changing password
+        [DataType(DataType.Password)]
+        [Display(Name = "Current Password")]
+        public string CurrentPassword { get; set; }
+
+        [DataType(DataType.Password)]
+        [StringLength(100, ErrorMessage = "The {0} must be at least {2} characters long.", MinimumLength = 6)]
+        [Display(Name = "New Password")]
+        public string NewPassword { get; set; }
+
+        [DataType(DataType.Password)]
+        [Display(Name = "Confirm New Password")]
+        [Compare("NewPassword", ErrorMessage = "The new password and confirmation password do not match.")]
+        public string ConfirmNewPassword { get; set; }
+    }
+
 }

@@ -603,6 +603,123 @@ namespace Law_Firm_EMS.Controllers
            
             return View("_TransactionHistoryPrintable", transactions);
         }
+
+        public ActionResult Settings()
+        {
+            if (Session["UserID"] == null || Session["RoleID"] == null || (int)Session["RoleID"] != 2)
+            {
+                return RedirectToAction("Login", "Login"); 
+            }
+
+            int currentUserId = (int)Session["UserID"];
+
+            Client client = db.ClientEntity.Include(c => c.User).FirstOrDefault(c => c.UserID == currentUserId);
+
+            if (client == null)
+            {
+                TempData["ErrorMessage"] = "Client profile not found. Please contact support.";
+                return RedirectToAction("Index", "Client"); 
+            }
+            ViewBag.ClientName = client.FullName;
+
+            ClientSettingsViewModel viewModel = new ClientSettingsViewModel
+            {
+                UserID = client.UserID,
+                Name = client.FullName,
+                Phone = client.Phone,
+                Email = client.User.Email
+            };
+
+            return View(viewModel);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Settings(ClientSettingsViewModel viewModel)
+        {
+            if (Session["UserID"] == null || Session["RoleID"] == null || (int)Session["RoleID"] != 2)
+            {
+                return RedirectToAction("Login", "Login");
+            }
+
+            int currentUserId = (int)Session["UserID"];
+
+            if (viewModel.UserID != currentUserId)
+            {
+                TempData["ErrorMessage"] = "Security violation: Attempt to modify another user's settings.";
+                return RedirectToAction("Settings", "Client");
+            }
+
+            Client clientInDb = db.ClientEntity.FirstOrDefault(c => c.UserID == currentUserId);
+            Users userInDb = db.UsersEntity.Find(currentUserId);
+
+            if (clientInDb == null || userInDb == null)
+            {
+                TempData["ErrorMessage"] = "Your profile could not be found for update. Please contact support.";
+                return RedirectToAction("Settings", "Client");
+            }
+
+           
+            bool passwordFieldsAttempted = !string.IsNullOrEmpty(viewModel.CurrentPassword) ||
+                                           !string.IsNullOrEmpty(viewModel.NewPassword) ||
+                                           !string.IsNullOrEmpty(viewModel.ConfirmNewPassword);
+
+            if (passwordFieldsAttempted)
+            {
+                if (viewModel.CurrentPassword != userInDb.PasswordHash)
+                {
+                    ModelState.AddModelError("CurrentPassword", "Current password is incorrect.");
+                }
+                else if (viewModel.NewPassword != viewModel.ConfirmNewPassword)
+                {
+                    
+                    ModelState.AddModelError("ConfirmNewPassword", "The new password and confirmation password do not match.");
+                }
+                else
+                {
+                   
+                    userInDb.PasswordHash = viewModel.NewPassword;
+                }
+            }
+
+            if (ModelState.IsValid)
+            {
+                clientInDb.FullName = viewModel.Name;
+                clientInDb.Phone = viewModel.Phone;
+                userInDb.Email = viewModel.Email;
+
+                try
+                {
+                    db.Entry(clientInDb).State = EntityState.Modified;
+                    db.Entry(userInDb).State = EntityState.Modified;
+                    db.SaveChanges();
+
+                    TempData["SuccessMessage"] = "Your profile has been updated successfully.";
+                    return RedirectToAction("Settings", "Client");
+                }
+                catch (System.Data.Entity.Infrastructure.DbUpdateException ex)
+                {
+                    var sqlException = ex.InnerException?.InnerException as System.Data.SqlClient.SqlException;
+                    if (sqlException != null && sqlException.Number == 2627) 
+                    {
+                        ModelState.AddModelError("Email", "This email address is already registered.");
+                    }
+                    else
+                    {
+                        ModelState.AddModelError("", "An error occurred while saving your profile. Please try again.");
+                    }
+                    System.Diagnostics.Debug.WriteLine($"DB Update Error: {ex.Message}");
+                }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError("", "An unexpected error occurred while saving your profile. Please try again.");
+                    System.Diagnostics.Debug.WriteLine($"General Error: {ex.Message} - StackTrace: {ex.StackTrace}");
+                }
+            }
+
+           
+            return View(viewModel);
+        }
     }
 }
     

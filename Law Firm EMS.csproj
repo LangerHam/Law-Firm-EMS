@@ -273,6 +273,7 @@
     <Content Include="Views\Client\Documents.cshtml" />
     <Content Include="Views\Client\Billing.cshtml" />
     <Content Include="Views\Client\_TransactionHistoryPrintable.cshtml" />
+    <Content Include="Views\Client\Settings.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
