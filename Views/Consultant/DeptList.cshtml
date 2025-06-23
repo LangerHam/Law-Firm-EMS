@@ -4,25 +4,75 @@
     Layout = "~/Views/Shared/ConsultantNavbar.cshtml";
 }
 
-<h2>Consultant Contact List</h2>
 
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>Name</th>
-            <th>Phone</th>
-            <th>Email</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var consultant in Model)
-        {
-            <tr>
-                <td>@consultant.Name</td>
-                <td>@consultant.Phone</td>
-                <td>@consultant.Email</td>
-            </tr>
-        }
-    </tbody>
-</table>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewBag.Title</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <div class="max-w-4xl mx-auto py-10 px-6">
+        <h1 class="text-2xl font-bold mb-6 text-center">Consultant Contact List</h1>
+
+        <!-- Search box -->
+        <div class="mb-4">
+            <input type="text" id="searchInput" placeholder="Search by name, phone or email..."
+                   class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400" />
+        </div>
+
+        <div class="overflow-x-auto bg-white shadow-md rounded-lg">
+            <table class="min-w-full divide-y divide-gray-200" id="consultantTable">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-sm font-semibold text-gray-600 uppercase">Name</th>
+                        <th class="px-6 py-3 text-left text-sm font-semibold text-gray-600 uppercase">Phone</th>
+                        <th class="px-6 py-3 text-left text-sm font-semibold text-gray-600 uppercase">Email</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    @foreach (var consultant in Model)
+                    {
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 text-sm">@consultant.Name</td>
+                            <td class="px-6 py-4 text-sm">@consultant.Phone</td>
+                            <td class="px-6 py-4 text-sm">@consultant.Email</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Client-side Search Script -->
+    <script>
+        const searchInput = document.getElementById("searchInput");
+        const table = document.getElementById("consultantTable");
+        const rows = table.getElementsByTagName("tr");
+
+        searchInput.addEventListener("keyup", function () {
+            const filter = searchInput.value.toLowerCase();
+
+            // Skip header row (index 0)
+            for (let i = 1; i < rows.length; i++) {
+                const cells = rows[i].getElementsByTagName("td");
+                let match = false;
+
+                for (let j = 0; j < cells.length; j++) {
+                    const cellText = cells[j].textContent.toLowerCase();
+                    if (cellText.includes(filter)) {
+                        match = true;
+                        break;
+                    }
+                }
+
+                rows[i].style.display = match ? "" : "none";
+            }
+        });
+    </script>
+
+</body>
+</html>
 
