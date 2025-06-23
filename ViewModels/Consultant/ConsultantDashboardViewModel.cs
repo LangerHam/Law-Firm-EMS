@@ -30,10 +30,38 @@
         {
             public List<Evaluation> Evaluations { get; set; }
         }
-    public class ConsultantContactViewModel
-    {
-        public string Name { get; set; }
-        public string Phone { get; set; }
-        public string Email { get; set; }
+        public class ConsultantContactViewModel
+        {
+            public string Name { get; set; }
+            public string Phone { get; set; }
+            public string Email { get; set; }
+        }
+
+        public class ConsultantClientListViewModel
+        {
+            public int UserID { get; set; }
+            public string FullName { get; set; }
+            public string Email { get; set; }
+            public string Status { get; set; }
+        }
+
+        public class ConsultantClientDetailViewModel
+        {
+            public Client ClientProfile { get; set; }
+            public DocumentGroupViewModel Documents { get; set; }
+        }
+
+        public class DocumentGroupViewModel
+        {
+            public List<Document> LoR_Documents { get; set; }
+            public List<Document> EIA_PES_Documents { get; set; }
+            public List<Document> Other_Documents { get; set; }
+
+            public DocumentGroupViewModel()
+            {
+                LoR_Documents = new List<Document>();
+                EIA_PES_Documents = new List<Document>();
+                Other_Documents = new List<Document>();
+            }
+        }
     }
-}

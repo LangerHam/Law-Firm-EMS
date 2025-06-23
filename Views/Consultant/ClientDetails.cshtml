@@ -1,0 +1,118 @@
+﻿@model Law_Firm_EMS.ViewModels.Consultant.ConsultantClientDetailViewModel
+@{
+    ViewBag.Title = "ClientDetails";
+    Layout = "~/Views/Shared/ConsultantNavbar.cshtml";
+}
+
+<div class="space-y-6">
+    <!-- Client Information Panel -->
+    <div class="bg-white p-6 rounded-lg shadow-md">
+        <div class="flex items-start space-x-6">
+            <img src="https://placehold.co/128x128/E2E8F0/4A5568?text=@Model.ClientProfile.FullName.Substring(0,1)"
+                 alt="Client Avatar"
+                 class="h-24 w-24 rounded-full object-cover border-4 border-gray-200" />
+            <div>
+                <h1 class="text-3xl font-bold text-gray-800">@Model.ClientProfile.FullName</h1>
+                <p class="text-lg text-gray-500">@Model.ClientProfile.User.Email</p>
+                <p class="text-sm text-gray-500 mt-1">Phone: @(Model.ClientProfile.Phone ?? "N/A")</p>
+                <div class="mt-2">
+                    <span class="px-3 py-1 text-sm font-semibold rounded-full bg-green-100 text-green-800">
+                        @Model.ClientProfile.Status.StatusName
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="mt-4 pt-4 border-t">
+            <h4 class="font-semibold text-gray-700">Case Details:</h4>
+            <p class="text-gray-600 mt-1 whitespace-pre-wrap">@Model.ClientProfile.CaseDetails</p>
+        </div>
+    </div>
+
+    <!-- Documents & Forms Panel -->
+    <div class="bg-white p-6 rounded-lg shadow-md">
+        <h3 class="text-xl font-bold text-gray-800 mb-4">Submitted Forms & Documents</h3>
+
+        <!-- Tab Navigation -->
+        <div>
+            <div class="border-b border-gray-200">
+                <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+                    <button onclick="changeTab('lor')" class="tab-btn whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm text-sky-600 border-sky-500">
+                        Letter of Recommendation
+                    </button>
+                    <button onclick="changeTab('eiapes')" class="tab-btn whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300 border-transparent">
+                        EIA & PES
+                    </button>
+                    <button onclick="changeTab('others')" class="tab-btn whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300 border-transparent">
+                        Others
+                    </button>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Tab Content -->
+        <div class="mt-4">
+            <!-- LoR Tab -->
+            <div id="tab-lor" class="tab-content space-y-3">
+                @if (!Model.Documents.LoR_Documents.Any())
+                {<p class="text-gray-500">No LoR documents uploaded yet.</p>}
+                @foreach (var doc in Model.Documents.LoR_Documents)
+                {
+                    <div class="flex justify-between items-center p-3 bg-gray-50 rounded-md">
+                        <p class="font-medium text-gray-700">@System.IO.Path.GetFileName(doc.UploadPath.Replace(System.Guid.NewGuid().ToString() + "_", ""))</p>
+                        <div>
+                            <a href="@Url.Content(doc.UploadPath)" target="_blank" class="text-sm text-sky-600 hover:underline mr-4">Download</a>
+                            <span class="text-sm font-semibold @(doc.Status.StatusName == "Draft" ? "text-yellow-600" : "text-green-600")">@doc.Status.StatusName</span>
+                        </div>
+                    </div>
+                }
+            </div>
+            <!-- EIA & PES Tab -->
+            <div id="tab-eiapes" class="tab-content hidden space-y-3">
+                @if (!Model.Documents.EIA_PES_Documents.Any())
+                {<p class="text-gray-500">No EIA or PES documents uploaded yet.</p>}
+                @foreach (var doc in Model.Documents.EIA_PES_Documents)
+                {
+                    <div class="flex justify-between items-center p-3 bg-gray-50 rounded-md">
+                        <p class="font-medium text-gray-700">@doc.DocumentType.TypeName</p>
+                        <div>
+                            <a href="@Url.Content(doc.UploadPath)" target="_blank" class="text-sm text-sky-600 hover:underline mr-4">Download</a>
+                            <span class="text-sm font-semibold @(doc.Status.StatusName == "In Progress" ? "text-yellow-600" : "text-green-600")">@doc.Status.StatusName</span>
+                        </div>
+                    </div>
+                }
+            </div>
+            <!-- Others Tab -->
+            <div id="tab-others" class="tab-content hidden space-y-3">
+                @if (!Model.Documents.Other_Documents.Any())
+                {<p class="text-gray-500">No other documents uploaded yet.</p>}
+                @foreach (var doc in Model.Documents.Other_Documents)
+                {
+                    <div class="flex justify-between items-center p-3 bg-gray-50 rounded-md">
+                        <p class="font-medium text-gray-700">@doc.DocumentType.TypeName</p>
+                        <a href="@Url.Content(doc.UploadPath)" target="_blank" class="text-sm text-sky-600 hover:underline">Download</a>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+    function changeTab(tabName) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.classList.remove('text-sky-600', 'border-sky-500');
+            btn.classList.add('text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300', 'border-transparent');
+        });
+
+        document.getElementById('tab-' + tabName).classList.remove('hidden');
+
+        const activeButton = event.currentTarget;
+        activeButton.classList.remove('text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300', 'border-transparent');
+        activeButton.classList.add('text-sky-600', 'border-sky-500');
+    }
+    </script>
+}
+
