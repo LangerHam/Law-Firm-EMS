@@ -183,6 +183,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ViewModels\Client\ClientDashboardViewModel.cs" />
     <Compile Include="ViewModels\Consultant\ConsultantDashboardViewModel.cs" />
+    <Compile Include="ViewModels\Consultant\ConsultantSettingsViewModel.cs" />
     <Compile Include="ViewModels\HR\ConsultantViewModel.cs" />
     <Compile Include="ViewModels\HR\EvaluationViewModel.cs" />
     <Compile Include="ViewModels\HR\HRDashboardViewModel.cs" />
@@ -289,6 +290,7 @@
     <Content Include="Uploads\ClientDocuments\bb728b68-f4cc-4c9b-b3af-9c01539dd64a_CV_Niloy Gabriel Gomes.pdf" />
     <Content Include="Views\Consultant\_TaskListPartial.cshtml" />
     <Content Include="Views\Consultant\MyTasks.cshtml" />
+    <Content Include="Views\Consultant\Settings.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

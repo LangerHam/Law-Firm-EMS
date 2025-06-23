@@ -285,6 +285,10 @@ namespace Law_Firm_EMS.Controllers
 
         public ActionResult DeptList()
         {
+            if (Session["UserID"] == null || (int)Session["RoleID"] != 3)
+            {
+                return RedirectToAction("Login", "Login");
+            }
             {
                 var contacts = db.ConsultantEntity
                     .Join(db.UsersEntity,
@@ -303,5 +307,77 @@ namespace Law_Firm_EMS.Controllers
             }
         }
 
+        public ActionResult Settings()
+        {
+            if (Session["UserID"] == null || (int)Session["RoleID"] != 3)
+                return RedirectToAction("Login", "Login");
+
+            int consultantId = (int)Session["UserID"];
+
+            var consultant = db.ConsultantEntity.Include(c => c.User).FirstOrDefault(c => c.UserID == consultantId);
+            if (consultant == null) return HttpNotFound();
+
+            var viewModel = new ConsultantSettingsViewModel
+            {
+                Name = consultant.Name,
+                Phone = consultant.Phone,
+                Email = consultant.User.Email,
+                CurrentProfilePhotoPath = consultant.ProfilePhotoPath
+            };
+
+            return View(viewModel);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Settings(ConsultantSettingsViewModel viewModel)
+        {
+            if (Session["UserID"] == null || (int)Session["RoleID"] != 3)
+                return RedirectToAction("Login", "Login");
+
+            int consultantId = (int)Session["UserID"];
+
+            if (string.IsNullOrEmpty(viewModel.NewPassword) && string.IsNullOrEmpty(viewModel.ConfirmPassword))
+            {
+                ModelState.Remove("NewPassword");
+                ModelState.Remove("ConfirmPassword");
+            }
+
+            if (ModelState.IsValid)
+            {
+                var consultantInDb = db.ConsultantEntity.Find(consultantId);
+                var userInDb = db.UsersEntity.Find(consultantId);
+
+                if (consultantInDb == null || userInDb == null) return HttpNotFound();
+
+                consultantInDb.Name = viewModel.Name;
+                consultantInDb.Phone = viewModel.Phone;
+
+                if (!string.IsNullOrEmpty(viewModel.NewPassword))
+                {
+                    userInDb.PasswordHash = viewModel.NewPassword;
+                }
+
+                if (viewModel.ProfileImageFile != null && viewModel.ProfileImageFile.ContentLength > 0)
+                {
+                    string uploadDir = Server.MapPath("~/Resources/Images/");
+                    if (!Directory.Exists(uploadDir)) Directory.CreateDirectory(uploadDir);
+
+                    string uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(viewModel.ProfileImageFile.FileName);
+                    string physicalPath = Path.Combine(uploadDir, uniqueFileName);
+                    viewModel.ProfileImageFile.SaveAs(physicalPath);
+
+                    consultantInDb.ProfilePhotoPath = "/Resources/Images/" + uniqueFileName;
+
+                    Session["ProfilePhotoPath"] = consultantInDb.ProfilePhotoPath;
+                }
+
+                db.SaveChanges();
+                TempData["SuccessMessage"] = "Your profile has been updated successfully.";
+                return RedirectToAction("Settings");
+            }
+
+            return View(viewModel);
+        }
     }
 }

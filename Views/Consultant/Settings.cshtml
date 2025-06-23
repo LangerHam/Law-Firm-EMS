@@ -1,0 +1,90 @@
+﻿@model Law_Firm_EMS.ViewModels.Consultant.ConsultantSettingsViewModel
+
+@{
+    ViewBag.Title = "Settings";
+    Layout = "~/Views/Shared/ConsultantNavbar.cshtml";
+}
+
+<div class="bg-white p-8 rounded-lg shadow-md max-w-4xl mx-auto">
+    <h1 class="text-3xl font-bold text-gray-800 mb-6 border-b pb-4">Profile Settings</h1>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6" role="alert">
+            <p>@TempData["SuccessMessage"]</p>
+        </div>
+    }
+
+    @using (Html.BeginForm("Settings", "Consultant", FormMethod.Post, new { enctype = "multipart/form-data" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.ValidationSummary(true, "", new { @class = "text-red-600 bg-red-50 p-3 rounded-md mb-6" })
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- Left Column: Profile Picture -->
+            <div class="md:col-span-1 text-center">
+                <p class="font-medium text-gray-700 mb-2">Profile Picture</p>
+                <img id="image-preview"
+                     src="@(Model.CurrentProfilePhotoPath ?? "https://placehold.co/400x400/E2E8F0/4A5568?text=" + Model.Name.Substring(0,1))"
+                     alt="Profile Picture"
+                     class="w-40 h-40 rounded-full mx-auto object-cover border-4 border-gray-200" />
+
+                <label for="ProfileImageFile" class="mt-4 inline-block bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors cursor-pointer text-sm">
+                    Change Picture
+                </label>
+                @Html.TextBoxFor(m => m.ProfileImageFile, new { type = "file", id = "ProfileImageFile", @class = "hidden", accept = "image/*" })
+            </div>
+
+            <!-- Right Column: Editable Fields -->
+            <div class="md:col-span-2 space-y-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-500">Email Address (Read-only)</label>
+                    <input type="text" value="@Model.Email" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100" readonly />
+                </div>
+                <div>
+                    @Html.LabelFor(m => m.Name, new { @class = "block text-sm font-medium text-gray-700" })
+                    @Html.EditorFor(m => m.Name, new { htmlAttributes = new { @class = "mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg" } })
+                    @Html.ValidationMessageFor(m => m.Name, "", new { @class = "text-red-600 text-xs mt-1" })
+                </div>
+                <div>
+                    @Html.LabelFor(m => m.Phone, new { @class = "block text-sm font-medium text-gray-700" })
+                    @Html.EditorFor(m => m.Phone, new { htmlAttributes = new { @class = "mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg" } })
+                    @Html.ValidationMessageFor(m => m.Phone, "", new { @class = "text-red-600 text-xs mt-1" })
+                </div>
+
+                <div class="border-t pt-6 space-y-6">
+                    <p class="text-gray-600">Leave the password fields blank to keep your current password.</p>
+                    <div>
+                        @Html.LabelFor(m => m.NewPassword, new { @class = "block text-sm font-medium text-gray-700" })
+                        @Html.EditorFor(m => m.NewPassword, new { htmlAttributes = new { @class = "mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg" } })
+                        @Html.ValidationMessageFor(m => m.NewPassword, "", new { @class = "text-red-600 text-xs mt-1" })
+                    </div>
+                    <div>
+                        @Html.LabelFor(m => m.ConfirmPassword, new { @class = "block text-sm font-medium text-gray-700" })
+                        @Html.EditorFor(m => m.ConfirmPassword, new { htmlAttributes = new { @class = "mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg" } })
+                        @Html.ValidationMessageFor(m => m.ConfirmPassword, "", new { @class = "text-red-600 text-xs mt-1" })
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-8 pt-6 border-t text-right">
+            <button type="submit" class="bg-sky-600 text-white px-6 py-2 rounded-lg hover:bg-sky-700 transition-colors font-semibold">
+                Save Changes
+            </button>
+        </div>
+    }
+</div>
+
+@section scripts {
+    <script>
+    document.getElementById('ProfileImageFile').addEventListener('change', function(event) {
+        const [file] = event.target.files;
+        if (file) {
+            const preview = document.getElementById('image-preview');
+            preview.src = URL.createObjectURL(file);
+        }
+    });
+    </script>
+}
+
