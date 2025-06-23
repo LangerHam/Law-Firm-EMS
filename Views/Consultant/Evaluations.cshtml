@@ -35,7 +35,7 @@
                 <div class="@cardClass evaluation-card" data-evaluation-id="@evaluation.EvalID">
                     <div class="flex justify-between items-center mb-2">
                         <h2 class="text-xl font-bold text-indigo-700">@evaluation.Title</h2>
-                        <span class="text-sm text-gray-500">@evaluation.DateGiven.ToString("MMM dd, Jamboree")</span>
+                        <span class="text-sm text-gray-500">@evaluation.DateGiven.ToString("MMM dd, yyyy")</span>
                     </div>
                     <p class="text-sm text-gray-600 mb-3">Evaluated by: <span class="font-semibold">@(evaluation.EvaluatedByHR != null ? evaluation.EvaluatedByHR.Name : "N/A")</span></p>
 

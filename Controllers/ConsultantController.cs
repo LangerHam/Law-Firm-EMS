@@ -118,5 +118,8 @@ namespace Law_Firm_EMS.Controllers
 
             return View(viewModel);
         }
+
+        public ActionResult DeptList()
+            { return View(); }
     }
 }
