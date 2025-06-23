@@ -9,6 +9,7 @@ using System.Web.Mvc;
 using System.Globalization;
 using static Law_Firm_EMS.ViewModels.Consultant.ConsultantDashboardViewModel;
 using Law_Firm_EMS.Models;
+using System.Net;
 
 namespace Law_Firm_EMS.Controllers
 {
@@ -89,6 +90,70 @@ namespace Law_Firm_EMS.Controllers
                 TotalUnpaidLeaveAllowance = unpaidLeaveAllowance,
                 LeaveChartLabels = chartLabels,
                 LeaveChartData = chartData
+            };
+
+            return View(viewModel);
+        }
+
+        public ActionResult MyClients()
+        {
+            if (Session["UserID"] == null || (int)Session["RoleID"] != 3)
+                return RedirectToAction("Login", "Login");
+
+            int consultantId = (int)Session["UserID"];
+
+            var clients = db.ClientEntity
+                .Where(c => c.AssignedConsultantID == consultantId)
+                .Include(c => c.User)
+                .Include(c => c.Status)
+                .Select(c => new ConsultantClientListViewModel
+                {
+                    UserID = c.UserID,
+                    FullName = c.FullName,
+                    Email = c.User.Email,
+                    Status = c.Status.StatusName
+                })
+                .OrderBy(c => c.FullName)
+                .ToList();
+
+            return View(clients);
+        }
+
+        // GET: Consultant/ClientDetails/{id}
+        public ActionResult ClientDetails(int? id)
+        {
+            if (Session["UserID"] == null || (int)Session["RoleID"] != 3)
+                return RedirectToAction("Login", "Login");
+
+            if (id == null) return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
+            int consultantId = (int)Session["UserID"];
+
+            var client = db.ClientEntity
+                .Include(c => c.User)
+                .Include(c => c.Status)
+                .FirstOrDefault(c => c.UserID == id && c.AssignedConsultantID == consultantId);
+
+            if (client == null) return HttpNotFound("Client not found or not assigned to you.");
+
+            var allClientDocuments = db.DocumentEntity
+                .Where(d => d.ClientID == id)
+                .Include(d => d.DocumentType)
+                .Include(d => d.Status)
+                .OrderByDescending(d => d.DocumentID) 
+                .ToList();
+
+            var documentGroups = new DocumentGroupViewModel
+            {
+                LoR_Documents = allClientDocuments.Where(d => d.DocumentType.TypeName == "LoR").ToList(),
+                EIA_PES_Documents = allClientDocuments.Where(d => d.DocumentType.TypeName == "EIA" || d.DocumentType.TypeName == "PES").ToList(),
+                Other_Documents = allClientDocuments.Where(d => d.DocumentType.TypeName != "LoR" && d.DocumentType.TypeName != "EIA" && d.DocumentType.TypeName != "PES").ToList()
+            };
+
+            var viewModel = new ConsultantClientDetailViewModel
+            {
+                ClientProfile = client,
+                Documents = documentGroups
             };
 
             return View(viewModel);

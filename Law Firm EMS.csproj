@@ -276,6 +276,8 @@
     <Content Include="Views\Client\Settings.cshtml" />
     <Content Include="Views\Consultant\Evaluations.cshtml" />
     <Content Include="Views\Consultant\DeptList.cshtml" />
+    <Content Include="Views\Consultant\MyClients.cshtml" />
+    <Content Include="Views\Consultant\ClientDetails.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
