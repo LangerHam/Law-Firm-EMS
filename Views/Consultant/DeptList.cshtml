@@ -1,8 +1,28 @@
-﻿
+﻿@model IEnumerable<Law_Firm_EMS.ViewModels.Consultant.ConsultantContactViewModel>
 @{
     ViewBag.Title = "DeptList";
     Layout = "~/Views/Shared/ConsultantNavbar.cshtml";
 }
 
-<h2>DeptList</h2>
+<h2>Consultant Contact List</h2>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Phone</th>
+            <th>Email</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var consultant in Model)
+        {
+            <tr>
+                <td>@consultant.Name</td>
+                <td>@consultant.Phone</td>
+                <td>@consultant.Email</td>
+            </tr>
+        }
+    </tbody>
+</table>
 

@@ -29,6 +29,11 @@
         public class ConsultantEvaluationsViewModel
         {
             public List<Evaluation> Evaluations { get; set; }
-            // You can add properties here for filtering, pagination, or other page-specific data later if needed
         }
+    public class ConsultantContactViewModel
+    {
+        public string Name { get; set; }
+        public string Phone { get; set; }
+        public string Email { get; set; }
     }
+}
