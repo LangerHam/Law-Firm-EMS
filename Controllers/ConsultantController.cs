@@ -7,6 +7,8 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using System.Globalization;
+using static Law_Firm_EMS.ViewModels.Consultant.ConsultantDashboardViewModel;
+using Law_Firm_EMS.Models;
 
 namespace Law_Firm_EMS.Controllers
 {
@@ -87,6 +89,31 @@ namespace Law_Firm_EMS.Controllers
                 TotalUnpaidLeaveAllowance = unpaidLeaveAllowance,
                 LeaveChartLabels = chartLabels,
                 LeaveChartData = chartData
+            };
+
+            return View(viewModel);
+        }
+
+        // GET: Consultant/Evaluations
+        public ActionResult Evaluations()
+        {
+           
+            if (Session["UserID"] == null || (int)Session["RoleID"] != 3)
+            {
+                return RedirectToAction("Login", "Login");
+            }
+
+            int consultantId = (int)Session["UserID"];
+
+            var evaluations = db.EvaluationEntity
+                                .Include(e => e.EvaluatedByHR) 
+                                .Where(e => e.ConsultantID == consultantId)
+                                .OrderByDescending(e => e.DateGiven)
+                                .ToList();
+
+            var viewModel = new ConsultantEvaluationsViewModel
+            {
+                Evaluations= evaluations 
             };
 
             return View(viewModel);
