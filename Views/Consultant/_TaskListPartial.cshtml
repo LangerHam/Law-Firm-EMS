@@ -1,0 +1,35 @@
+﻿@model IEnumerable<Law_Firm_EMS.Models.Tasks>
+
+@if (!Model.Any())
+{
+    <div class="text-center p-12 text-gray-500">
+        <i data-lucide="inbox" class="h-12 w-12 mx-auto mb-2"></i>
+        <p>No tasks found for the selected client.</p>
+    </div>
+}
+else
+{
+    <div class="space-y-4">
+        @foreach (var task in Model)
+        {
+            <div class="border rounded-lg p-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div class="flex-grow">
+                    <p class="font-bold text-gray-800">@task.Document.DocumentType.TypeName</p>
+                    <p class="text-sm text-gray-600">For Client: <span class="font-medium">@task.Document.Client.FullName</span></p>
+                    <p class="text-sm text-gray-500 mt-2">Instructions: @(task.Instructions ?? "None")</p>
+                </div>
+                <div class="flex-shrink-0 flex flex-col md:flex-row items-stretch md:items-center gap-4 w-full md:w-auto">
+                    <div class="w-full md:w-40">
+                        @Html.DropDownList("StatusID", new SelectList((IEnumerable<SelectListItem>)ViewBag.StatusList, "Value", "Text", task.StatusID), new { @class = "w-full p-2 border rounded-lg status-indicator", onchange = $"updateStatus(this, {task.DocumentID})" })
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="openUploadModal(@task.DocumentID)" class="text-sm text-sky-600 hover:underline focus:outline-none">Submit</button>
+                        <span class="text-gray-300">|</span>
+                        <a href="@Url.Content(task.Document.UploadPath)" class="text-sm text-gray-600 hover:underline @(task.Document.UploadPath.StartsWith("/Uploads") ? "" : "hidden")" download>Download</a>
+                    </div>
+                    <button onclick="removeTask(@task.DocumentID, this)" class="text-sm text-red-600 hover:underline focus:outline-none">Remove</button>
+                </div>
+            </div>
+        }
+    </div>
+}

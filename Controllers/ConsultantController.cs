@@ -10,6 +10,7 @@ using System.Globalization;
 using static Law_Firm_EMS.ViewModels.Consultant.ConsultantDashboardViewModel;
 using Law_Firm_EMS.Models;
 using System.Net;
+using System.IO;
 
 namespace Law_Firm_EMS.Controllers
 {
@@ -132,6 +133,7 @@ namespace Law_Firm_EMS.Controllers
             var client = db.ClientEntity
                 .Include(c => c.User)
                 .Include(c => c.Status)
+                .Include(c => c.Billing) 
                 .FirstOrDefault(c => c.UserID == id && c.AssignedConsultantID == consultantId);
 
             if (client == null) return HttpNotFound("Client not found or not assigned to you.");
@@ -140,7 +142,7 @@ namespace Law_Firm_EMS.Controllers
                 .Where(d => d.ClientID == id)
                 .Include(d => d.DocumentType)
                 .Include(d => d.Status)
-                .OrderByDescending(d => d.DocumentID) 
+                .OrderByDescending(d => d.DocumentID)
                 .ToList();
 
             var documentGroups = new DocumentGroupViewModel
@@ -150,13 +152,110 @@ namespace Law_Firm_EMS.Controllers
                 Other_Documents = allClientDocuments.Where(d => d.DocumentType.TypeName != "LoR" && d.DocumentType.TypeName != "EIA" && d.DocumentType.TypeName != "PES").ToList()
             };
 
+            var submittedForms = db.FormEntity
+                .Where(f => f.ClientID == id)
+                .Include(f => f.FormType)
+                .ToList();
+
             var viewModel = new ConsultantClientDetailViewModel
             {
                 ClientProfile = client,
-                Documents = documentGroups
+                Documents = documentGroups,
+                BillingSummary = client.Billing, 
+                SubmittedForms = submittedForms  
+            };
+            return View(viewModel);
+        }
+
+        public ActionResult MyTasks()
+        {
+            if (Session["UserID"] == null || (int)Session["RoleID"] != 3)
+                return RedirectToAction("Login", "Login");
+
+            int consultantId = (int)Session["UserID"];
+
+            var assignedClients = db.ClientEntity
+                .Where(c => c.AssignedConsultantID == consultantId)
+                .OrderBy(c => c.FullName)
+                .ToList();
+
+            var tasks = db.TasksEntity
+                .Where(t => t.AssignedToConsultantID == consultantId)
+                .Include(t => t.Document.Client)
+                .Include(t => t.Document.DocumentType)
+                .Include(t => t.Status)
+                .OrderByDescending(t => t.DocumentID)
+                .ToList();
+
+            var viewModel = new MyTasksViewModel
+            {
+                AssignedClients = new SelectList(assignedClients, "UserID", "FullName"),
+                Tasks = tasks
             };
 
+            ViewBag.StatusList = new SelectList(db.StatusTypeEntity.ToList(), "StatusID", "StatusName");
+
             return View(viewModel);
+        }
+
+        [HttpPost]
+        public JsonResult UpdateTaskStatus(int taskId, int statusId)
+        {
+            if (Session["UserID"] == null || (int)Session["RoleID"] != 3)
+                return Json(new { success = false, message = "Unauthorized" });
+
+            int consultantId = (int)Session["UserID"];
+            var task = db.TasksEntity.FirstOrDefault(t => t.DocumentID == taskId && t.AssignedToConsultantID == consultantId);
+
+            if (task == null)
+                return Json(new { success = false, message = "Task not found." });
+
+            task.StatusID = statusId;
+            db.SaveChanges();
+
+            return Json(new { success = true, message = "Status updated." });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult SubmitTaskDocument(int documentId, HttpPostedFileBase file)
+        {
+            if (Session["UserID"] == null || (int)Session["RoleID"] != 3)
+                return RedirectToAction("Login", "Login");
+
+            if (file == null || file.ContentLength == 0)
+            {
+                TempData["ErrorMessage"] = "Please select a file to submit.";
+                return RedirectToAction("MyTasks");
+            }
+
+            int consultantId = (int)Session["UserID"];
+            var document = db.DocumentEntity.Include(d => d.Task).FirstOrDefault(d => d.DocumentID == documentId);
+
+            if (document == null || document.Task.AssignedToConsultantID != consultantId)
+            {
+                TempData["ErrorMessage"] = "Document not found or you are not authorized to modify it.";
+                return RedirectToAction("MyTasks");
+            }
+
+            string uploadDir = Server.MapPath("~/Uploads/ConsultantDocuments/");
+            if (!Directory.Exists(uploadDir)) Directory.CreateDirectory(uploadDir);
+            string uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+            string physicalPath = Path.Combine(uploadDir, uniqueFileName);
+            file.SaveAs(physicalPath);
+            document.UploadPath = "/Uploads/ConsultantDocuments/" + uniqueFileName;
+            document.UploadedByUserID = consultantId;
+
+            var submittedStatus = db.StatusTypeEntity.FirstOrDefault(s => s.StatusName == "Submitted");
+            if (submittedStatus != null)
+            {
+                document.Task.StatusID = submittedStatus.StatusID;
+            }
+
+            db.SaveChanges();
+
+            TempData["SuccessMessage"] = "Task submitted successfully!";
+            return RedirectToAction("MyTasks");
         }
 
         // GET: Consultant/Evaluations

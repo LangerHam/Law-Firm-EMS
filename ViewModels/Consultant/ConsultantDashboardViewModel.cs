@@ -2,9 +2,10 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Web;
+using System.Web;
+using System.Web.Mvc;
 
-    namespace Law_Firm_EMS.ViewModels.Consultant
+namespace Law_Firm_EMS.ViewModels.Consultant
     {
 	    public class ConsultantDashboardViewModel
 	    {
@@ -49,6 +50,8 @@
         {
             public Client ClientProfile { get; set; }
             public DocumentGroupViewModel Documents { get; set; }
+            public Billing BillingSummary { get; set; }
+            public List<Form> SubmittedForms { get; set; }
         }
 
         public class DocumentGroupViewModel
@@ -64,4 +67,10 @@
                 Other_Documents = new List<Document>();
             }
         }
+        public class MyTasksViewModel
+        {
+            public int? SelectedClientID { get; set; }
+            public IEnumerable<SelectListItem> AssignedClients { get; set; }
+            public IEnumerable<Tasks> Tasks { get; set; }
     }
+}

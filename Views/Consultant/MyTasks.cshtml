@@ -1,0 +1,112 @@
+﻿@model Law_Firm_EMS.ViewModels.Consultant.MyTasksViewModel
+@{
+    ViewBag.Title = "MyTasks";
+    Layout = "~/Views/Shared/ConsultantNavbar.cshtml";
+}
+
+<div class="space-y-6">
+    <div class="bg-white p-6 rounded-lg shadow-md">
+        <div class="flex flex-wrap justify-between items-center gap-4">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-800">My Assigned Tasks</h1>
+                <p class="text-gray-500">A list of all your active and pending tasks.</p>
+            </div>
+            <div class="w-full sm:w-auto">
+                @Html.DropDownListFor(m => m.SelectedClientID, Model.AssignedClients, "All My Clients", new { @id = "client-filter-dd", @class = "w-full sm:w-64 p-2 border rounded-lg" })
+            </div>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4" role="alert">
+            <p>@TempData["SuccessMessage"]</p>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4" role="alert">
+            <p>@TempData["ErrorMessage"]</p>
+        </div>
+    }
+
+    <div id="task-list-container" class="bg-white p-6 rounded-lg shadow-md">
+        @Html.Partial("_TaskListPartial", Model.Tasks)
+    </div>
+</div>
+
+<div id="upload-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 backdrop-blur-sm flex items-center justify-center hidden z-50">
+    <div class="bg-white p-8 rounded-lg shadow-xl max-w-lg w-full">
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">Submit Task Document</h2>
+        @using (Html.BeginForm("SubmitTaskDocument", "Consultant", FormMethod.Post, new { enctype = "multipart/form-data" }))
+        {
+            @Html.AntiForgeryToken()
+            <input type="hidden" id="modalDocumentId" name="documentId" />
+
+            <div class="mt-4">
+                <label for="modalFileInput" class="block text-sm font-medium text-gray-700">Select Document</label>
+                <input type="file" name="file" id="modalFileInput" required class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-sky-50 file:text-sky-700 hover:file:bg-sky-100" />
+            </div>
+
+            <div class="flex items-center justify-end space-x-4 pt-6">
+                <button type="button" onclick="closeUploadModal()" class="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-300">Cancel</button>
+                <button type="submit" class="bg-sky-500 text-white px-6 py-2 rounded-lg hover:bg-sky-600">Upload & Submit</button>
+            </div>
+        }
+    </div>
+</div>
+
+
+@section scripts {
+    <script>
+    // --- Modal Control Functions ---
+    const uploadModal = document.getElementById('upload-modal');
+    const modalDocumentIdField = document.getElementById('modalDocumentId');
+
+    function openUploadModal(documentId) {
+        modalDocumentIdField.value = documentId;
+        uploadModal.classList.remove('hidden');
+    }
+
+    function closeUploadModal() {
+        uploadModal.classList.add('hidden');
+    }
+
+    function updateStatus(selectElement, taskId) {
+        const statusId = selectElement.value;
+        $.post('@Url.Action("UpdateTaskStatus", "Consultant")', { taskId: taskId, statusId: statusId })
+            .done(function(response) {
+                if(response.success){
+                    $(selectElement).closest('td').find('.status-indicator').addClass('bg-green-200');
+                    setTimeout(() => $(selectElement).closest('td').find('.status-indicator').removeClass('bg-green-200'), 1000);
+                } else {
+                    alert('Error: ' + response.message);
+                }
+            })
+            .fail(function() {
+                alert('An error occurred while updating the status.');
+            });
+    }
+
+    function removeTask(taskId, buttonElement) {
+        if (!confirm('Are you sure you want to remove this task? This cannot be undone.')) {
+            return;
+        }
+
+        $.ajax({
+            url: '/api/tasks/' + taskId,
+            type: 'DELETE',
+            headers: {
+                'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+            },
+            success: function(response) {
+                $(buttonElement).closest('div.border').fadeOut(500, function() { $(this).remove(); });
+            },
+            error: function(jqXHR) {
+                alert('Error removing task: ' + (jqXHR.responseJSON?.message || 'Server error'));
+            }
+        });
+    }
+    </script>
+}
+

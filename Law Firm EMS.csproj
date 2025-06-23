@@ -237,6 +237,14 @@
     <Content Include="Scripts\jquery.validate.unobtrusive.js" />
     <Content Include="Scripts\jquery.validate.unobtrusive.min.js" />
     <Content Include="Scripts\modernizr-2.8.3.js" />
+    <Content Include="Uploads\ClientDocuments\1ac6c458-9999-40d9-9616-abd18a4f13f3_dotnetfinal.txt" />
+    <Content Include="Uploads\ClientDocuments\361dedd6-75fe-4e2c-ad7d-b3fd5802ca53_dotnetfinal.txt" />
+    <Content Include="Uploads\ClientDocuments\388b0a58-07cf-492b-87a3-f789197cd275_dotnetfinal.txt" />
+    <Content Include="Uploads\ClientDocuments\3f1d3006-d95d-4564-9c01-187910596025_dotnetfinal.txt" />
+    <Content Include="Uploads\ClientDocuments\44795d5c-155c-4c61-b2a2-601fe21c4ee6_dotnetfinal.txt" />
+    <Content Include="Uploads\ClientDocuments\6c4bbd3b-4dd9-49dd-932a-62a07fb6be60_dotnetfinal.txt" />
+    <Content Include="Uploads\ClientDocuments\742fb0ce-646c-4fc0-a6d3-f69010861b0c_dotnetfinal.txt" />
+    <Content Include="Uploads\ClientDocuments\eb93999b-7dee-43fd-8a4a-e21623230ce9_dotnetfinal.txt" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
@@ -278,11 +286,15 @@
     <Content Include="Views\Consultant\DeptList.cshtml" />
     <Content Include="Views\Consultant\MyClients.cshtml" />
     <Content Include="Views\Consultant\ClientDetails.cshtml" />
+    <Content Include="Uploads\ClientDocuments\bb728b68-f4cc-4c9b-b3af-9c01539dd64a_CV_Niloy Gabriel Gomes.pdf" />
+    <Content Include="Views\Consultant\_TaskListPartial.cshtml" />
+    <Content Include="Views\Consultant\MyTasks.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
     <Folder Include="Resources\Images\" />
     <Folder Include="Resources\UploadedClientForms\" />
+    <Folder Include="Uploads\ConsultantDocuments\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap.rtl.min.css.map" />
