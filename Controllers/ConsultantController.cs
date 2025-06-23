@@ -122,14 +122,18 @@ namespace Law_Firm_EMS.Controllers
         public ActionResult DeptList()
         {
             {
-                var contacts = (from consultant in db.ConsultantEntity
-                                join user in db.UsersEntity on consultant.UserID equals user.UserID
-                                select new ConsultantContactViewModel
-                                {
-                                    Name = consultant.Name,
-                                    Phone = consultant.Phone,
-                                    Email = user.Email
-                                }).ToList();
+                var contacts = db.ConsultantEntity
+                    .Join(db.UsersEntity,
+                    consultant => consultant.UserID,
+                    user => user.UserID,
+                    (consultant, user) => new ConsultantContactViewModel
+                    {
+                        Name = consultant.Name,
+                        Phone = consultant.Phone,
+                        Email = user.Email
+                    })
+                .ToList();
+
 
                 return View(contacts);
             }
