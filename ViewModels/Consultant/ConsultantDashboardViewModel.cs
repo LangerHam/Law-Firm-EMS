@@ -1,7 +1,8 @@
 ﻿    using Law_Firm_EMS.Models;
     using System;
     using System.Collections.Generic;
-    using System.Linq;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 
@@ -72,5 +73,34 @@ namespace Law_Firm_EMS.ViewModels.Consultant
             public int? SelectedClientID { get; set; }
             public IEnumerable<SelectListItem> AssignedClients { get; set; }
             public IEnumerable<Tasks> Tasks { get; set; }
+        }
+
+    public class ConsultantLeaveViewModel
+    {
+        
+        public List<Leave> MyLeaveRequests { get; set; }
+
+        
+
+        [Required(ErrorMessage = "Leave Type is required.")]
+        [Display(Name = "Leave Type")]
+        public string LeaveType { get; set; }
+
+        [Required(ErrorMessage = "Start Date is required.")]
+        [Display(Name = "Start Date")]
+        [DataType(DataType.Date)]
+        [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
+        public DateTime FromDate { get; set; }
+
+        [Required(ErrorMessage = "End Date is required.")]
+        [Display(Name = "End Date")]
+        [DataType(DataType.Date)]
+        [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
+        public DateTime ToDate { get; set; }
+
+       
+
+       
+        public IEnumerable<SelectListItem> AvailableLeaveTypes { get; set; }
     }
 }

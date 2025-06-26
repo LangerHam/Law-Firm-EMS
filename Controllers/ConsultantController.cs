@@ -379,5 +379,132 @@ namespace Law_Firm_EMS.Controllers
 
             return View(viewModel);
         }
+
+
+        // GET: Consultant/LeaveRequests
+        public ActionResult LeaveRequests()
+        {
+            
+            if (Session["UserID"] == null || (int)Session["RoleID"] != 3)
+                return RedirectToAction("Login", "Login");
+
+            int consultantId = (int)Session["UserID"];
+
+            
+            var leaveRequests = db.LeaveEntity
+                .Where(l => l.RequestedByConsultantID == consultantId)
+                .Include(l => l.Status) 
+                .OrderByDescending(l => l.FromDate) 
+                .ToList();
+
+            
+            var viewModel = new ConsultantLeaveViewModel
+            {
+                MyLeaveRequests = leaveRequests,
+                
+                AvailableLeaveTypes = new List<SelectListItem>
+                {
+                    new SelectListItem { Text = "Paid Leave", Value = "Paid Leave" },
+                    new SelectListItem { Text = "Sick Leave", Value = "Sick Leave" },
+                    new SelectListItem { Text = "Unpaid Leave", Value = "Unpaid Leave" }
+                }
+            };
+
+            return View(viewModel);
+        }
+
+        // POST: Consultant/ApplyForLeave
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult ApplyForLeave(ConsultantLeaveViewModel model)
+        {
+           
+            if (Session["UserID"] == null || (int)Session["RoleID"] != 3)
+                return RedirectToAction("Login", "Login");
+
+            int consultantId = (int)Session["UserID"];
+
+            
+            model.AvailableLeaveTypes = new List<SelectListItem>
+            {
+                new SelectListItem { Text = "Paid Leave", Value = "Paid Leave" },
+                new SelectListItem { Text = "Sick Leave", Value = "Sick Leave" },
+                new SelectListItem { Text = "Unpaid Leave", Value = "Unpaid Leave" }
+            };
+
+           
+            if (model.FromDate == default(DateTime) || model.ToDate == default(DateTime))
+            {
+                ModelState.AddModelError("", "Please select valid start and end dates.");
+            }
+            else if (model.FromDate > model.ToDate)
+            {
+                ModelState.AddModelError("", "Start Date cannot be after End Date.");
+            }
+            else if (model.FromDate < DateTime.Today) 
+            {
+                ModelState.AddModelError("", "Start Date cannot be in the past.");
+            }
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    
+                    var pendingStatus = db.StatusTypeEntity.FirstOrDefault(s => s.StatusName == "Pending");
+                    if (pendingStatus == null)
+                    {
+                        
+                        TempData["ErrorMessage"] = "System error: 'Pending' status not found. Please contact support.";
+                       
+                        model.MyLeaveRequests = db.LeaveEntity
+                                                 .Where(l => l.RequestedByConsultantID == consultantId)
+                                                 .Include(l => l.Status)
+                                                 .OrderByDescending(l => l.FromDate)
+                                                 .ToList();
+                        return View("LeaveRequests", model);
+                    }
+
+                    
+                    var newLeave = new Leave
+                    {
+                        Type = model.LeaveType,
+                        FromDate = model.FromDate,
+                        ToDate = model.ToDate,
+                        RequestedByConsultantID = consultantId,
+                        StatusID = pendingStatus.StatusID,
+                        
+                    };
+
+                    db.LeaveEntity.Add(newLeave);
+                    db.SaveChanges();
+
+                    TempData["SuccessMessage"] = "Your leave request has been submitted successfully and is pending approval!";
+                    return RedirectToAction("LeaveRequests"); 
+                }
+                catch (Exception ex)
+                {
+                    
+                    System.Diagnostics.Debug.WriteLine($"Error submitting leave request: {ex.Message}");
+                    TempData["ErrorMessage"] = $"An unexpected error occurred: {ex.Message}. Please try again.";
+
+                    
+                    model.MyLeaveRequests = db.LeaveEntity
+                                             .Where(l => l.RequestedByConsultantID == consultantId)
+                                             .Include(l => l.Status)
+                                             .OrderByDescending(l => l.FromDate)
+                                             .ToList();
+                    return View("LeaveRequests", model);
+                }
+            }
+
+          
+            model.MyLeaveRequests = db.LeaveEntity
+                                     .Where(l => l.RequestedByConsultantID == consultantId)
+                                     .Include(l => l.Status)
+                                     .OrderByDescending(l => l.FromDate)
+                                     .ToList();
+            return View("LeaveRequests", model); 
+        }
     }
 }
