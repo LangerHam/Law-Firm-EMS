@@ -205,12 +205,19 @@ namespace Law_Firm_EMS.Controllers
                 return Json(new { success = false, message = "Unauthorized" });
 
             int consultantId = (int)Session["UserID"];
-            var task = db.TasksEntity.FirstOrDefault(t => t.DocumentID == taskId && t.AssignedToConsultantID == consultantId);
+            var task = db.TasksEntity.FirstOrDefault(t => t.DocumentID == taskId && t.AssignedToConsultantID == consultantId);           
 
             if (task == null)
                 return Json(new { success = false, message = "Task not found." });
 
+            var doc = db.DocumentEntity.Find(taskId);
+            if (doc == null)
+            {
+                return Json(new { success = false, message = "Associated document could not be found." });
+            }
+
             task.StatusID = statusId;
+            doc.StatusID = statusId;
             db.SaveChanges();
 
             return Json(new { success = true, message = "Status updated." });
