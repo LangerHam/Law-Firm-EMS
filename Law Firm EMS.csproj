@@ -147,6 +147,7 @@
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Context\LawContextDb.cs" />
     <Compile Include="Controllers\Api\ConsultantApiController.cs" />
+    <Compile Include="Controllers\Api\HRApiController.cs" />
     <Compile Include="Controllers\ClientController.cs" />
     <Compile Include="Controllers\ConsultantController.cs" />
     <Compile Include="Controllers\HRController.cs" />

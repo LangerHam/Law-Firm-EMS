@@ -59,8 +59,8 @@ namespace Law_Firm_EMS.Controllers
         {
             if (Session["RoleID"] == null || (int)Session["RoleID"] != 1) return RedirectToAction("Login", "Login");
 
-            var consultants = db.ConsultantEntity.Include(c => c.User);
-            return View(consultants.ToList());
+            //var consultants = db.ConsultantEntity.Include(c => c.User);
+            return View(/*consultants.ToList()*/);
         }
 
         public ActionResult CreateConsultant()
