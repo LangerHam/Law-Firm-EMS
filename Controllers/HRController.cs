@@ -135,6 +135,7 @@ namespace Law_Firm_EMS.Controllers
                     return HttpNotFound();
                 }
             }
+            consultant.User = await db.UsersEntity.FindAsync(id);
             return View(consultant);
         }
 
@@ -160,7 +161,16 @@ namespace Law_Firm_EMS.Controllers
                     }
                 }
             }
-            return View(consultant);
+            var orgConsultant = await db.ConsultantEntity.Include(c => c.User).FirstOrDefaultAsync(c => c.UserID == id);
+            if (orgConsultant == null)
+            {
+                return HttpNotFound();
+            }
+
+            orgConsultant.Name = consultant.Name;
+            orgConsultant.Phone = consultant.Phone;
+
+            return View(orgConsultant);
         }
 
         // POST: HR/DeleteConsultant/{id}
