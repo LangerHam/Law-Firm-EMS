@@ -142,7 +142,7 @@ namespace Law_Firm_EMS.Controllers
         // POST: HR/ConsultantDetails/{id} 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> EditConsultant(int id, Consultant consultant)
+        public async Task<ActionResult> EditConsultant(int id, [Bind(Include = "UserID,Name,Phone,ProfilePhotoPath")] Consultant consultant)
         {
             if (Session["RoleID"] == null || (int)Session["RoleID"] != 1) return RedirectToAction("Login", "Login");
 
@@ -161,16 +161,17 @@ namespace Law_Firm_EMS.Controllers
                     }
                 }
             }
-            var orgConsultant = await db.ConsultantEntity.Include(c => c.User).FirstOrDefaultAsync(c => c.UserID == id);
+            consultant.User = await db.UsersEntity.FindAsync(id);
+            /*var orgConsultant = await db.ConsultantEntity.Include(c => c.User).FirstOrDefaultAsync(c => c.UserID == id);
             if (orgConsultant == null)
             {
                 return HttpNotFound();
             }
 
             orgConsultant.Name = consultant.Name;
-            orgConsultant.Phone = consultant.Phone;
+            orgConsultant.Phone = consultant.Phone;*/
 
-            return View(orgConsultant);
+            return View(consultant);
         }
 
         // POST: HR/DeleteConsultant/{id}

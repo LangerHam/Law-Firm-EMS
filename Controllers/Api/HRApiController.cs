@@ -78,7 +78,8 @@ namespace Law_Firm_EMS.Controllers.Api
             return Created(ret, new { consultant.UserID, consultant.Name, consultant.Phone, Email = user.Email });
         }
 
-        [HttpPut, Route("api/consultants/{id}")]
+        [HttpPut]
+        [Route("api/consultants/{id}")]
         public IHttpActionResult UpdateConsultant(int id, Consultant consultantData)
         {
             if (!ModelState.IsValid || id != consultantData.UserID) return BadRequest();
