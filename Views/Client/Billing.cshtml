@@ -4,18 +4,25 @@
     ViewBag.Title = "My Billing";
     Layout = "~/Views/Shared/ClientNavbar.cshtml";
 
-    
     var cardClass = "bg-white p-6 rounded-xl shadow-md border border-gray-200";
 }
+
+<div class="bg-white shadow-sm flex justify-between items-center px-6 py-4">
+    <div class="text-base text-gray-700">
+        
+    </div>
+    <div class="flex items-center">
+        <i data-lucide="scale" class="h-6 w-6 text-sky-400"></i>
+        <span class="ml-2 text-lg font-semibold">NIW Solutions</span>
+    </div>
+</div>
 
 <main class="p-6 overflow-y-auto flex-1 bg-gray-50">
 
     <h1 class="text-2xl font-bold text-gray-800 mb-4">Billing & Payments</h1>
     <p class="text-md text-gray-700 mb-8 max-w-2xl">Manage your service fees, view payment history, and make payments securely.</p>
 
-    @* Alert Messages (Success/Error) *@
     <div id="alertContainer" class="mb-6">
-       
         @if (TempData["SuccessMessage"] != null)
         {
             <div class="bg-green-50 border-l-4 border-green-400 text-green-800 p-5 rounded-lg shadow-md flex items-center animate-fade-in-down" role="alert">
@@ -70,57 +77,13 @@
                 <button type="button" class="payment-tab flex items-center justify-center flex-1 py-3 px-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors duration-200 border border-transparent data-[state=active]:border-blue-500 data-[state=active]:text-blue-600 data-[state=active]:shadow data-[state=active]:bg-blue-50" data-tab="giftCard">
                     <i data-lucide="gift" class="w-6 h-6 mr-2 text-orange-500 data-[state=active]:text-blue-600"></i> Gift Card
                 </button>
-                <button type="button" class="payment-tab flex items-center justify-center flex-1 py-3 px-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors duration-200 border border-transparent data-[state=active]:border-blue-500 data-[state=active]:text-blue-600 data-[state=active]:shadow data-[state=active]:bg-blue-50" data-tab="paypal">
-                    <i data-lucide="paypal" class="w-6 h-6 mr-2 text-blue-700 data-[state=active]:text-blue-600"></i> PayPal
-                </button>
             </div>
 
             <div id="paymentContent">
                 <div id="creditCardTab" class="payment-tab-content space-y-8">
                     <form id="paymentForm" class="space-y-6">
                         @Html.AntiForgeryToken()
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div class="space-y-4">
-                                <h3 class="text-base font-semibold text-gray-800 flex items-center mb-2">
-                                    <i data-lucide="map-pin" class="w-4 h-4 mr-2 text-gray-500"></i> Billing Address
-                                </h3>
-                                <div>
-                                    <label for="fullName" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-                                    <input type="text" id="fullName" name="FullName"
-                                           class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="John Doe">
-                                </div>
-                                <div>
-                                    <label for="address1" class="block text-sm font-medium text-gray-700 mb-1">Address 1</label>
-                                    <input type="text" id="address1" name="Address1"
-                                           class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="123 Main St">
-                                </div>
-                                <div>
-                                    <label for="address2" class="block text-sm font-medium text-gray-700 mb-1">Address 2 (Optional)</label>
-                                    <input type="text" id="address2" name="Address2"
-                                           class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="Apartment, suite, unit, etc.">
-                                </div>
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    <div>
-                                        <label for="city" class="block text-sm font-medium text-gray-700 mb-1">City</label>
-                                        <input type="text" id="city" name="City"
-                                               class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="New York">
-                                    </div>
-                                    <div>
-                                        <label for="state" class="block text-sm font-medium text-gray-700 mb-1">State</label>
-                                        <select id="state" name="State" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                                            <option value="">Select State</option>
-                                            <option value="NY">New York</option>
-                                            <option value="CA">California</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div>
-                                    <label for="zipCode" class="block text-sm font-medium text-gray-700 mb-1">Zip Code</label>
-                                    <input type="text" id="zipCode" name="ZipCode"
-                                           class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="10001">
-                                </div>
-                            </div>
-
+                        <div class="grid grid-cols-1 gap-6">
                             <div class="space-y-4">
                                 <h3 class="text-base font-semibold text-gray-800 flex items-center mb-2">
                                     <i data-lucide="credit-card" class="w-4 h-4 mr-2 text-gray-500"></i> Credit Card Info
@@ -128,18 +91,21 @@
                                 <div>
                                     <label for="nameOnCard" class="block text-sm font-medium text-gray-700 mb-1">Name on Card</label>
                                     <input type="text" id="nameOnCard" name="NameOnCard"
-                                           class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="JOHN DOE">
+                                           class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="Samiha Rahman">
+                                    <p id="nameOnCardError" class="mt-1 text-sm text-red-600 hidden"></p>
                                 </div>
                                 <div>
                                     <label for="cardNumber" class="block text-sm font-medium text-gray-700 mb-1">Card Number</label>
                                     <input type="text" id="cardNumber" name="CardNumber"
                                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="0000 0000 0000 0000">
+                                    <p id="cardNumberError" class="mt-1 text-sm text-red-600 hidden"></p>
                                 </div>
                                 <div class="grid grid-cols-3 gap-4">
                                     <div>
                                         <label for="cvv" class="block text-sm font-medium text-gray-700 mb-1">CVV</label>
                                         <input type="text" id="cvv" name="CVV"
                                                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="123">
+                                        <p id="cvvError" class="mt-1 text-sm text-red-600 hidden"></p>
                                     </div>
                                     <div>
                                         <label for="expMonth" class="block text-sm font-medium text-gray-700 mb-1">Exp. Month</label>
@@ -150,6 +116,7 @@
                                                 <option value="@i.ToString("00")">@i.ToString("00")</option>
                                             }
                                         </select>
+                                        <p id="expMonthError" class="mt-1 text-sm text-red-600 hidden"></p>
                                     </div>
                                     <div>
                                         <label for="expYear" class="block text-sm font-medium text-gray-700 mb-1">Exp. Year</label>
@@ -160,11 +127,11 @@
                                                 <option value="@i">@i</option>
                                             }
                                         </select>
+                                        <p id="expYearError" class="mt-1 text-sm text-red-600 hidden"></p>
                                     </div>
                                 </div>
 
                                 <div class="relative pt-4">
-                                   
                                     <label for="amountToPay" class="block text-sm font-medium text-gray-700 mb-2">Amount to Pay</label>
                                     <div class="mt-1 relative rounded-md shadow-sm">
                                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -177,7 +144,7 @@
                                             <span class="text-gray-500 sm:text-sm" id="price-currency">BDT</span>
                                         </div>
                                     </div>
-                                    <p id="amountError" class="mt-2 text-sm text-red-600 hidden"></p>
+                                    <p id="amountToPayError" class="mt-2 text-sm text-red-600 hidden"></p>
                                 </div>
                             </div>
                         </div>
@@ -186,7 +153,7 @@
                                 class="w-full bg-indigo-600 text-white py-3 px-5 rounded-lg text-lg font-semibold
                                 hover:bg-indigo-700 transition-colors duration-300 ease-in-out shadow-md hover:shadow-lg
                                 transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-indigo-300">
-                            <i data-lucide="arrow-right" class="w-5 h-5 mr-2 inline-block"></i> Continue @* Changed icon and text to "Continue" *@
+                            <i data-lucide="arrow-right" class="w-5 h-5 mr-2 inline-block"></i> Continue
                         </button>
                     </form>
                 </div>
@@ -195,12 +162,6 @@
                     <i data-lucide="gift" class="w-16 h-16 mx-auto mb-4 text-orange-300"></i>
                     <p class="text-lg font-medium mb-2">Gift Card payments are not currently supported.</p>
                     <p class="text-sm">Please check back later or use another payment method.</p>
-                </div>
-
-                <div id="paypalTab" class="payment-tab-content hidden text-center py-10 text-gray-500">
-                    <i data-lucide="paypal" class="w-16 h-16 mx-auto mb-4 text-blue-400"></i>
-                    <p class="text-lg font-medium mb-2">PayPal integration is coming soon!</p>
-                    <p class="text-sm">For now, please use the Credit Card option to proceed with your payment.</p>
                 </div>
             </div>
         </div>
@@ -211,8 +172,8 @@
             <i data-lucide="history" class="w-5 h-5 mr-2 text-teal-600"></i>
             Transaction History
             <button id="generatePdfBtn" class="ml-auto bg-gray-200 text-gray-700 py-2 px-5 rounded-lg text-sm font-semibold
-                                          hover:bg-gray-300 transition-colors duration-200 ease-in-out
-                                          focus:outline-none focus:ring-2 focus:ring-gray-400">
+                                                hover:bg-gray-300 transition-colors duration-200 ease-in-out
+                                                focus:outline-none focus:ring-2 focus:ring-gray-400">
                 <i data-lucide="file-text" class="w-4 h-4 mr-1 inline-block"></i> Generate PDF
             </button>
         </h2>
@@ -254,9 +215,8 @@
 @section scripts {
     <script src="https://unpkg.com/lucide@latest"></script>
     <script>
-        lucide.createIcons(); 
+        lucide.createIcons();
 
-        
         function showAlert(message, type = 'success') {
             const alertContainer = document.getElementById('alertContainer');
             const bgColor = type === 'success' ? 'bg-green-50' : 'bg-red-50';
@@ -272,20 +232,17 @@
             `;
             alertContainer.prepend(alertDiv);
 
-            lucide.createIcons(); 
+            lucide.createIcons();
 
-            
             setTimeout(() => {
                 alertDiv.remove();
             }, 5000);
         }
 
-       
         document.addEventListener('DOMContentLoaded', function () {
             const tabs = document.querySelectorAll('.payment-tab');
             const tabContents = document.querySelectorAll('.payment-tab-content');
 
-            
             function activateTab(tabId) {
                 tabs.forEach(tab => {
                     if (tab.dataset.tab === tabId) {
@@ -303,64 +260,198 @@
                     }
                 });
 
-                lucide.createIcons(); 
+                lucide.createIcons();
             }
 
-            
             tabs.forEach(tab => {
                 tab.addEventListener('click', () => {
                     activateTab(tab.dataset.tab);
                 });
             });
 
-            
             activateTab('creditCard');
 
-            
             const amountInput = document.getElementById('amountToPay');
             const payNowBtn = document.getElementById('payNowBtn');
-            const dueAmount = parseFloat(document.getElementById('dueAmountDisplay').textContent.replace(/[^0-9.]/g, '')); // Clean up currency symbol for parsing
+            const dueAmount = parseFloat(document.getElementById('dueAmountDisplay').textContent.replace(/[^[^0-9.]/g, '')); // Adjusted regex
 
             if (dueAmount <= 0) {
                 amountInput.value = 0;
                 amountInput.disabled = true;
                 payNowBtn.disabled = true;
                 payNowBtn.innerHTML = 'No Amount Due';
-                payNowBtn.classList.add('opacity-50', 'cursor-not-allowed'); 
+                payNowBtn.classList.add('opacity-50', 'cursor-not-allowed');
             } else {
                 amountInput.value = dueAmount;
             }
+
+            // --- Client-side Validation Setup ---
+            const nameOnCardInput = document.getElementById('nameOnCard');
+            const cardNumberInput = document.getElementById('cardNumber');
+            const cvvInput = document.getElementById('cvv');
+            const expMonthSelect = document.getElementById('expMonth');
+            const expYearSelect = document.getElementById('expYear');
+
+            function showValidationError(element, message) {
+                const errorElement = document.getElementById(element.id + 'Error');
+                element.classList.add('border-red-500', 'focus:border-red-500', 'focus:ring-red-500');
+                errorElement.textContent = message;
+                errorElement.classList.remove('hidden');
+            }
+
+            function hideValidationError(element) {
+                const errorElement = document.getElementById(element.id + 'Error');
+                element.classList.remove('border-red-500', 'focus:border-red-500', 'focus:ring-red-500');
+                errorElement.classList.add('hidden');
+                errorElement.textContent = '';
+            }
+
+            function validateNameOnCard() {
+                const value = nameOnCardInput.value.trim();
+                if (value === "") {
+                    showValidationError(nameOnCardInput, "Name on Card is required.");
+                    return false;
+                } else if (!/^[a-zA-Z\s]+$/.test(value)) {
+                    showValidationError(nameOnCardInput, "Name on Card should contain only letters and spaces.");
+                    return false;
+                }
+                hideValidationError(nameOnCardInput);
+                return true;
+            }
+
+            function validateCardNumber() {
+                let value = cardNumberInput.value.trim().replace(/\s/g, ''); // Remove spaces for validation
+                if (value === "") {
+                    showValidationError(cardNumberInput, "Card Number is required.");
+                    return false;
+                } else if (!/^\d{13,19}$/.test(value)) { // Most card numbers are between 13 and 19 digits
+                    showValidationError(cardNumberInput, "Card Number must be 13-19 digits.");
+                    return false;
+                }
+                // Basic Luhn algorithm check (optional, but good practice for real projects)
+                if (!luhnCheck(value)) {
+                    showValidationError(cardNumberInput, "Invalid Card Number.");
+                    return false;
+                }
+                hideValidationError(cardNumberInput);
+                return true;
+            }
+
+            function luhnCheck(num) {
+                let sum = 0;
+                let doubleUp = false;
+                for (let i = num.length - 1; i >= 0; i--) {
+                    let digit = parseInt(num.charAt(i), 10);
+                    if (doubleUp) {
+                        digit *= 2;
+                        if (digit > 9) {
+                            digit -= 9;
+                        }
+                    }
+                    sum += digit;
+                    doubleUp = !doubleUp;
+                }
+                return (sum % 10) == 0;
+            }
+
+            function validateCvv() {
+                const value = cvvInput.value.trim();
+                if (value === "") {
+                    showValidationError(cvvInput, "CVV is required.");
+                    return false;
+                } else if (!/^\d{3,4}$/.test(value)) { // CVV is typically 3 or 4 digits
+                    showValidationError(cvvInput, "CVV must be 3 or 4 digits.");
+                    return false;
+                }
+                hideValidationError(cvvInput);
+                return true;
+            }
+
+            function validateExpiry() {
+                const month = parseInt(expMonthSelect.value, 10);
+                const year = parseInt(expYearSelect.value, 10);
+                const currentYear = new Date().getFullYear();
+                const currentMonth = new Date().getMonth() + 1; // getMonth() is 0-indexed
+
+                let isValid = true;
+
+                if (isNaN(month) || month < 1 || month > 12) {
+                    showValidationError(expMonthSelect, "Invalid month.");
+                    isValid = false;
+                } else {
+                    hideValidationError(expMonthSelect);
+                }
+
+                if (isNaN(year) || year < currentYear || year > currentYear + 10) {
+                    showValidationError(expYearSelect, "Invalid year.");
+                    isValid = false;
+                } else {
+                    hideValidationError(expYearSelect);
+                }
+
+                if (isValid && (year < currentYear || (year === currentYear && month < currentMonth))) {
+                    showValidationError(expMonthSelect, "Card has expired.");
+                    showValidationError(expYearSelect, "Card has expired.");
+                    isValid = false;
+                } else if (isValid) {
+                    hideValidationError(expMonthSelect);
+                    hideValidationError(expYearSelect);
+                }
+                return isValid;
+            }
+
+            function validateAmountToPay() {
+                const amount = parseFloat(amountInput.value);
+                const currentDue = parseFloat(document.getElementById('dueAmountDisplay').textContent.replace(/[^0-9.]/g, ''));
+
+                if (isNaN(amount) || amount <= 0) {
+                    showValidationError(amountInput, "Please enter a valid amount greater than zero.");
+                    return false;
+                }
+                if (amount > currentDue) {
+                    showValidationError(amountInput, `Amount cannot exceed the due amount (${formatCurrency(currentDue, 'BDT')}).`);
+                    return false;
+                }
+                hideValidationError(amountInput);
+                return true;
+            }
+
+            // Add event listeners for real-time validation feedback
+            nameOnCardInput.addEventListener('input', validateNameOnCard);
+            cardNumberInput.addEventListener('input', validateCardNumber);
+            cvvInput.addEventListener('input', validateCvv);
+            expMonthSelect.addEventListener('change', validateExpiry);
+            expYearSelect.addEventListener('change', validateExpiry);
+            amountInput.addEventListener('input', validateAmountToPay);
+
         });
 
 
-        
         document.getElementById('paymentForm').addEventListener('submit', async function (event) {
-            event.preventDefault(); 
+            event.preventDefault();
 
-            const amountInput = document.getElementById('amountToPay');
-            const amountError = document.getElementById('amountError');
-            const payNowBtn = document.getElementById('payNowBtn');
+            // Re-run all validations on submit
+            let isValidForm = true;
+            isValidForm = validateNameOnCard() && isValidForm;
+            isValidForm = validateCardNumber() && isValidForm;
+            isValidForm = validateCvv() && isValidForm;
+            isValidForm = validateExpiry() && isValidForm;
+            isValidForm = validateAmountToPay() && isValidForm;
 
-            
-            amountError.classList.add('hidden');
-            amountInput.classList.remove('border-red-500', 'focus:border-red-500', 'focus:ring-red-500');
-            payNowBtn.disabled = true; 
-            payNowBtn.innerHTML = '<i data-lucide="loader" class="w-5 h-5 mr-2 inline-block animate-spin"></i> Processing...';
-            lucide.createIcons(); 
 
-            const formData = new FormData(this); 
-            const amountToPay = parseFloat(amountInput.value);
-
-            
-            if (isNaN(amountToPay) || amountToPay <= 0) {
-                amountError.textContent = "Please enter a valid amount greater than zero.";
-                amountError.classList.remove('hidden');
-                amountInput.classList.add('border-red-500', 'focus:border-red-500', 'focus:ring-red-500');
-                payNowBtn.disabled = false;
-                payNowBtn.innerHTML = '<i data-lucide="arrow-right" class="w-5 h-5 mr-2 inline-block"></i> Continue'; // Adjusted icon size
-                lucide.createIcons();
+            if (!isValidForm) {
+                showAlert('Please correct the errors in the form.', 'error');
                 return;
             }
+
+            const amountInput = document.getElementById('amountToPay');
+            const payNowBtn = document.getElementById('payNowBtn');
+
+            payNowBtn.disabled = true;
+            payNowBtn.innerHTML = '<i data-lucide="loader" class="w-5 h-5 mr-2 inline-block animate-spin"></i> Processing...';
+            lucide.createIcons();
+
+            const formData = new FormData(this);
 
             try {
                 const response = await fetch('@Url.Action("ProcessPayment", "Client")', {
@@ -375,14 +466,13 @@
 
                 if (result.success) {
                     showAlert(result.message, 'success');
-                    
+
                     document.getElementById('totalFeesDisplay').textContent = formatCurrency(result.summary.TotalFees, 'BDT');
                     document.getElementById('paidAmountDisplay').textContent = formatCurrency(result.summary.PaidAmount, 'BDT');
                     document.getElementById('dueAmountDisplay').textContent = formatCurrency(result.summary.DueAmount, 'BDT');
 
-                    
                     const transactionTableBody = document.getElementById('transactionTableBody');
-                    transactionTableBody.innerHTML = ''; 
+                    transactionTableBody.innerHTML = '';
                     if (result.transactions && result.transactions.length > 0) {
                         result.transactions.forEach(tx => {
                             const row = document.createElement('tr');
@@ -393,30 +483,28 @@
                             `;
                             transactionTableBody.appendChild(row);
                         });
-                       
-                         const noTransactionsDiv = document.querySelector('.text-center.py-8.text-gray-500');
-                         if (noTransactionsDiv && noTransactionsDiv.closest('table') === null) { 
-                            noTransactionsDiv.remove();
-                         }
+
+                        // Remove the "No transactions recorded yet" div if it exists and transactions are added
+                        const noTransactionsDivWrapper = document.querySelector('.text-center.py-8.text-gray-500');
+                        if (noTransactionsDivWrapper) {
+                            noTransactionsDivWrapper.closest('div.text-center.py-8.text-gray-500').remove(); // Remove the entire div
+                        }
+
+
                     } else {
-                        
-                        if (!document.querySelector('.text-center.py-8.text-gray-500')) { 
-                             const emptyStateRow = document.createElement('tr');
-                             emptyStateRow.innerHTML = `
-                                <td colspan="3">
-                                    <div class="text-center py-8 text-gray-500">
-                                        <i data-lucide="piggy-bank" class="w-14 h-14 mx-auto mb-3 text-gray-300"></i>
-                                        <p class="text-md font-medium">No transactions recorded yet.</p>
-                                    </div>
-                                </td>
-                            `;
-                            transactionTableBody.appendChild(emptyStateRow);
-                            lucide.createIcons(); 
+                        // Re-add the "No transactions recorded yet" div if there are no transactions
+                        if (!document.querySelector('.text-center.py-8.text-gray-500')) {
+                               const emptyStateDiv = document.createElement('div');
+                               emptyStateDiv.className = "text-center py-8 text-gray-500";
+                               emptyStateDiv.innerHTML = `
+                                    <i data-lucide="piggy-bank" class="w-14 h-14 mx-auto mb-3 text-gray-300"></i>
+                                    <p class="text-md font-medium">No transactions recorded yet.</p>
+                                `;
+                               transactionTableBody.closest('.overflow-x-auto').insertAdjacentElement('afterend', emptyStateDiv);
+                               lucide.createIcons();
                         }
                     }
 
-
-                    
                     const updatedDueAmount = parseFloat(document.getElementById('dueAmountDisplay').textContent.replace(/[^0-9.]/g, ''));
                     if (updatedDueAmount <= 0) {
                         amountInput.value = 0;
@@ -436,6 +524,9 @@
                 } else {
                     showAlert(result.message, 'error');
                     if (result.errors) {
+                        // This part is for server-side errors, still useful to keep
+                        // You can enhance this to map server errors to specific fields if needed
+                        const amountError = document.getElementById('amountToPayError');
                         amountError.textContent = result.errors.join(', ');
                         amountError.classList.remove('hidden');
                         amountInput.classList.add('border-red-500', 'focus:border-red-500', 'focus:ring-red-500');
@@ -445,24 +536,23 @@
                 console.error('Fetch error:', error);
                 showAlert('An unexpected error occurred. Please try again.', 'error');
             } finally {
-                
+
                 const finalDueAmount = parseFloat(document.getElementById('dueAmountDisplay').textContent.replace(/[^0-9.]/g, ''));
                 if (finalDueAmount <= 0) {
-                     payNowBtn.innerHTML = 'No Amount Due';
-                     payNowBtn.disabled = true;
-                     amountInput.disabled = true;
-                     payNowBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                    payNowBtn.innerHTML = 'No Amount Due';
+                    payNowBtn.disabled = true;
+                    amountInput.disabled = true;
+                    payNowBtn.classList.add('opacity-50', 'cursor-not-allowed');
                 } else {
-                     payNowBtn.innerHTML = '<i data-lucide="arrow-right" class="w-5 h-5 mr-2 inline-block"></i> Continue';
-                     payNowBtn.disabled = false;
-                     amountInput.disabled = false;
-                     payNowBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    payNowBtn.innerHTML = '<i data-lucide="arrow-right" class="w-5 h-5 mr-2 inline-block"></i> Continue';
+                    payNowBtn.disabled = false;
+                    amountInput.disabled = false;
+                    payNowBtn.classList.remove('opacity-50', 'cursor-not-allowed');
                 }
                 lucide.createIcons();
             }
         });
 
-        // --- PDF Generation ---
         document.getElementById('generatePdfBtn').addEventListener('click', function () {
             const printWindow = window.open('@Url.Action("GenerateTransactionPdf", "Client")', '_blank');
             if (printWindow) {
@@ -472,8 +562,7 @@
             }
         });
 
-        // --- Utility Functions ---
-        function formatCurrency(amount, currencyCode = 'BDT') { 
+        function formatCurrency(amount, currencyCode = 'BDT') {
             return new Intl.NumberFormat('en-BD', { style: 'currency', currency: currencyCode }).format(amount);
         }
 
@@ -487,26 +576,25 @@
         }
     </script>
     <style>
-       
         .custom-scrollbar::-webkit-scrollbar {
             width: 8px;
         }
 
         .custom-scrollbar::-webkit-scrollbar-track {
-            background: #f0f4f8; 
+            background: #f0f4f8;
             border-radius: 10px;
         }
 
         .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #a7b7cd; 
+            background: #a7b7cd;
             border-radius: 10px;
         }
 
             .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-                background: #8096b7; 
+                background: #8096b7;
             }
 
-        
+
         @@keyframes fade-in-down {
             from {
                 opacity: 0;

@@ -19,8 +19,6 @@
 
 <main class="p-6 overflow-y-auto flex-1 bg-gray-50">
 
-    <h1 class="text-2xl font-bold text-gray-800 mb-6">Client Dashboard</h1>
-
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
 
         <div class="@cardClass h-fit">
@@ -134,9 +132,20 @@
             <i data-lucide="donut" class="w-5 h-5 mr-2 text-teal-500"></i>
             Overall Document Status Breakdown
         </h2>
-        <div style="width: 100%; max-width: 800px; margin: auto; height: 400px;">
-            <canvas id="statusChart" class="mt-4"></canvas>
-        </div>
+        @if (Model.StatusSummary == null || !Model.StatusSummary.Any())
+        {
+            <div class="flex flex-col items-center justify-center py-10 text-gray-500">
+                <i data-lucide="info" class="w-12 h-12 mb-4 text-gray-400"></i>
+                <p class="text-lg font-medium">No document status data available yet.</p>
+                <p class="text-sm mt-2">Upload documents to see their status breakdown here.</p>
+            </div>
+        }
+        else
+        {
+            <div style="width: 100%; max-width: 800px; margin: auto; height: 400px;">
+                <canvas id="statusChart" class="mt-4"></canvas>
+            </div>
+        }
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -164,73 +173,99 @@
     </div>
 </main>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-    lucide.createIcons();
+@section scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lucide@latest"></script> 
+            <script>
+                lucide.createIcons(); // Initialize Lucide icons on page load
 
-    document.addEventListener('DOMContentLoaded', function () {
-        const ctx = document.getElementById('statusChart').getContext('2d');
-        const statusData = @Html.Raw(Json.Encode(Model.StatusSummary));
+                document.addEventListener('DOMContentLoaded', function () {
+                    const statusData = @Html.Raw(Json.Encode(Model.StatusSummary));
 
-        const labels = statusData.map(s => s.Status);
-        const dataCounts = statusData.map(s => s.Count);
-        const backgroundColors = statusData.map(s => s.Color);
+                    if (statusData && statusData.length > 0) {
+                        const ctx = document.getElementById('statusChart').getContext('2d');
 
-        const chart = new Chart(ctx, {
-            type: 'pie',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Number of Documents',
-                    data: dataCounts,
-                    backgroundColor: backgroundColors,
-                    borderColor: '#ffffff',
-                    borderWidth: 2
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                animation: {
-                    animateScale: true,
-                    animateRotate: true
-                },
-                cutout: '70%',
-                plugins: {
-                    title: {
-                        display: true,
-                        text: 'Overall Document Status Breakdown',
-                        font: {
-                            size: 16
-                        }
-                    },
-                    legend: {
-                        display: true,
-                        position: 'right',
-                        labels: {
-                            usePointStyle: true,
-                            font: {
-                                size: 12
-                            }
-                        }
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                let label = context.label || '';
-                                if (label) {
-                                    label += ': ';
+                        const labels = statusData.map(s => s.Status);
+                        const dataCounts = statusData.map(s => s.Count);
+
+                        // Default colors for the pie chart.
+                        // You can expand this array or generate colors dynamically if you have many statuses.
+                        // If your Model.StatusSummary already provides colors (s.Color), those will be used first.
+                        const defaultColors = [
+                            '#4dc9f6', // blue
+                            '#f67019', // orange
+                            '#f53794', // pink
+                            '#537bc4', // dark blue
+                            '#acc236', // lime green
+                            '#166a8f', // steel blue
+                            '#00a950', // green
+                            '#58595b', // dark gray
+                            '#8549ba', // purple
+                            '#FFC107', // amber (new color)
+                            '#795548'  // brown (new color)
+                        ];
+                        // Use the color from the model if available, otherwise use a default color
+                        const backgroundColors = statusData.map((s, index) => s.Color || defaultColors[index % defaultColors.length]);
+
+                        const chart = new Chart(ctx, {
+                            type: 'pie',
+                            data: {
+                                labels: labels,
+                                datasets: [{
+                                    label: 'Number of Documents',
+                                    data: dataCounts,
+                                    backgroundColor: backgroundColors,
+                                    borderColor: '#ffffff',
+                                    borderWidth: 2
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                animation: {
+                                    animateScale: true,
+                                    animateRotate: true
+                                },
+                                cutout: '70%',
+                                plugins: {
+                                    title: {
+                                        display: true,
+                                        text: 'Overall Document Status Breakdown',
+                                        font: {
+                                            size: 16
+                                        }
+                                    },
+                                    legend: {
+                                        display: true,
+                                        position: 'right',
+                                        labels: {
+                                            usePointStyle: true,
+                                            font: {
+                                                size: 12
+                                            }
+                                        }
+                                    },
+                                    tooltip: {
+                                        callbacks: {
+                                            label: function(context) {
+                                                let label = context.label || '';
+                                                if (label) {
+                                                    label += ': ';
+                                                }
+                                                const total = context.dataset.data.reduce((acc, current) => acc + current, 0);
+                                                const value = context.parsed;
+                                                const percentage = ((value / total) * 100).toFixed(1) + '%';
+                                                label += value + ' (' + percentage + ')';
+                                                return label;
+                                            }
+                                        }
+                                    }
                                 }
-                                const total = context.dataset.data.reduce((acc, current) => acc + current, 0);
-                                const value = context.parsed;
-                                const percentage = ((value / total) * 100).toFixed(1) + '%';
-                                label += value + ' (' + percentage + ')';
-                                return label;
                             }
-                        }
+                        });
+                    } else {
+                        console.log("No status data available for the chart. The placeholder message is displayed.");
                     }
-                }
-            }
-        });
-    });
-</script>
+                });
+            </script>
+        }
