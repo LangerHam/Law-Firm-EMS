@@ -39,6 +39,7 @@
         @Html.ValidationSummary(true, "", new { @class = "text-red-600 bg-red-50 p-3 rounded-md mb-6" })
 
 
+
         <!-- Main Details Grid -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
 
@@ -72,7 +73,6 @@
                     @Html.EditorFor(model => model.Phone, new { htmlAttributes = new { @class = "mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-sky-500 focus:border-sky-500" } })
                     @Html.ValidationMessageFor(model => model.Phone, "", new { @class = "text-red-600 text-xs mt-1" })
                 </div>
-                <!-- Add Upload Profile later -->
             </div>
         </div>
 
@@ -86,25 +86,23 @@
 </div>
 
 <!-- Delete Confirmation Modal -->
-<div id="delete-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 backdrop-blur-sm flex items-center justify-center hidden z-50 transition-opacity duration-300">
-    <div class="bg-white p-8 rounded-lg shadow-xl max-w-md w-full transform transition-all duration-300 scale-95">
+<div id="delete-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 backdrop-blur-sm flex items-center justify-center hidden z-50">
+    <div class="bg-white p-8 rounded-lg shadow-xl max-w-md w-full">
         <div class="text-center">
             <i data-lucide="alert-triangle" class="h-16 w-16 text-red-500 mx-auto mb-4"></i>
             <h2 class="text-2xl font-bold text-gray-800 mb-2">Are you sure?</h2>
             <p class="text-gray-600 mb-6">
-                You are about to permanently delete the consultant <strong id="consultant-name-in-modal" class="text-gray-800"></strong>. This action cannot be undone.
+                You are about to permanently delete consultant <strong id="consultant-name-in-modal" class="text-gray-800"></strong>. This action cannot be undone.
             </p>
         </div>
-
-        <form id="delete-form" method="post">
+        @using (Html.BeginForm(null, null, FormMethod.Post, new { id = "delete-form" }))
+        {
             @Html.AntiForgeryToken()
             <div class="flex items-center justify-center space-x-4 pt-4">
-                <button type="button" onclick="closeDeleteModal()" class="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-300 transition-colors">
-                    Cancel
-                </button>
-                <input type="submit" value="Yes, Delete Consultant" class="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition-colors cursor-pointer" />
+                <button type="button" onclick="closeDeleteModal()" class="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-300">Cancel</button>
+                <input type="submit" value="Yes, Delete" class="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 cursor-pointer" />
             </div>
-        </form>
+        }
     </div>
 </div>
 
@@ -112,7 +110,6 @@
 @section scripts {
     <script>
     const modal = document.getElementById('delete-modal');
-    const modalContent = modal.querySelector('div');
     const deleteForm = document.getElementById('delete-form');
     const consultantNameSpan = document.getElementById('consultant-name-in-modal');
 
@@ -121,27 +118,11 @@
         deleteForm.action = deleteUrl;
 
         consultantNameSpan.textContent = name;
-
         modal.classList.remove('hidden');
-        setTimeout(() => {
-            modal.classList.add('opacity-100');
-            modalContent.classList.remove('scale-95');
-            modalContent.classList.add('scale-100');
-        }, 10);
     }
 
     function closeDeleteModal() {
-        modal.classList.remove('opacity-100');
-        modalContent.classList.add('scale-95');
-        setTimeout(() => {
-            modal.classList.add('hidden');
-        }, 300);
+        modal.classList.add('hidden');
     }
-
-    modal.addEventListener('click', function(event) {
-        if (event.target === modal) {
-            closeDeleteModal();
-        }
-    });
     </script>
 }

@@ -1,6 +1,5 @@
 ﻿using Law_Firm_EMS.Context;
 using Law_Firm_EMS.Models;
-using Law_Firm_EMS.Models.DTO;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;

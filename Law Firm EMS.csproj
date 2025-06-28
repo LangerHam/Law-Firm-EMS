@@ -188,7 +188,6 @@
     <Compile Include="Models\Consultant.cs" />
     <Compile Include="Models\Document.cs" />
     <Compile Include="Models\DocumentType.cs" />
-    <Compile Include="Models\DTO\ConsultantDTO.cs" />
     <Compile Include="Models\Evaluation.cs" />
     <Compile Include="Models\Form.cs" />
     <Compile Include="Models\FormType.cs" />
