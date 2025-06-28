@@ -177,7 +177,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/lucide@latest"></script> 
             <script>
-                lucide.createIcons(); // Initialize Lucide icons on page load
+                lucide.createIcons(); 
 
                 document.addEventListener('DOMContentLoaded', function () {
                     const statusData = @Html.Raw(Json.Encode(Model.StatusSummary));
@@ -188,23 +188,16 @@
                         const labels = statusData.map(s => s.Status);
                         const dataCounts = statusData.map(s => s.Count);
 
-                        // Default colors for the pie chart.
-                        // You can expand this array or generate colors dynamically if you have many statuses.
-                        // If your Model.StatusSummary already provides colors (s.Color), those will be used first.
                         const defaultColors = [
-                            '#4dc9f6', // blue
-                            '#f67019', // orange
-                            '#f53794', // pink
-                            '#537bc4', // dark blue
-                            '#acc236', // lime green
-                            '#166a8f', // steel blue
-                            '#00a950', // green
-                            '#58595b', // dark gray
-                            '#8549ba', // purple
-                            '#FFC107', // amber (new color)
-                            '#795548'  // brown (new color)
+                            '#fee2e2', 
+                            '#dcfce7',
+                            '#b91c1c', 
+                            '#ffedd5', 
+                            '#dbeafe', 
+                            '#fef9c3', 
+
                         ];
-                        // Use the color from the model if available, otherwise use a default color
+
                         const backgroundColors = statusData.map((s, index) => s.Color || defaultColors[index % defaultColors.length]);
 
                         const chart = new Chart(ctx, {
