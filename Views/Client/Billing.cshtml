@@ -7,16 +7,6 @@
     var cardClass = "bg-white p-6 rounded-xl shadow-md border border-gray-200";
 }
 
-<div class="bg-white shadow-sm flex justify-between items-center px-6 py-4">
-    <div class="text-base text-gray-700">
-        
-    </div>
-    <div class="flex items-center">
-        <i data-lucide="scale" class="h-6 w-6 text-sky-400"></i>
-        <span class="ml-2 text-lg font-semibold">NIW Solutions</span>
-    </div>
-</div>
-
 <main class="p-6 overflow-y-auto flex-1 bg-gray-50">
 
     <h1 class="text-2xl font-bold text-gray-800 mb-4">Billing & Payments</h1>
@@ -91,7 +81,7 @@
                                 <div>
                                     <label for="nameOnCard" class="block text-sm font-medium text-gray-700 mb-1">Name on Card</label>
                                     <input type="text" id="nameOnCard" name="NameOnCard"
-                                           class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="Samiha Rahman">
+                                           class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="Samira Rahman">
                                     <p id="nameOnCardError" class="mt-1 text-sm text-red-600 hidden"></p>
                                 </div>
                                 <div>
@@ -172,8 +162,8 @@
             <i data-lucide="history" class="w-5 h-5 mr-2 text-teal-600"></i>
             Transaction History
             <button id="generatePdfBtn" class="ml-auto bg-gray-200 text-gray-700 py-2 px-5 rounded-lg text-sm font-semibold
-                                                hover:bg-gray-300 transition-colors duration-200 ease-in-out
-                                                focus:outline-none focus:ring-2 focus:ring-gray-400">
+                                    hover:bg-gray-300 transition-colors duration-200 ease-in-out
+                                    focus:outline-none focus:ring-2 focus:ring-gray-400">
                 <i data-lucide="file-text" class="w-4 h-4 mr-1 inline-block"></i> Generate PDF
             </button>
         </h2>
@@ -215,8 +205,10 @@
 @section scripts {
     <script src="https://unpkg.com/lucide@latest"></script>
     <script>
+       
         lucide.createIcons();
 
+        
         function showAlert(message, type = 'success') {
             const alertContainer = document.getElementById('alertContainer');
             const bgColor = type === 'success' ? 'bg-green-50' : 'bg-red-50';
@@ -230,250 +222,303 @@
                 <i data-lucide="${icon}" class="w-6 h-6 mr-3 ${type === 'success' ? 'text-green-500' : 'text-red-500'}"></i>
                 <p class="font-semibold">${message}</p>
             `;
-            alertContainer.prepend(alertDiv);
+            alertContainer.prepend(alertDiv); 
 
             lucide.createIcons();
 
+           
             setTimeout(() => {
                 alertDiv.remove();
             }, 5000);
         }
 
         document.addEventListener('DOMContentLoaded', function () {
+            console.log('DOM Content Loaded - Initializing script.');
+
+           
             const tabs = document.querySelectorAll('.payment-tab');
             const tabContents = document.querySelectorAll('.payment-tab-content');
+            const amountInput = document.getElementById('amountToPay');
+            const payNowBtn = document.getElementById('payNowBtn');
 
+           
             function activateTab(tabId) {
                 tabs.forEach(tab => {
                     if (tab.dataset.tab === tabId) {
-                        tab.setAttribute('data-state', 'active');
+                        tab.setAttribute('data-state', 'active'); 
                     } else {
-                        tab.removeAttribute('data-state');
+                        tab.removeAttribute('data-state'); 
                     }
                 });
 
                 tabContents.forEach(content => {
                     if (content.id === `${tabId}Tab`) {
-                        content.classList.remove('hidden');
+                        content.classList.remove('hidden'); 
                     } else {
-                        content.classList.add('hidden');
+                        content.classList.add('hidden'); 
                     }
                 });
 
                 lucide.createIcons();
             }
 
+           
             tabs.forEach(tab => {
                 tab.addEventListener('click', () => {
                     activateTab(tab.dataset.tab);
                 });
             });
 
-            activateTab('creditCard');
+            activateTab('creditCard'); 
 
-            const amountInput = document.getElementById('amountToPay');
-            const payNowBtn = document.getElementById('payNowBtn');
-            const dueAmount = parseFloat(document.getElementById('dueAmountDisplay').textContent.replace(/[^[^0-9.]/g, '')); // Adjusted regex
-
-            if (dueAmount <= 0) {
-                amountInput.value = 0;
-                amountInput.disabled = true;
-                payNowBtn.disabled = true;
-                payNowBtn.innerHTML = 'No Amount Due';
-                payNowBtn.classList.add('opacity-50', 'cursor-not-allowed');
-            } else {
-                amountInput.value = dueAmount;
-            }
-
-            // --- Client-side Validation Setup ---
-            const nameOnCardInput = document.getElementById('nameOnCard');
-            const cardNumberInput = document.getElementById('cardNumber');
-            const cvvInput = document.getElementById('cvv');
-            const expMonthSelect = document.getElementById('expMonth');
-            const expYearSelect = document.getElementById('expYear');
-
-            function showValidationError(element, message) {
-                const errorElement = document.getElementById(element.id + 'Error');
-                element.classList.add('border-red-500', 'focus:border-red-500', 'focus:ring-red-500');
-                errorElement.textContent = message;
-                errorElement.classList.remove('hidden');
-            }
-
-            function hideValidationError(element) {
-                const errorElement = document.getElementById(element.id + 'Error');
-                element.classList.remove('border-red-500', 'focus:border-red-500', 'focus:ring-red-500');
-                errorElement.classList.add('hidden');
-                errorElement.textContent = '';
-            }
-
-            function validateNameOnCard() {
-                const value = nameOnCardInput.value.trim();
-                if (value === "") {
-                    showValidationError(nameOnCardInput, "Name on Card is required.");
-                    return false;
-                } else if (!/^[a-zA-Z\s]+$/.test(value)) {
-                    showValidationError(nameOnCardInput, "Name on Card should contain only letters and spaces.");
-                    return false;
-                }
-                hideValidationError(nameOnCardInput);
-                return true;
-            }
-
-            function validateCardNumber() {
-                let value = cardNumberInput.value.trim().replace(/\s/g, ''); // Remove spaces for validation
-                if (value === "") {
-                    showValidationError(cardNumberInput, "Card Number is required.");
-                    return false;
-                } else if (!/^\d{13,19}$/.test(value)) { // Most card numbers are between 13 and 19 digits
-                    showValidationError(cardNumberInput, "Card Number must be 13-19 digits.");
-                    return false;
-                }
-                // Basic Luhn algorithm check (optional, but good practice for real projects)
-                if (!luhnCheck(value)) {
-                    showValidationError(cardNumberInput, "Invalid Card Number.");
-                    return false;
-                }
-                hideValidationError(cardNumberInput);
-                return true;
-            }
-
-            function luhnCheck(num) {
-                let sum = 0;
-                let doubleUp = false;
-                for (let i = num.length - 1; i >= 0; i--) {
-                    let digit = parseInt(num.charAt(i), 10);
-                    if (doubleUp) {
-                        digit *= 2;
-                        if (digit > 9) {
-                            digit -= 9;
-                        }
+           
+            function parseCurrencyToFloat(currencyString) {
+                let cleanedString = '';
+                for (let i = 0; i < currencyString.length; i++) {
+                    const char = currencyString.charAt(i);
+                    // Keep only digits ('0'-'9') and the decimal point ('.')
+                    if ((char >= '0' && char <= '9') || char === '.') {
+                        cleanedString += char;
                     }
-                    sum += digit;
-                    doubleUp = !doubleUp;
                 }
-                return (sum % 10) == 0;
+                return parseFloat(cleanedString);
             }
 
-            function validateCvv() {
-                const value = cvvInput.value.trim();
-                if (value === "") {
-                    showValidationError(cvvInput, "CVV is required.");
-                    return false;
-                } else if (!/^\d{3,4}$/.test(value)) { // CVV is typically 3 or 4 digits
-                    showValidationError(cvvInput, "CVV must be 3 or 4 digits.");
-                    return false;
-                }
-                hideValidationError(cvvInput);
-                return true;
+            const dueAmountString = document.getElementById('dueAmountDisplay').textContent;
+            const dueAmount = parseCurrencyToFloat(dueAmountString);
+            console.log('Initial Due Amount:', dueAmount);
+
+           
+            if (dueAmount <= 0) {
+                amountInput.value = 0; 
+                amountInput.disabled = true; 
+                payNowBtn.disabled = true; 
+                payNowBtn.innerHTML = 'No Amount Due'; 
+                payNowBtn.classList.add('opacity-50', 'cursor-not-allowed'); 
+                console.log('Payment button disabled: No Amount Due.');
+            } else {
+                amountInput.value = dueAmount; 
+                payNowBtn.disabled = false; 
+                payNowBtn.innerHTML = '<i data-lucide="arrow-right" class="w-5 h-5 mr-2 inline-block"></i> Continue';
+                payNowBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                lucide.createIcons();
+                console.log('Payment button enabled: Amount Due.');
             }
-
-            function validateExpiry() {
-                const month = parseInt(expMonthSelect.value, 10);
-                const year = parseInt(expYearSelect.value, 10);
-                const currentYear = new Date().getFullYear();
-                const currentMonth = new Date().getMonth() + 1; // getMonth() is 0-indexed
-
-                let isValid = true;
-
-                if (isNaN(month) || month < 1 || month > 12) {
-                    showValidationError(expMonthSelect, "Invalid month.");
-                    isValid = false;
-                } else {
-                    hideValidationError(expMonthSelect);
-                }
-
-                if (isNaN(year) || year < currentYear || year > currentYear + 10) {
-                    showValidationError(expYearSelect, "Invalid year.");
-                    isValid = false;
-                } else {
-                    hideValidationError(expYearSelect);
-                }
-
-                if (isValid && (year < currentYear || (year === currentYear && month < currentMonth))) {
-                    showValidationError(expMonthSelect, "Card has expired.");
-                    showValidationError(expYearSelect, "Card has expired.");
-                    isValid = false;
-                } else if (isValid) {
-                    hideValidationError(expMonthSelect);
-                    hideValidationError(expYearSelect);
-                }
-                return isValid;
-            }
-
-            function validateAmountToPay() {
-                const amount = parseFloat(amountInput.value);
-                const currentDue = parseFloat(document.getElementById('dueAmountDisplay').textContent.replace(/[^0-9.]/g, ''));
-
-                if (isNaN(amount) || amount <= 0) {
-                    showValidationError(amountInput, "Please enter a valid amount greater than zero.");
-                    return false;
-                }
-                if (amount > currentDue) {
-                    showValidationError(amountInput, `Amount cannot exceed the due amount (${formatCurrency(currentDue, 'BDT')}).`);
-                    return false;
-                }
-                hideValidationError(amountInput);
-                return true;
-            }
-
-            // Add event listeners for real-time validation feedback
-            nameOnCardInput.addEventListener('input', validateNameOnCard);
-            cardNumberInput.addEventListener('input', validateCardNumber);
-            cvvInput.addEventListener('input', validateCvv);
-            expMonthSelect.addEventListener('change', validateExpiry);
-            expYearSelect.addEventListener('change', validateExpiry);
-            amountInput.addEventListener('input', validateAmountToPay);
-
         });
 
-
-        document.getElementById('paymentForm').addEventListener('submit', async function (event) {
-            event.preventDefault();
-
-            // Re-run all validations on submit
-            let isValidForm = true;
-            isValidForm = validateNameOnCard() && isValidForm;
-            isValidForm = validateCardNumber() && isValidForm;
-            isValidForm = validateCvv() && isValidForm;
-            isValidForm = validateExpiry() && isValidForm;
-            isValidForm = validateAmountToPay() && isValidForm;
+      
+        const nameOnCardInput = document.getElementById('nameOnCard');
+        const cardNumberInput = document.getElementById('cardNumber');
+        const cvvInput = document.getElementById('cvv');
+        const expMonthSelect = document.getElementById('expMonth');
+        const expYearSelect = document.getElementById('expYear');
+        const amountToPayInput = document.getElementById('amountToPay'); 
+        const amountToPayError = document.getElementById('amountToPayError'); 
 
 
-            if (!isValidForm) {
-                showAlert('Please correct the errors in the form.', 'error');
-                return;
+        
+        function showValidationError(element, message) {
+           
+            let errorElementId = element.id + 'Error';
+            if (element.id === 'amountToPay') { 
+                errorElementId = 'amountToPayError';
+            }
+            const targetErrorElement = document.getElementById(errorElementId);
+
+            element.classList.add('border-red-500', 'focus:border-red-500', 'focus:ring-red-500'); 
+            if (targetErrorElement) {
+                targetErrorElement.textContent = message; 
+                targetErrorElement.classList.remove('hidden'); 
+            }
+            console.log(`Validation Error for ${element.id}: ${message}`); 
+        }
+
+        
+        function hideValidationError(element) {
+            let errorElementId = element.id + 'Error';
+            if (element.id === 'amountToPay') { 
+                errorElementId = 'amountToPayError';
+            }
+            const targetErrorElement = document.getElementById(errorElementId);
+
+            element.classList.remove('border-red-500', 'focus:border-red-500', 'focus:ring-red-500'); 
+            if (targetErrorElement) { 
+                targetErrorElement.classList.add('hidden'); 
+                targetErrorElement.textContent = '';
+            }
+        }
+
+        
+        function clearAllValidationErrors() {
+            hideValidationError(nameOnCardInput);
+            hideValidationError(cardNumberInput);
+            hideValidationError(cvvInput);
+            hideValidationError(expMonthSelect);
+            hideValidationError(expYearSelect);
+            hideValidationError(amountToPayInput); 
+        }
+
+       
+        function validateNameOnCard() {
+            const value = nameOnCardInput.value.trim();
+            if (value === "") {
+                showValidationError(nameOnCardInput, "Name on Card is required.");
+                return false;
+            }
+            hideValidationError(nameOnCardInput);
+            return true;
+        }
+
+       
+        function validateCardNumber() {
+            const value = cardNumberInput.value.trim();
+            if (value === "") {
+                showValidationError(cardNumberInput, "Card Number is required.");
+                return false;
+            }
+            hideValidationError(cardNumberInput);
+            return true;
+        }
+
+        
+        function validateCvv() {
+            const value = cvvInput.value.trim();
+            if (value === "") {
+                showValidationError(cvvInput, "CVV is required.");
+                return false;
+            }
+            hideValidationError(cvvInput);
+            return true;
+        }
+
+        
+        function validateExpiry() {
+            const monthValue = expMonthSelect.value;
+            const yearValue = expYearSelect.value;
+            let isValid = true;
+
+            if (monthValue === "") {
+                showValidationError(expMonthSelect, "Please select an expiry month.");
+                isValid = false;
+            } else {
+                hideValidationError(expMonthSelect);
             }
 
+            if (yearValue === "") {
+                showValidationError(expYearSelect, "Please select an expiry year.");
+                isValid = false;
+            } else {
+                hideValidationError(expYearSelect);
+            }
+            return isValid;
+        }
+
+        
+        function parseCurrencyToFloat(currencyString) {
+            let cleanedString = '';
+            for (let i = 0; i < currencyString.length; i++) {
+                const char = currencyString.charAt(i);
+                if ((char >= '0' && char <= '9') || char === '.') {
+                    cleanedString += char;
+                }
+            }
+            return parseFloat(cleanedString);
+        }
+
+        
+        function validateAmountToPay() {
+            const amount = parseFloat(amountToPayInput.value); 
+            const currentDueString = document.getElementById('dueAmountDisplay').textContent;
+            const currentDue = parseCurrencyToFloat(currentDueString);
+            let isValid = true;
+
+            if (isNaN(amount) || amount <= 0) {
+                showValidationError(amountToPayInput, "Please enter a valid amount greater than zero.");
+                isValid = false;
+            } else if (amount > currentDue) {
+                showValidationError(amountToPayInput, `Amount cannot exceed the due amount (${formatCurrency(currentDue, 'BDT')}).`);
+                isValid = false;
+            } else {
+                hideValidationError(amountToPayInput);
+            }
+            return isValid;
+        }
+
+
+       
+        document.getElementById('paymentForm').addEventListener('submit', async function (event) {
+            event.preventDefault(); 
+          
+
+            
+            clearAllValidationErrors();
+           
+
+           
+            let isValidForm = true;
+
+            if (!validateNameOnCard()) isValidForm = false;
+            if (!validateCardNumber()) isValidForm = false;
+            if (!validateCvv()) isValidForm = false;
+            if (!validateExpiry()) isValidForm = false;
+            if (!validateAmountToPay()) isValidForm = false;
+
+            console.log('Overall form validation result:', isValidForm); 
+
+            if (!isValidForm) {
+                showAlert('Please correct the errors in the form before proceeding.', 'error');
+               
+                const amountInput = document.getElementById('amountToPay');
+                const payNowBtn = document.getElementById('payNowBtn');
+                payNowBtn.disabled = false;
+                payNowBtn.innerHTML = '<i data-lucide="arrow-right" class="w-5 h-5 mr-2 inline-block"></i> Continue';
+                payNowBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                lucide.createIcons();
+                console.log('Form validation failed, button re-enabled.');
+                return; 
+            }
+
+           
             const amountInput = document.getElementById('amountToPay');
             const payNowBtn = document.getElementById('payNowBtn');
 
-            payNowBtn.disabled = true;
+            payNowBtn.disabled = true; 
             payNowBtn.innerHTML = '<i data-lucide="loader" class="w-5 h-5 mr-2 inline-block animate-spin"></i> Processing...';
             lucide.createIcons();
+            console.log('Payment button set to processing state.');
 
-            const formData = new FormData(this);
+            const formData = new FormData(this); 
 
             try {
+                console.log('Sending payment request to server...'); 
                 const response = await fetch('@Url.Action("ProcessPayment", "Client")', {
                     method: 'POST',
                     headers: {
+                        
                         'RequestVerificationToken': formData.get('__RequestVerificationToken')
                     },
-                    body: formData
+                    body: formData 
                 });
 
-                const result = await response.json();
+                const result = await response.json(); 
+                console.log('Server response received:', result); 
 
-                if (result.success) {
-                    showAlert(result.message, 'success');
+                if (response.ok && result.success) { 
+                    showAlert(result.message, 'success'); 
+                    console.log('Payment successful. Updating UI.');
 
+                   
                     document.getElementById('totalFeesDisplay').textContent = formatCurrency(result.summary.TotalFees, 'BDT');
                     document.getElementById('paidAmountDisplay').textContent = formatCurrency(result.summary.PaidAmount, 'BDT');
                     document.getElementById('dueAmountDisplay').textContent = formatCurrency(result.summary.DueAmount, 'BDT');
 
+                   
                     const transactionTableBody = document.getElementById('transactionTableBody');
-                    transactionTableBody.innerHTML = '';
+                    const overflowDiv = document.querySelector('.overflow-x-auto.border.border-gray-200.rounded-lg');
+                    const existingNoTransactionsDiv = document.querySelector('.text-center.py-8.text-gray-500');
+
                     if (result.transactions && result.transactions.length > 0) {
+                        transactionTableBody.innerHTML = ''; 
                         result.transactions.forEach(tx => {
                             const row = document.createElement('tr');
                             row.innerHTML = `
@@ -481,120 +526,127 @@
                                 <td class="px-4 py-3 whitespace-nowrap text-base text-green-600 font-semibold">${formatCurrency(tx.Amount, 'BDT')}</td>
                                 <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">${formatDate(tx.PaymentDate)}</td>
                             `;
-                            transactionTableBody.appendChild(row);
+                            transactionTableBody.appendChild(row); 
                         });
 
-                        // Remove the "No transactions recorded yet" div if it exists and transactions are added
-                        const noTransactionsDivWrapper = document.querySelector('.text-center.py-8.text-gray-500');
-                        if (noTransactionsDivWrapper) {
-                            noTransactionsDivWrapper.closest('div.text-center.py-8.text-gray-500').remove(); // Remove the entire div
+                        
+                        if (overflowDiv) {
+                            overflowDiv.style.display = 'block';
                         }
-
-
+                        if (existingNoTransactionsDiv) {
+                            existingNoTransactionsDiv.remove();
+                        }
+                        console.log('Transaction history updated.');
                     } else {
-                        // Re-add the "No transactions recorded yet" div if there are no transactions
-                        if (!document.querySelector('.text-center.py-8.text-gray-500')) {
-                               const emptyStateDiv = document.createElement('div');
-                               emptyStateDiv.className = "text-center py-8 text-gray-500";
-                               emptyStateDiv.innerHTML = `
-                                    <i data-lucide="piggy-bank" class="w-14 h-14 mx-auto mb-3 text-gray-300"></i>
-                                    <p class="text-md font-medium">No transactions recorded yet.</p>
-                                `;
-                               transactionTableBody.closest('.overflow-x-auto').insertAdjacentElement('afterend', emptyStateDiv);
-                               lucide.createIcons();
+                        
+                         if (overflowDiv) {
+                            overflowDiv.style.display = 'none'; 
+                         }
+                         if (!existingNoTransactionsDiv) { 
+                            const historyCard = document.querySelector('.cardClass:last-of-type');
+                            const emptyStateDiv = document.createElement('div');
+                            emptyStateDiv.className = "text-center py-8 text-gray-500";
+                            emptyStateDiv.innerHTML = `
+                                <i data-lucide="piggy-bank" class="w-14 h-14 mx-auto mb-3 text-gray-300"></i>
+                                <p class="text-md font-medium">No transactions recorded yet.</p>
+                            `;
+                            if(historyCard) {
+                                historyCard.appendChild(emptyStateDiv);
+                            }
+                            lucide.createIcons();
+                            console.log('No transactions: displayed empty state message.');
                         }
                     }
-
-                    const updatedDueAmount = parseFloat(document.getElementById('dueAmountDisplay').textContent.replace(/[^0-9.]/g, ''));
-                    if (updatedDueAmount <= 0) {
-                        amountInput.value = 0;
-                        amountInput.disabled = true;
-                        payNowBtn.disabled = true;
-                        payNowBtn.innerHTML = 'No Amount Due';
-                        payNowBtn.classList.add('opacity-50', 'cursor-not-allowed');
-                    } else {
-                        amountInput.value = updatedDueAmount;
-                        amountInput.disabled = false;
-                        payNowBtn.disabled = false;
-                        payNowBtn.innerHTML = '<i data-lucide="arrow-right" class="w-5 h-5 mr-2 inline-block"></i> Continue';
-                        payNowBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-                    }
-
 
                 } else {
-                    showAlert(result.message, 'error');
+                    
+                    const errorMessage = result.message || `Payment failed with status: ${response.status}. Please check your input.`;
+                    showAlert(errorMessage, 'error');
+                    console.error('Server reported error:', result.message, result.errors);
+
                     if (result.errors) {
-                        // This part is for server-side errors, still useful to keep
-                        // You can enhance this to map server errors to specific fields if needed
-                        const amountError = document.getElementById('amountToPayError');
-                        amountError.textContent = result.errors.join(', ');
-                        amountError.classList.remove('hidden');
-                        amountInput.classList.add('border-red-500', 'focus:border-red-500', 'focus:ring-red-500');
+                        const errorDisplayElement = document.getElementById('amountToPayError');
+                        if (errorDisplayElement) {
+                             errorDisplayElement.textContent = result.errors.join(', ');
+                             errorDisplayElement.classList.remove('hidden');
+                             amountInput.classList.add('border-red-500', 'focus:border-red-500', 'focus:ring-red-500');
+                        }
                     }
                 }
             } catch (error) {
-                console.error('Fetch error:', error);
+                console.error('Fetch error during payment process:', error); 
                 showAlert('An unexpected error occurred. Please try again.', 'error');
             } finally {
-
-                const finalDueAmount = parseFloat(document.getElementById('dueAmountDisplay').textContent.replace(/[^0-9.]/g, ''));
+               
+                const finalDueAmount = parseCurrencyToFloat(document.getElementById('dueAmountDisplay').textContent);
                 if (finalDueAmount <= 0) {
+                    amountInput.value = 0; 
+                    amountInput.disabled = true;
                     payNowBtn.innerHTML = 'No Amount Due';
                     payNowBtn.disabled = true;
-                    amountInput.disabled = true;
                     payNowBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                    console.log('Final state: No Amount Due.');
                 } else {
+                    amountInput.value = finalDueAmount; 
+                    amountInput.disabled = false;
                     payNowBtn.innerHTML = '<i data-lucide="arrow-right" class="w-5 h-5 mr-2 inline-block"></i> Continue';
                     payNowBtn.disabled = false;
-                    amountInput.disabled = false;
                     payNowBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    console.log('Final state: Amount Due, button re-enabled.');
                 }
-                lucide.createIcons();
+                lucide.createIcons(); 
             }
         });
 
+       
         document.getElementById('generatePdfBtn').addEventListener('click', function () {
+            console.log('Generate PDF button clicked.');
+           
             const printWindow = window.open('@Url.Action("GenerateTransactionPdf", "Client")', '_blank');
             if (printWindow) {
-                printWindow.focus();
+                printWindow.focus(); 
             } else {
-                showAlert('Please allow pop-ups for PDF generation.', 'error');
+                showAlert('Please allow pop-ups for PDF generation.', 'error'); 
             }
         });
 
+        
         function formatCurrency(amount, currencyCode = 'BDT') {
             return new Intl.NumberFormat('en-BD', { style: 'currency', currency: currencyCode }).format(amount);
         }
 
+        
         function formatDate(dateString) {
             const date = new Date(dateString);
-            if (isNaN(date.getTime())) {
-                return dateString;
+            if (isNaN(date.getTime())) { 
+                return dateString; 
             }
+            
             const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true };
             return date.toLocaleDateString('en-BD', options);
         }
     </script>
     <style>
+        
         .custom-scrollbar::-webkit-scrollbar {
             width: 8px;
         }
 
         .custom-scrollbar::-webkit-scrollbar-track {
-            background: #f0f4f8;
+            background: #f0f4f8; 
             border-radius: 10px;
         }
 
         .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #a7b7cd;
+            background: #cbd5e0; 
             border-radius: 10px;
         }
 
             .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-                background: #8096b7;
+                background: #a0aec0; 
             }
 
-
+        
         @@keyframes fade-in-down {
             from {
                 opacity: 0;

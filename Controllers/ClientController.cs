@@ -59,7 +59,7 @@ namespace Law_Firm_EMS.Controllers
             string pespStatus = "N/A";
             var pespDocument = client.Documents?
                 .FirstOrDefault(d => d.DocumentType?.TypeName != null &&
-                                     d.DocumentType.TypeName.Contains("PESP")); 
+                                     d.DocumentType.TypeName.Contains("PES")); 
 
             if (pespDocument != null && pespDocument.Status != null)
             {
