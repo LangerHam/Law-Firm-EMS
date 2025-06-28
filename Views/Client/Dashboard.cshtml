@@ -54,13 +54,13 @@
                                 </a>
                                 <span class="font-medium text-xs px-2 py-1 rounded-full border
                                         @(lor.StatusName == "Pending" ? "bg-red-100 text-red-700 border-red-300" :
-                                          lor.StatusName == "Approved" ? "bg-green-100 text-green-700 border-green-300" :
-                                          lor.StatusName == "Rejected" ? "bg-red-700 text-white border-red-800" :
-                                          lor.StatusName == "Reviewing" ? "bg-orange-100 text-orange-700 border-orange-300" :
-                                          lor.StatusName == "Submitted" ? "bg-blue-100 text-blue-700 border-blue-300" :
-                                          lor.StatusName == "Completed" ? "bg-green-100 text-green-700 border-green-300" :
-                                          lor.StatusName == "In Progress" ? "bg-yellow-100 text-yellow-800 border-yellow-300" :
-                                          "bg-gray-100 text-gray-700 border-gray-300")">
+                                          lor.StatusName == "Approved" ? "bg-green-300 text-green-700 border-green-300" :
+                                          lor.StatusName == "Rejected" ? "bg-red-900 text-white border-red-800" :
+                                          lor.StatusName == "Reviewing" ? "bg-teal-100 text-orange-700 border-orange-300" :
+                                          lor.StatusName == "Submitted" ? "bg-lime-200 text-blue-700 border-blue-300" :
+                                          lor.StatusName == "Completed" ? "bg-orange-300 text-green-700 border-green-300" :
+                                          lor.StatusName == "In Progress" ? "bg-gray-300 text-yellow-800 border-yellow-300" :
+                                          "bg-gray-500 text-gray-700 border-gray-300")">
                                     @lor.StatusName
                                 </span>
                             </div>
@@ -86,13 +86,13 @@
                     switch (eiaStatusDisplay)
                     {
                         case "Pending": eiaStatusClass = "bg-red-100 text-red-700 border-red-300"; break;
-                        case "Approved": eiaStatusClass = "bg-green-100 text-green-700 border-green-300"; break;
-                        case "Rejected": eiaStatusClass = "bg-red-700 text-white border-red-800"; break;
-                        case "Reviewing": eiaStatusClass = "bg-orange-100 text-orange-700 border-orange-300"; break;
-                        case "Submitted": eiaStatusClass = "bg-blue-100 text-blue-700 border-blue-300"; break;
-                        case "Completed": eiaStatusClass = "bg-green-100 text-green-700 border-green-300"; break;
-                        case "In Progress": eiaStatusClass = "bg-yellow-100 text-yellow-800 border-yellow-300"; break;
-                        default: eiaStatusClass = "bg-gray-100 text-gray-700 border-gray-300"; break;
+                        case "Approved": eiaStatusClass = "bg-green-300 text-green-700 border-green-300"; break;
+                        case "Rejected": eiaStatusClass = "bg-red-900 text-white border-red-800"; break;
+                        case "Reviewing": eiaStatusClass = "bg-teal-100 text-orange-700 border-orange-300"; break;
+                        case "Submitted": eiaStatusClass = "bg-lime-200 text-blue-700 border-blue-300"; break;
+                        case "Completed": eiaStatusClass = "bg-orange-300 text-green-700 border-green-300"; break;
+                        case "In Progress": eiaStatusClass = "bg-gray-300 text-yellow-800 border-yellow-300"; break;
+                        default: eiaStatusClass = "bg-gray-500 text-gray-700 border-gray-300"; break;
                     }
                 }
                 <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full border @eiaStatusClass">
@@ -111,13 +111,13 @@
                     switch (pespStatusDisplay)
                     {
                         case "Pending": pespStatusClass = "bg-red-100 text-red-700 border-red-300"; break;
-                        case "Approved": pespStatusClass = "bg-green-100 text-green-700 border-green-300"; break;
-                        case "Rejected": pespStatusClass = "bg-red-700 text-white border-red-800"; break;
-                        case "Reviewing": pespStatusClass = "bg-orange-100 text-orange-700 border-orange-300"; break;
-                        case "Submitted": pespStatusClass = "bg-blue-100 text-blue-700 border-blue-300"; break;
-                        case "Completed": pespStatusClass = "bg-green-100 text-green-700 border-green-300"; break;
-                        case "In Progress": pespStatusClass = "bg-yellow-100 text-yellow-800 border-yellow-300"; break;
-                        default: pespStatusClass = "bg-gray-100 text-gray-700 border-gray-300"; break;
+                        case "Approved": pespStatusClass = "bg-green-300 text-green-700 border-green-300"; break;
+                        case "Rejected": pespStatusClass = "bg-red-900 text-white border-red-800"; break;
+                        case "Reviewing": pespStatusClass = "bg-teal-700 text-orange-700 border-orange-300"; break;
+                        case "Submitted": pespStatusClass = "bg-lime-200 text-blue-700 border-blue-300"; break;
+                        case "Completed": pespStatusClass = "bg-orange-300 text-green-700 border-green-300"; break;
+                        case "In Progress": pespStatusClass = "bg-gray-300 text-yellow-800 border-yellow-300"; break;
+                        default: pespStatusClass = "bg-gray-500 text-gray-700 border-gray-300"; break;
                     }
                 }
                 <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full border @pespStatusClass">
@@ -175,90 +175,94 @@
 
 @section scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/lucide@latest"></script> 
-            <script>
-                lucide.createIcons(); 
+    <script src="https://cdn.jsdelivr.net/npm/lucide@latest"></script>
+    <script>
+        lucide.createIcons();
 
-                document.addEventListener('DOMContentLoaded', function () {
-                    const statusData = @Html.Raw(Json.Encode(Model.StatusSummary));
+        document.addEventListener('DOMContentLoaded', function () {
+            const statusData = @Html.Raw(Json.Encode(Model.StatusSummary));
 
-                    if (statusData && statusData.length > 0) {
-                        const ctx = document.getElementById('statusChart').getContext('2d');
+            if (statusData && statusData.length > 0) {
+                const ctx = document.getElementById('statusChart').getContext('2d');
 
-                        const labels = statusData.map(s => s.Status);
-                        const dataCounts = statusData.map(s => s.Count);
+                const labels = statusData.map(s => s.Status);
+                const dataCounts = statusData.map(s => s.Count);
 
-                        const defaultColors = [
-                            '#fee2e2', 
-                            '#dcfce7',
-                            '#b91c1c', 
-                            '#ffedd5', 
-                            '#dbeafe', 
-                            '#fef9c3', 
+                
+                const statusColorsMap = {
+                    "Pending": '#FECACA', 
+                    "Approved": '#99cca7', 
+                    "Rejected": '#421719', 
+                    "Reviewing": '#5e807e', 
+                    "Submitted": '#bdd47f', 
+                    "Completed": '#e3b071', 
+                    "In Progress": '#c6c2cf', 
+                    "Default": '#808080' 
+                };
 
-                        ];
+                
+                const backgroundColors = statusData.map(s => statusColorsMap[s.Status] || statusColorsMap["Default"]);
 
-                        const backgroundColors = statusData.map((s, index) => s.Color || defaultColors[index % defaultColors.length]);
 
-                        const chart = new Chart(ctx, {
-                            type: 'pie',
-                            data: {
-                                labels: labels,
-                                datasets: [{
-                                    label: 'Number of Documents',
-                                    data: dataCounts,
-                                    backgroundColor: backgroundColors,
-                                    borderColor: '#ffffff',
-                                    borderWidth: 2
-                                }]
+                const chart = new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Number of Documents',
+                            data: dataCounts,
+                            backgroundColor: backgroundColors,
+                            borderColor: '#ffffff',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        animation: {
+                            animateScale: true,
+                            animateRotate: true
+                        },
+                        cutout: '70%',
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Overall Document Status Breakdown',
+                                font: {
+                                    size: 16
+                                }
                             },
-                            options: {
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                animation: {
-                                    animateScale: true,
-                                    animateRotate: true
-                                },
-                                cutout: '70%',
-                                plugins: {
-                                    title: {
-                                        display: true,
-                                        text: 'Overall Document Status Breakdown',
-                                        font: {
-                                            size: 16
+                            legend: {
+                                display: true,
+                                position: 'right',
+                                labels: {
+                                    usePointStyle: true,
+                                    font: {
+                                        size: 12
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.label || '';
+                                        if (label) {
+                                            label += ': ';
                                         }
-                                    },
-                                    legend: {
-                                        display: true,
-                                        position: 'right',
-                                        labels: {
-                                            usePointStyle: true,
-                                            font: {
-                                                size: 12
-                                            }
-                                        }
-                                    },
-                                    tooltip: {
-                                        callbacks: {
-                                            label: function(context) {
-                                                let label = context.label || '';
-                                                if (label) {
-                                                    label += ': ';
-                                                }
-                                                const total = context.dataset.data.reduce((acc, current) => acc + current, 0);
-                                                const value = context.parsed;
-                                                const percentage = ((value / total) * 100).toFixed(1) + '%';
-                                                label += value + ' (' + percentage + ')';
-                                                return label;
-                                            }
-                                        }
+                                        const total = context.dataset.data.reduce((acc, current) => acc + current, 0);
+                                        const value = context.parsed;
+                                        const percentage = ((value / total) * 100).toFixed(1) + '%';
+                                        label += value + ' (' + percentage + ')';
+                                        return label;
                                     }
                                 }
                             }
-                        });
-                    } else {
-                        console.log("No status data available for the chart. The placeholder message is displayed.");
+                        }
                     }
                 });
-            </script>
-        }
+            } else {
+                console.log("No status data available for the chart. The placeholder message is displayed.");
+            }
+        });
+    </script>
+}
