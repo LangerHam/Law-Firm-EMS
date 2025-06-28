@@ -20,12 +20,11 @@ namespace Law_Firm_EMS.Controllers.Api
             db = new LawContextDb();
         }
 
-        [HttpGet]
-        [Route("api/consultants")]
+        [HttpGet, Route("api/consultants")]
         public IHttpActionResult GetConsultants()
         {
             var consultants = db.ConsultantEntity
-                .Include("User")
+                .Include(c => c.User)
                 .OrderBy(c => c.Name)
                 .ToList()
                 .Select(c => new {
@@ -38,35 +37,51 @@ namespace Law_Firm_EMS.Controllers.Api
             return Ok(consultants);
         }
 
-        [HttpPost]
-        [Route("api/consultants")]
-        public IHttpActionResult PostConsultant(ConsultantViewModel viewModel)
+        [HttpGet, Route("api/consultants/{id}")]
+        public IHttpActionResult GetConsultant(int id)
+        {
+            var consultant = db.ConsultantEntity.Include(c => c.User).FirstOrDefault(c => c.UserID == id);
+            if (consultant == null) return NotFound();
+
+            return Ok(new
+            {
+                consultant.UserID,
+                consultant.Name,
+                consultant.Phone,
+                consultant.ProfilePhotoPath,
+                Email = consultant.User.Email
+            });
+        }
+
+        [HttpPost, Route("api/consultants")]
+        public IHttpActionResult CreateConsultant(ConsultantViewModel viewModel)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-
             if (db.UsersEntity.Any(u => u.Email == viewModel.Email))
                 return BadRequest("An account with this email already exists.");
 
-            var user = new Users
-            {
+            var user = new Users {
                 Email = viewModel.Email,
                 PasswordHash = viewModel.Password, 
-                RoleID = 3,
+                RoleID = 3, 
                 CreatedAt = DateTime.UtcNow
             };
-            var consultant = new Consultant { Name = viewModel.Name, Phone = viewModel.Phone, User = user };
+            var consultant = new Consultant {
+                User = user,
+                Name = viewModel.Name,
+                Phone = viewModel.Phone,
+                ProfilePhotoPath = viewModel.ProfilePhotoPath
+            };
             db.ConsultantEntity.Add(consultant);
             db.SaveChanges();
-
-            return Ok(new { consultant.UserID, consultant.Name, consultant.Phone, Email = user.Email });
+            var ret = new Uri(Request.RequestUri + "/" + consultant.UserID);
+            return Created(ret, new { consultant.UserID, consultant.Name, consultant.Phone, Email = user.Email });
         }
 
-        [HttpPut]
-        [Route("api/consultants/{id}")]
-        public IHttpActionResult PutConsultant(int id, Consultant consultantData)
+        [HttpPut, Route("api/consultants/{id}")]
+        public IHttpActionResult UpdateConsultant(int id, Consultant consultantData)
         {
             if (!ModelState.IsValid || id != consultantData.UserID) return BadRequest();
-
             var consultantInDb = db.ConsultantEntity.Find(id);
             if (consultantInDb == null) return NotFound();
 
@@ -74,13 +89,11 @@ namespace Law_Firm_EMS.Controllers.Api
             consultantInDb.Phone = consultantData.Phone;
             consultantInDb.ProfilePhotoPath = consultantData.ProfilePhotoPath;
 
-            db.Entry(consultantInDb).State = EntityState.Modified;
             db.SaveChanges();
-            return Ok();
+            return StatusCode(HttpStatusCode.NoContent);
         }
 
-        [HttpDelete]
-        [Route("api/consultants/{id}")]
+        [HttpDelete, Route("api/consultants/{id}")]
         public IHttpActionResult DeleteConsultant(int id)
         {
             Consultant consultant = db.ConsultantEntity.Include(c => c.User).FirstOrDefault(c => c.UserID == id);

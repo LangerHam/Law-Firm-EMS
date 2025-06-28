@@ -11,6 +11,8 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 using Rotativa;
+using System.Net.Http.Headers;
+using System.Net.Http;
 
 namespace Law_Firm_EMS.Controllers
 {
@@ -55,12 +57,33 @@ namespace Law_Firm_EMS.Controllers
 
         //---------CONSULTANT MANAGEMENT---------
 
-        public ActionResult ManageConsultants()
+        private HttpClient GetApiClient()
         {
-            if (Session["RoleID"] == null || (int)Session["RoleID"] != 1) return RedirectToAction("Login", "Login");
+            var client = new HttpClient();
+            client.BaseAddress = new Uri("http://localhost:49269/");
+            client.DefaultRequestHeaders.Accept.Clear();
+            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            return client;
+        }
+        public async Task<ActionResult> ManageConsultants()
+        {
+            if (Session["RoleID"] == null || (int)Session["RoleID"] != 1)
+                return RedirectToAction("Login", "Login");
 
-            //var consultants = db.ConsultantEntity.Include(c => c.User);
-            return View(/*consultants.ToList()*/);
+            IEnumerable<Consultant> consultants = new List<Consultant>();
+            using (var client = GetApiClient())
+            {
+                var response = await client.GetAsync("api/consultants");
+                if (response.IsSuccessStatusCode)
+                {
+                    consultants = await response.Content.ReadAsAsync<List<Consultant>>();
+                }
+                else
+                {
+                    ModelState.AddModelError(string.Empty, "Error fetching data from API.");
+                }
+            }
+            return View(consultants);
         }
 
         public ActionResult CreateConsultant()
@@ -72,95 +95,93 @@ namespace Law_Firm_EMS.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult CreateConsultant(ConsultantViewModel viewModel)
+        public async Task<ActionResult> CreateConsultant(ConsultantViewModel viewModel)
         {
             if (Session["RoleID"] == null || (int)Session["RoleID"] != 1) return RedirectToAction("Login", "Login");
 
             if (ModelState.IsValid)
             {
-                if (db.UsersEntity.Any(u => u.Email == viewModel.Email))
+                using (var client = GetApiClient())
                 {
-                    ModelState.AddModelError("Email", "An account with this email already exists.");
-                    return View(viewModel);
+                    var response = await client.PostAsJsonAsync("api/consultants", viewModel);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        return RedirectToAction("ManageConsultants");
+                    }
+                    else
+                    {
+                        ModelState.AddModelError(string.Empty, "API Error: " + await response.Content.ReadAsStringAsync());
+                    }
                 }
-
-                // Replace with BCrypt
-                string hashedPassword = viewModel.Password;
-
-                var user = new Users
-                {
-                    Email = viewModel.Email,
-                    PasswordHash = hashedPassword,
-                    RoleID = 3,
-                    CreatedAt = System.DateTime.UtcNow
-                };
-
-                var consultant = new Consultant
-                {
-                    Name = viewModel.Name,
-                    Phone = viewModel.Phone,
-                   // HRID = (int)Session["UserID"],
-                    User = user
-                };
-
-                db.ConsultantEntity.Add(consultant);
-                db.SaveChanges();
-                return RedirectToAction("ManageConsultants");
             }
             return View(viewModel);
         }
 
-        public ActionResult ConsultantDetails(int? id)
+        public async Task<ActionResult> ConsultantDetails(int? id)
         {
-            if (Session["RoleID"] == null || (int)Session["RoleID"] != 1) return RedirectToAction("Login", "Login");
             if (id == null) return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            if (Session["RoleID"] == null || (int)Session["RoleID"] != 1) return RedirectToAction("Login", "Login");
 
-            Consultant consultant = db.ConsultantEntity.Include(c => c.User).FirstOrDefault(c => c.UserID == id);
-            if (consultant == null) return HttpNotFound();
-
+            Consultant consultant = null;
+            using (var client = GetApiClient())
+            {
+                var response = await client.GetAsync($"api/consultants/{id}");
+                if (response.IsSuccessStatusCode)
+                {
+                    consultant = await response.Content.ReadAsAsync<Consultant>();
+                }
+                else
+                {
+                    return HttpNotFound();
+                }
+            }
             return View(consultant);
         }
 
         // POST: HR/ConsultantDetails/{id} 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult ConsultantDetails(Consultant consultant)
+        public async Task<ActionResult> EditConsultant(int id, Consultant consultant)
         {
             if (Session["RoleID"] == null || (int)Session["RoleID"] != 1) return RedirectToAction("Login", "Login");
 
             if (ModelState.IsValid)
             {
-                var consultantInDb = db.ConsultantEntity.Find(consultant.UserID);
-                if (consultantInDb == null)
+                using (var client = GetApiClient())
                 {
-                    return HttpNotFound();
+                    var response = await client.PutAsJsonAsync($"api/consultants/{id}", consultant);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        return RedirectToAction("ManageConsultants");
+                    }
+                    else
+                    {
+                        ModelState.AddModelError(string.Empty, "API Error: " + await response.Content.ReadAsStringAsync());
+                    }
                 }
-                consultantInDb.Name = consultant.Name;
-                consultantInDb.Phone = consultant.Phone;
-                consultantInDb.ProfilePhotoPath = consultant.ProfilePhotoPath;
-                db.SaveChanges();
-
-                TempData["SuccessMessage"] = "Consultant details updated successfully.";
-                return RedirectToAction("ConsultantDetails", new { id = consultant.UserID });
             }
-            consultant.User = db.UsersEntity.Find(consultant.UserID);
             return View(consultant);
         }
 
         // POST: HR/DeleteConsultant/{id}
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult DeleteConsultant(int id)
+        public async Task<ActionResult> DeleteConsultant(int id)
         {
-            if (Session["RoleID"] == null || (int)Session["RoleID"] != 1) return RedirectToAction("Login", "Login");
+            if (Session["RoleID"] == null || (int)Session["RoleID"] != 1)
+                return RedirectToAction("Login", "Login");
 
-            Consultant consultant = db.ConsultantEntity.Include(c => c.User).FirstOrDefault(c => c.UserID == id);
-            if (consultant != null)
+            using (var client = GetApiClient())
             {
-                Users user = consultant.User;
-                db.ConsultantEntity.Remove(consultant);
-                db.UsersEntity.Remove(user);
-                db.SaveChanges();
+                var response = await client.DeleteAsync($"api/consultants/{id}");
+                if (response.IsSuccessStatusCode)
+                {
+                    TempData["SuccessMessage"] = "Consultant deleted successfully.";
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "API Error: Could not delete consultant.";
+                }
             }
             return RedirectToAction("ManageConsultants");
         }
