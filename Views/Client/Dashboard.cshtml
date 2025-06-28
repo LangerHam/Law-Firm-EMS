@@ -1,9 +1,9 @@
 ﻿@model Law_Firm_EMS.ViewModels.ClientDashboardViewModel
 
 @{
-    ViewBag.Title = "Client Dashboard"; 
+    ViewBag.Title = "Client Dashboard";
     Layout = "~/Views/Shared/ClientNavbar.cshtml";
-    
+
     var cardClass = "bg-white p-6 rounded-xl shadow-md border border-gray-200";
 }
 
@@ -19,7 +19,7 @@
 
 <main class="p-6 overflow-y-auto flex-1 bg-gray-50">
 
-    <h1 class="text-2xl font-bold text-gray-800 mb-6">Client Dashboard</h1> 
+    <h1 class="text-2xl font-bold text-gray-800 mb-6">Client Dashboard</h1>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
 
@@ -55,11 +55,14 @@
                                     @System.IO.Path.GetFileName(lor.UploadPath)
                                 </a>
                                 <span class="font-medium text-xs px-2 py-1 rounded-full border
-                                             @(lor.StatusName == "Pending" ? "bg-red-100 text-red-700 border-red-300" :
-                                               lor.StatusName == "Completed" ? "bg-green-100 text-green-700 border-green-300" :
-                                               lor.StatusName == "Reviewing" ? "bg-orange-100 text-orange-700 border-orange-300" :
-                                               lor.StatusName == "Submitted" ? "bg-blue-100 text-blue-700 border-blue-300" :
-                                               "bg-gray-100 text-gray-700 border-gray-300")">
+                                        @(lor.StatusName == "Pending" ? "bg-red-100 text-red-700 border-red-300" :
+                                          lor.StatusName == "Approved" ? "bg-green-100 text-green-700 border-green-300" :
+                                          lor.StatusName == "Rejected" ? "bg-red-700 text-white border-red-800" :
+                                          lor.StatusName == "Reviewing" ? "bg-orange-100 text-orange-700 border-orange-300" :
+                                          lor.StatusName == "Submitted" ? "bg-blue-100 text-blue-700 border-blue-300" :
+                                          lor.StatusName == "Completed" ? "bg-green-100 text-green-700 border-green-300" :
+                                          lor.StatusName == "In Progress" ? "bg-yellow-100 text-yellow-800 border-yellow-300" :
+                                          "bg-gray-100 text-gray-700 border-gray-300")">
                                     @lor.StatusName
                                 </span>
                             </div>
@@ -79,23 +82,24 @@
                     <i data-lucide="bar-chart-2" class="w-5 h-5 mr-2 text-purple-500"></i>
                     EIA Status
                 </h2>
-                <div class="flex flex-wrap items-center gap-x-4 gap-y-2 mt-2">
-                    <div class="flex items-center gap-2">
-                        <div class="w-4 h-4 rounded-full @(Model.EIAStatus == "In Progress" ? "bg-green-500" : "border border-gray-400")"></div>
-                        <span class="text-sm text-gray-700">In Progress</span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <div class="w-4 h-4 rounded-full @(Model.EIAStatus == "Completed" ? "bg-blue-500" : "border border-gray-400")"></div>
-                        <span class="text-sm text-gray-700">Completed</span>
-                    </div>
-                    @if (Model.EIAStatus != "In Progress" && Model.EIAStatus != "Completed")
+                @{
+                    var eiaStatusDisplay = Model.EIAStatus;
+                    string eiaStatusClass;
+                    switch (eiaStatusDisplay)
                     {
-                        <div class="flex items-center gap-2">
-                            <div class="w-4 h-4 rounded-full bg-gray-300 border border-gray-400"></div>
-                            <span class="text-sm text-gray-700">@Model.EIAStatus</span>
-                        </div>
+                        case "Pending": eiaStatusClass = "bg-red-100 text-red-700 border-red-300"; break;
+                        case "Approved": eiaStatusClass = "bg-green-100 text-green-700 border-green-300"; break;
+                        case "Rejected": eiaStatusClass = "bg-red-700 text-white border-red-800"; break;
+                        case "Reviewing": eiaStatusClass = "bg-orange-100 text-orange-700 border-orange-300"; break;
+                        case "Submitted": eiaStatusClass = "bg-blue-100 text-blue-700 border-blue-300"; break;
+                        case "Completed": eiaStatusClass = "bg-green-100 text-green-700 border-green-300"; break;
+                        case "In Progress": eiaStatusClass = "bg-yellow-100 text-yellow-800 border-yellow-300"; break;
+                        default: eiaStatusClass = "bg-gray-100 text-gray-700 border-gray-300"; break;
                     }
-                </div>
+                }
+                <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full border @eiaStatusClass">
+                    @eiaStatusDisplay
+                </span>
             </div>
 
             <div class="@cardClass">
@@ -103,30 +107,31 @@
                     <i data-lucide="bar-chart-2" class="w-5 h-5 mr-2 text-purple-500"></i>
                     PESP Status
                 </h2>
-                <div class="flex flex-wrap items-center gap-x-4 gap-y-2 mt-2">
-                    <div class="flex items-center gap-2">
-                        <div class="w-4 h-4 rounded-full @(Model.PESPStatus == "In Progress" ? "bg-green-500" : "border border-gray-400")"></div>
-                        <span class="text-sm text-gray-700">In Progress</span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <div class="w-4 h-4 rounded-full @(Model.PESPStatus == "Completed" ? "bg-blue-500" : "border border-gray-400")"></div>
-                        <span class="text-sm text-gray-700">Completed</span>
-                    </div>
-                    @if (Model.PESPStatus != "In Progress" && Model.PESPStatus != "Completed")
+                @{
+                    var pespStatusDisplay = Model.PESPStatus;
+                    string pespStatusClass;
+                    switch (pespStatusDisplay)
                     {
-                        <div class="flex items-center gap-2">
-                            <div class="w-4 h-4 rounded-full bg-gray-300 border border-gray-400"></div>
-                            <span class="text-sm text-gray-700">@Model.PESPStatus</span>
-                        </div>
+                        case "Pending": pespStatusClass = "bg-red-100 text-red-700 border-red-300"; break;
+                        case "Approved": pespStatusClass = "bg-green-100 text-green-700 border-green-300"; break;
+                        case "Rejected": pespStatusClass = "bg-red-700 text-white border-red-800"; break;
+                        case "Reviewing": pespStatusClass = "bg-orange-100 text-orange-700 border-orange-300"; break;
+                        case "Submitted": pespStatusClass = "bg-blue-100 text-blue-700 border-blue-300"; break;
+                        case "Completed": pespStatusClass = "bg-green-100 text-green-700 border-green-300"; break;
+                        case "In Progress": pespStatusClass = "bg-yellow-100 text-yellow-800 border-yellow-300"; break;
+                        default: pespStatusClass = "bg-gray-100 text-gray-700 border-gray-300"; break;
                     }
-                </div>
+                }
+                <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full border @pespStatusClass">
+                    @pespStatusDisplay
+                </span>
             </div>
         </div>
     </div>
 
     <div class="@cardClass mb-6">
         <h2 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-            <i data-lucide="donut" class="w-5 h-5 mr-2 text-teal-500"></i> 
+            <i data-lucide="donut" class="w-5 h-5 mr-2 text-teal-500"></i>
             Overall Document Status Breakdown
         </h2>
         <div style="width: 100%; max-width: 800px; margin: auto; height: 400px;">
@@ -140,21 +145,21 @@
                 <i data-lucide="wallet" class="w-5 h-5 mr-2 text-green-500"></i>
                 Paid Invoices
             </h3>
-            <p class="text-3xl font-bold text-sky-600">@Model.Paid.ToString("C")</p>
+            <p class="text-3xl font-bold text-sky-600">@Model.Paid.ToString("C", new System.Globalization.CultureInfo("bn-BD"))</p>
         </div>
         <div class="@cardClass text-center">
             <h3 class="text-base text-gray-600 mb-2 flex items-center justify-center">
                 <i data-lucide="credit-card" class="w-5 h-5 mr-2 text-red-500"></i>
                 Dues
             </h3>
-            <p class="text-3xl font-bold text-red-500">@Model.Due.ToString("C")</p>
+            <p class="text-3xl font-bold text-red-500">@Model.Due.ToString("C", new System.Globalization.CultureInfo("bn-BD"))</p>
         </div>
         <div class="@cardClass text-center">
             <h3 class="text-base text-gray-600 mb-2 flex items-center justify-center">
                 <i data-lucide="receipt-text" class="w-5 h-5 mr-2 text-gray-600"></i>
                 Total Fees
             </h3>
-            <p class="text-3xl font-bold text-gray-800">@Model.TotalFees.ToString("C")</p>
+            <p class="text-3xl font-bold text-gray-800">@Model.TotalFees.ToString("C", new System.Globalization.CultureInfo("bn-BD"))</p>
         </div>
     </div>
 </main>
@@ -172,7 +177,7 @@
         const backgroundColors = statusData.map(s => s.Color);
 
         const chart = new Chart(ctx, {
-            type: 'pie', 
+            type: 'pie',
             data: {
                 labels: labels,
                 datasets: [{
@@ -190,7 +195,7 @@
                     animateScale: true,
                     animateRotate: true
                 },
-                cutout: '70%', 
+                cutout: '70%',
                 plugins: {
                     title: {
                         display: true,

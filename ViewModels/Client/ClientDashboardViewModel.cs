@@ -17,6 +17,8 @@ namespace Law_Firm_EMS.ViewModels
         public decimal Paid { get; set; }
         public decimal Due { get; set; }
         public decimal TotalFees { get; set; }
+
+        public string LOROverallStatus { get; set; }
     }
 
     public class StatusSummaryVM

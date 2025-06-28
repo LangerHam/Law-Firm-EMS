@@ -25,23 +25,47 @@ namespace Law_Firm_EMS.Controllers
             if (Session["UserID"] == null)
                 return RedirectToAction("Login", "Login");
 
-            if (Session["RoleID"] == null || (int)Session["RoleID"] != 2) return RedirectToAction("Login", "Login");
+            if (Session["RoleID"] == null || (int)Session["RoleID"] != 2)
+                return RedirectToAction("Login", "Login");
 
             int userId = (int)Session["UserID"];
 
             var client = db.ClientEntity
                 .Include(c => c.AssignedConsultant)
                 .Include(c => c.Billing)
-                .Include(c => c.Documents.Select(d => d.DocumentType))
-                .Include(c => c.Documents.Select(d => d.Status))
-                .Include(c => c.Forms.Select(f => f.FormType))
-                .Include(c => c.Forms.Select(f => f.Status))
+                .Include(c => c.Documents.Select(d => d.DocumentType)) 
+                .Include(c => c.Documents.Select(d => d.Status))       
+                .Include(c => c.Forms.Select(f => f.FormType)) 
+                .Include(c => c.Forms.Select(f => f.Status))   
                 .FirstOrDefault(c => c.UserID == userId);
 
             if (client == null)
                 return Content("You are logged in, but no client profile found. Please contact admin.");
 
             ViewBag.ClientName = client.FullName;
+
+            
+            string eiaStatus = "N/A";
+            var eiaDocument = client.Documents?
+                .FirstOrDefault(d => d.DocumentType?.TypeName != null &&
+                                     d.DocumentType.TypeName.Contains("EIA")); 
+
+            if (eiaDocument != null && eiaDocument.Status != null)
+            {
+                eiaStatus = eiaDocument.Status.StatusName;
+            }
+
+            
+            string pespStatus = "N/A";
+            var pespDocument = client.Documents?
+                .FirstOrDefault(d => d.DocumentType?.TypeName != null &&
+                                     d.DocumentType.TypeName.Contains("PESP")); 
+
+            if (pespDocument != null && pespDocument.Status != null)
+            {
+                pespStatus = pespDocument.Status.StatusName;
+            }
+
             var viewModel = new ClientDashboardViewModel
             {
                 ClientName = client.FullName,
@@ -50,29 +74,29 @@ namespace Law_Firm_EMS.Controllers
                 Paid = client.Billing?.PaidAmount ?? 0,
                 Due = (client.Billing?.TotalFees ?? 0) - (client.Billing?.PaidAmount ?? 0),
                 LORs = client.Documents?
-                    .Where(d => d.DocumentType?.TypeName == "LoR")
+                    .Where(d => d.DocumentType?.TypeName == "LoR") 
                     .Select(d => new LORStatusVM
                     {
                         DocumentID = d.DocumentID,
                         UploadPath = d.UploadPath,
                         StatusName = d.Status?.StatusName ?? "N/A"
                     }).ToList() ?? new List<LORStatusVM>(),
-                EIAStatus = client.Forms?
-                    .FirstOrDefault(f => f.FormType?.TypeName != null && f.FormType.TypeName.Contains("EIA"))?.Status?.StatusName ?? "N/A",
-                PESPStatus = client.Forms?
-                    .FirstOrDefault(f => f.FormType?.TypeName != null && f.FormType.TypeName.Contains("PESP"))?.Status?.StatusName ?? "N/A",
+                EIAStatus = eiaStatus,
+                PESPStatus = pespStatus,
                 StatusSummary = client.Documents?
                     .GroupBy(d => d.Status?.StatusName ?? "Unknown")
                     .Select(g => new StatusSummaryVM
                     {
                         Status = g.Key,
                         Count = g.Count(),
-                        Color = GetStatusColor(g.Key)
+                        Color = GetStatusColor(g.Key) 
                     }).ToList() ?? new List<StatusSummaryVM>()
             };
 
             return View(viewModel);
         }
+
+
 
 
         public string GetStatusColor(string statusName)
@@ -81,12 +105,18 @@ namespace Law_Firm_EMS.Controllers
             {
                 case "pending":
                     return "#FECACA";
-                case "completed":
-                    return "#008000";
-                case "reviewing":
-                    return "#FFA500";
-                case "submitted":
-                    return "#0000FF";
+                case "Approved":
+                    return "#99cca7"; 
+                case "Rejected":
+                    return "#421719"; 
+                case "Reviewing":
+                    return "#5e807e"; 
+                case "Submitted":
+                    return "#bdd47f"; 
+                case "Completed":
+                    return "#e3b071"; 
+                case "In Progress":
+                    return "#c6c2cf"; 
                 default:
                     return "#808080";
             }
