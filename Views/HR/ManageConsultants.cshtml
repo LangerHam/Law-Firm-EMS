@@ -1,4 +1,4 @@
-﻿@model IEnumerable<Law_Firm_EMS.Models.Consultant>
+﻿
 @{
     ViewBag.Title = "ManageConsultants";
     Layout = "~/Views/Shared/HRnavbar.cshtml";
@@ -8,103 +8,160 @@
     <div class="flex justify-between items-center mb-6">
         <div>
             <h1 class="text-2xl font-bold text-gray-800">Consultant Roster</h1>
-            <p class="text-gray-500">Manage consultant profiles and assignments.</p>
+            <p class="text-gray-500">Manage consultant profiles via API.</p>
         </div>
-        <a href="@Url.Action("CreateConsultant", "HR")" class="bg-sky-500 text-white px-4 py-2 rounded-lg hover:bg-sky-600 transition-colors flex items-center">
+        <button onclick="openCreateModal()" class="bg-sky-500 text-white px-4 py-2 rounded-lg hover:bg-sky-600 flex items-center">
             <i data-lucide="plus" class="h-5 w-5 mr-2"></i>
             <span>Add Consultant</span>
-        </a>
+        </button>
     </div>
 
+    <!-- Consultant Table -->
     <div class="overflow-x-auto">
         <table class="min-w-full bg-white">
             <thead class="bg-gray-50">
                 <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
-                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Phone</th>
+                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-gray-200">
-                @foreach (var item in Model)
-                {
-                    <tr>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">@Html.DisplayFor(modelItem => item.Name)</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">@Html.DisplayFor(modelItem => item.User.Email)</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">@Html.DisplayFor(modelItem => item.Phone)</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <a href="@Url.Action("ConsultantDetails", "HR", new { id = item.UserID })" class="text-indigo-600 hover:text-indigo-900 mr-4">View / Edit</a>
-                            <button type="button"
-                                    onclick="openDeleteModal(@item.UserID, '@HttpUtility.JavaScriptStringEncode(item.Name)')"
-                                    class="text-red-600 hover:text-red-900 focus:outline-none">
-                                Delete
-                            </button>
-                        </td>
-                    </tr>
-                }
+            <tbody id="consultants-table-body" class="divide-y divide-gray-200">
             </tbody>
         </table>
     </div>
 </div>
 
-<!-- Delete Confirmation Modal -->
-<div id="delete-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 backdrop-blur-sm flex items-center justify-center hidden z-50 transition-opacity duration-300">
-    <div class="bg-white p-8 rounded-lg shadow-xl max-w-md w-full transform transition-all duration-300 scale-95">
-        <div class="text-center">
-            <i data-lucide="alert-triangle" class="h-16 w-16 text-red-500 mx-auto mb-4"></i>
-            <h2 class="text-2xl font-bold text-gray-800 mb-2">Are you sure?</h2>
-            <p class="text-gray-600 mb-6">
-                You are about to permanently delete the consultant <strong id="consultant-name-in-modal" class="text-gray-800"></strong>. This action cannot be undone.
-            </p>
-        </div>
-
-        <form id="delete-form" method="post">
-            @Html.AntiForgeryToken()
-            <div class="flex items-center justify-center space-x-4 pt-4">
-                <button type="button" onclick="closeDeleteModal()" class="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-300 transition-colors">
-                    Cancel
-                </button>
-                <input type="submit" value="Yes, Delete Consultant" class="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition-colors cursor-pointer" />
+<!-- Create/Edit -->
+<div id="consultant-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 backdrop-blur-sm flex items-center justify-center hidden z-50">
+    <div class="bg-white p-8 rounded-lg shadow-xl max-w-lg w-full">
+        <h2 id="modal-title" class="text-2xl font-bold text-gray-800 mb-6"></h2>
+        <form id="consultant-form" class="space-y-4">
+            <input type="hidden" id="form-userid" />
+            <div>
+                <label for="form-name" class="block text-sm font-medium text-gray-700">Full Name</label>
+                <input type="text" id="form-name" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg" required />
+            </div>
+            <div>
+                <label for="form-email" class="block text-sm font-medium text-gray-700">Email</label>
+                <input type="email" id="form-email" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg" required />
+            </div>
+            <div id="password-container">
+                <label for="form-password" class="block text-sm font-medium text-gray-700">Password</label>
+                <input type="password" id="form-password" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg" required />
+            </div>
+            <div>
+                <label for="form-phone" class="block text-sm font-medium text-gray-700">Phone</label>
+                <input type="tel" id="form-phone" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg" />
+            </div>
+            <div class="flex items-center justify-end space-x-4 pt-4">
+                <button type="button" onclick="closeModal()" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg">Cancel</button>
+                <button type="submit" class="bg-sky-500 text-white px-4 py-2 rounded-lg">Save</button>
             </div>
         </form>
     </div>
 </div>
 
-
 @section scripts {
     <script>
-    const modal = document.getElementById('delete-modal');
-    const modalContent = modal.querySelector('div');
-    const deleteForm = document.getElementById('delete-form');
-    const consultantNameSpan = document.getElementById('consultant-name-in-modal');
+    const modal = $('#consultant-modal');
+    const form = $('#consultant-form');
 
-    function openDeleteModal(id, name) {
-        const deleteUrl = '@Url.Action("DeleteConsultant", "HR")/' + id;
-        deleteForm.action = deleteUrl;
-
-        consultantNameSpan.textContent = name;
-
-        modal.classList.remove('hidden');
-        setTimeout(() => {
-            modal.classList.add('opacity-100');
-            modalContent.classList.remove('scale-95');
-            modalContent.classList.add('scale-100');
-        }, 10);
+    function renderRow(consultant) {
+        return `
+            <tr id="consultant-row-${consultant.UserID}">
+                <td class="px-6 py-4 text-sm font-medium text-gray-900">${consultant.Name}</td>
+                <td class="px-6 py-4 text-sm text-gray-500">${consultant.Email}</td>
+                <td class="px-6 py-4 text-sm text-gray-500">${consultant.Phone || 'N/A'}</td>
+                <td class="px-6 py-4 text-right text-sm font-medium">
+                    <button onclick='openEditModal(${JSON.stringify(consultant)})' class="text-indigo-600 hover:text-indigo-900 mr-4">Edit</button>
+                    <button onclick="deleteConsultant(${consultant.UserID})" class="text-red-600 hover:text-red-900">Delete</button>
+                </td>
+            </tr>
+        `;
     }
 
-    function closeDeleteModal() {
-        modal.classList.remove('opacity-100');
-        modalContent.classList.add('scale-95');
-        setTimeout(() => {
-            modal.classList.add('hidden');
-        }, 300);
+    function loadConsultants() {
+        $('#consultants-table-body').html('<tr><td colspan="4" class="text-center p-6"><i data-lucide="loader-2" class="animate-spin h-8 w-8 mx-auto"></i></td></tr>');
+        lucide.createIcons();
+        $.get('/api/consultants')
+            .done(function(data) {
+                $('#consultants-table-body').empty();
+                data.forEach(c => $('#consultants-table-body').append(renderRow(c)));
+            })
+            .fail(err => alert('Error loading consultants.'));
     }
 
-    modal.addEventListener('click', function(event) {
-        if (event.target === modal) {
-            closeDeleteModal();
-        }
+    function openCreateModal() {
+        form[0].reset();
+        $('#modal-title').text('Add New Consultant');
+        $('#form-userid').val(0);
+        $('#form-email').prop('readonly', false);
+        $('#password-container').show();
+        modal.removeClass('hidden');
+    }
+
+    function openEditModal(consultant) {
+        form[0].reset();
+        $('#modal-title').text('Edit Consultant');
+        $('#form-userid').val(consultant.UserID);
+        $('#form-name').val(consultant.Name);
+        $('#form-email').val(consultant.Email).prop('readonly', true);
+        $('#form-phone').val(consultant.Phone);
+        $('#password-container').hide();
+        modal.removeClass('hidden');
+    }
+
+    function closeModal() {
+        modal.addClass('hidden');
+    }
+
+    function deleteConsultant(id) {
+        if (!confirm('Are you sure you want to delete this consultant?')) return;
+        $.ajax({
+            url: '/api/consultants/' + id,
+            type: 'DELETE'
+        }).done(() => {
+            $(`#consultant-row-${id}`).fadeOut(500, function() { $(this).remove(); });
+        }).fail(err => alert('Error deleting consultant.'));
+    }
+
+    form.on('submit', function(e) {
+        e.preventDefault();
+        const id = parseInt($('#form-userid').val());
+        const isEdit = id > 0;
+
+        const data = {
+            UserID: id,
+            Name: $('#form-name').val(),
+            Email: $('#form-email').val(),
+            Password: $('#form-password').val(),
+            Phone: $('#form-phone').val()
+        };
+
+        const ajaxSettings = {
+            url: isEdit ? '/api/consultants/' + id : '/api/consultants',
+            type: isEdit ? 'PUT' : 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(data)
+        };
+
+        $.ajax(ajaxSettings)
+            .done(function(newOrUpdatedData) {
+                if (isEdit) {
+                     loadConsultants();
+                } else {
+                    $('#consultants-table-body').append(renderRow(newOrUpdatedData));
+                }
+                closeModal();
+            })
+            .fail(err => alert('Error saving consultant: ' + (err.responseJSON?.Message || 'Please check your input.')));
     });
+
+    $(document).ready(function() {
+        loadConsultants();
+    });
+
     </script>
 }

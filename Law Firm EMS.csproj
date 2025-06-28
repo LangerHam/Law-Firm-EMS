@@ -265,7 +265,7 @@
     <Content Include="Views\Shared\HRnavbar.cshtml" />
     <Content Include="Views\Client\Dashboard.cshtml" />
     <Content Include="Views\Shared\ClientNavbar.cshtml" />
-    <Content Include="Views\HR\ManageConsultants.cshtml" />
+    <Content Include="Views\HR\%28OLD%29ManageConsultants.cshtml" />
     <Content Include="Views\HR\CreateConsultant.cshtml" />
     <Content Include="Views\HR\ConsultantDetails.cshtml" />
     <Content Include="Views\HR\ManageClients.cshtml" />
@@ -293,6 +293,7 @@
     <Content Include="Views\Consultant\MyTasks.cshtml" />
     <Content Include="Views\Consultant\Settings.cshtml" />
     <Content Include="Views\Consultant\LeaveRequests.cshtml" />
+    <Content Include="Views\HR\ManageConsultants.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
