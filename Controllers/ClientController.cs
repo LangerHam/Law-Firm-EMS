@@ -203,7 +203,7 @@ namespace Law_Firm_EMS.Controllers
             if (!Directory.Exists(uploadDir))
                 Directory.CreateDirectory(uploadDir);
 
-            string uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+            string uniqueFileName = Path.GetExtension(file.FileName);
             string physicalPath = Path.Combine(uploadDir, uniqueFileName);
             file.SaveAs(physicalPath);
 
@@ -344,10 +344,10 @@ namespace Law_Firm_EMS.Controllers
                 }
 
                 string fileName = Path.GetFileName(file.FileName);
-                string uniqueFileName = Guid.NewGuid().ToString() + "_" + fileName;
-                string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+                //string uniqueFileName = Guid.NewGuid().ToString() + "_" + fileName;
+                string filePath = Path.Combine(uploadsFolder, fileName);
 
-                string dbFilePath = "~/Resources/ClientDocuments/" + uniqueFileName;
+                string dbFilePath = "~/Resources/ClientDocuments/" + fileName;
 
                 file.SaveAs(filePath);
 
@@ -436,7 +436,6 @@ namespace Law_Firm_EMS.Controllers
                 return RedirectToAction("Dashboard");
             }
 
-            // Ensure client can only download their own documents
             var document = db.DocumentEntity
                 .FirstOrDefault(d => d.DocumentID == id && d.ClientID == client.UserID);
 

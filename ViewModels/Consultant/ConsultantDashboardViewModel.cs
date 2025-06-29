@@ -103,4 +103,13 @@ namespace Law_Firm_EMS.ViewModels.Consultant
        
         public IEnumerable<SelectListItem> AvailableLeaveTypes { get; set; }
     }
+
+    public class ConsultantListItemViewModel
+    {
+        public int UserID { get; set; }
+        public string Name { get; set; }
+        public string Phone { get; set; }
+        public string ProfilePhotoPath { get; set; }
+        public string Email { get; set; } 
+    }
 }

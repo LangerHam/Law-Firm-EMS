@@ -13,6 +13,7 @@ using System.Web.Mvc;
 using Rotativa;
 using System.Net.Http.Headers;
 using System.Net.Http;
+using Law_Firm_EMS.ViewModels.Consultant;
 
 namespace Law_Firm_EMS.Controllers
 {
@@ -70,13 +71,16 @@ namespace Law_Firm_EMS.Controllers
             if (Session["RoleID"] == null || (int)Session["RoleID"] != 1)
                 return RedirectToAction("Login", "Login");
 
-            IEnumerable<Consultant> consultants = new List<Consultant>();
+            // Change the type to your new ViewModel
+            IEnumerable<ConsultantListItemViewModel> consultants = new List<ConsultantListItemViewModel>();
+
             using (var client = GetApiClient())
             {
                 var response = await client.GetAsync("api/consultants");
                 if (response.IsSuccessStatusCode)
                 {
-                    consultants = await response.Content.ReadAsAsync<List<Consultant>>();
+                    // Deserialize directly into the ViewModel that matches the API's output
+                    consultants = await response.Content.ReadAsAsync<List<ConsultantListItemViewModel>>();
                 }
                 else
                 {
@@ -123,6 +127,7 @@ namespace Law_Firm_EMS.Controllers
             if (Session["RoleID"] == null || (int)Session["RoleID"] != 1) return RedirectToAction("Login", "Login");
 
             Consultant consultant = null;
+            
             using (var client = GetApiClient())
             {
                 var response = await client.GetAsync($"api/consultants/{id}");
@@ -142,7 +147,7 @@ namespace Law_Firm_EMS.Controllers
         // POST: HR/ConsultantDetails/{id} 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> EditConsultant(int id, [Bind(Include = "UserID,Name,Phone,ProfilePhotoPath")] Consultant consultant)
+        public async Task<ActionResult> ConsultantDetails(int id, [Bind(Include = "UserID,Name,Phone,ProfilePhotoPath")] Consultant consultant)
         {
             if (Session["RoleID"] == null || (int)Session["RoleID"] != 1) return RedirectToAction("Login", "Login");
 

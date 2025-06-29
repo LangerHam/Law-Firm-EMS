@@ -26,15 +26,18 @@ namespace Law_Firm_EMS.Controllers.Api
             var consultants = db.ConsultantEntity
                 .Include(c => c.User)
                 .OrderBy(c => c.Name)
-                .ToList()
+                .AsEnumerable();
+
+            var consultants_U = consultants
                 .Select(c => new {
                     c.UserID,
                     c.Name,
                     c.Phone,
                     c.ProfilePhotoPath,
-                    Email = c.User.Email
-                });
-            return Ok(consultants);
+                    Email = c.User?.Email ?? "N/A"
+                })
+                .ToList();
+            return Ok(consultants_U);
         }
 
         [HttpGet, Route("api/consultants/{id}")]
