@@ -6,7 +6,7 @@
 
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-    <!-- Left Column: Create Task Form -->
+    
     <div class="lg:col-span-1">
         <div class="bg-white p-6 rounded-lg shadow-md sticky top-6">
             <h2 class="text-2xl font-bold text-gray-800 mb-6">Assign New Task</h2>
@@ -71,7 +71,7 @@
         </div>
     </div>
 
-    <!-- Right Column: Task List -->
+    
     <div class="lg:col-span-2">
         <div class="bg-white p-6 rounded-lg shadow-md">
             <div class="flex justify-between items-center mb-6">
@@ -116,7 +116,7 @@
 @section scripts {
     <script>
     $(document).ready(function() {
-        // This script is the same as before, just part of the combined view now.
+        
         const clientContainer = $('#client-container');
         const lorFields = $('#lor-fields');
         const newDocFields = $('#new-doc-fields');
@@ -147,7 +147,7 @@
 
         $('input[name="CreateTaskForm.TaskCreationType"]').on('change', toggleFormFields);
 
-        // Run on page load in case of validation error
+        
         toggleFormFields();
 
         $('#CreateTaskForm_SelectedClientID').on('change', function() {

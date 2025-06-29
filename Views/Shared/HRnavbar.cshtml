@@ -7,7 +7,7 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Lucide Icons -->
+    
     <script src="https://unpkg.com/lucide@latest"></script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -35,16 +35,15 @@
 <body class="bg-gray-100">
 
     <div class="flex h-screen bg-gray-100">
-        <!-- Sidebar -->
+        
         <aside id="sidebar" class="w-72 bg-gray-800 text-white flex-shrink-0 transition-all duration-300 ease-in-out">
             <div class="flex flex-col h-full">
-                <!-- Logo -->
                 <div class="flex items-center justify-center h-16 border-b border-gray-700">
                     <i data-lucide="scale" class="h-8 w-8 text-sky-400"></i>
                     <span class="ml-3 text-xl font-bold">NIW Solutions</span>
                 </div>
 
-                <!-- Navigation -->
+               
                 <nav class="flex-1 px-4 py-4 overflow-y-auto sidebar-scroll">
                     <ul class="space-y-2">
                         <li>
@@ -98,7 +97,6 @@
                     </ul>
                 </nav>
 
-                <!-- User Profile / Logout -->
                 <div class="p-4 border-t border-gray-700">
                     <a href="@Url.Action("Logout", "Login")" class="flex items-center w-full px-3 py-2 rounded-lg text-gray-300 hover:bg-red-600 hover:text-white transition-colors">
                         <i data-lucide="log-out" class="w-5 h-5 mr-3"></i>
@@ -108,18 +106,17 @@
             </div>
         </aside>
 
-        <!-- Main Content -->
         <div class="flex-1 flex flex-col overflow-hidden">
-            <!-- Top Header -->
+            
             <header class="bg-white shadow-sm flex justify-between items-center p-4">
-                <!-- Sidebar Toggle Button -->
+               
                 <div>
                     <button id="sidebar-toggle" class="text-gray-500 hover:text-gray-700 focus:outline-none">
                         <i data-lucide="panel-left-close" class="w-6 h-6"></i>
                     </button>
                 </div>
 
-                <!-- User Info -->
+                
                 <div class="flex items-center space-x-4">
                     <span class="text-gray-700 font-medium">
                         Welcome, @(Session["Email"] ?? "HR Admin")
@@ -128,7 +125,7 @@
                 </div>
             </header>
 
-            <!-- Page Content -->
+            
             <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
                 @RenderBody()
                 @RenderSection("styles", required: false)  

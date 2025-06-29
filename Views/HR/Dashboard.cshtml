@@ -4,28 +4,27 @@
     Layout = "~/Views/Shared/HRnavbar.cshtml";
 }
 
-<!-- Page Header -->
+
 <div class="mb-6">
     <h1 class="text-3xl font-bold text-gray-800">Dashboard</h1>
     <p class="text-gray-500">Welcome back, here's your overview for today.</p>
 </div>
 
-<!-- Main Dashboard Content -->
 <div class="flex flex-col gap-6">
 
-    <!-- Center Section: Attendance Tracker -->
+   
     <div class="bg-white p-6 rounded-lg shadow-md text-center">
         <h3 class="font-semibold text-lg text-gray-800 mb-4">Attendance Tracker</h3>
 
-        <!-- Animation Container -->
+       
         <div class="relative w-48 h-48 mx-auto my-4 flex items-center justify-center">
             <svg id="animation-svg" class="absolute inset-0 w-full h-full" viewBox="0 0 100 100">
-                <!-- Background Circle -->
+               
                 <circle cx="50" cy="50" r="45" stroke="#e5e7eb" stroke-width="5" fill="none" />
-                <!-- Animated Progress Circle -->
+               
                 <circle id="progress-circle" cx="50" cy="50" r="45" stroke="#10b981" stroke-width="5" fill="none" transform="rotate(-90 50 50)" stroke-linecap="round" />
             </svg>
-            <!-- Timer Display -->
+           
             <div id="timer-display" class="text-4xl font-bold text-gray-800 z-10">00:00:00</div>
         </div>
 
@@ -40,10 +39,10 @@
         <p id="checkInTime" class="text-sm text-gray-500 mt-4 h-5"></p>
     </div>
 
-    <!-- Bottom Section: Notification Boards -->
+   
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-        <!-- New Client Requests Card -->
+        
         <div class="bg-white p-6 rounded-lg shadow-md">
             <div class="flex items-center mb-4">
                 <div class="bg-sky-100 p-2 rounded-full">
@@ -77,7 +76,7 @@
             </div>
         </div>
 
-        <!-- Pending Leave Requests Card -->
+        
         <div class="bg-white p-6 rounded-lg shadow-md">
             <div class="flex items-center mb-4">
                 <div class="bg-amber-100 p-2 rounded-full">
@@ -129,7 +128,7 @@
             let timerInterval;
             let startTime;
 
-            // --- GSAP Animation Setup ---
+           
             const circleLength = progressCircle.getTotalLength();
             gsap.set(progressCircle, { strokeDasharray: circleLength, strokeDashoffset: circleLength });
 
@@ -153,7 +152,7 @@
                 isCheckedIn = !isCheckedIn;
 
                 if (isCheckedIn) {
-                    // --- Handle Check In ---
+                   
                     this.classList.remove('bg-green-500', 'hover:bg-green-600');
                     this.classList.add('bg-red-500', 'hover:bg-red-600');
                     this.innerHTML = `<span class="flex items-center justify-center"><i data-lucide="stop-circle" class="h-6 w-6 mr-2"></i><span>Check Out</span></span>`;
@@ -167,7 +166,7 @@
                     timerInterval = setInterval(updateTimer, 1000);
 
                 } else {
-                    // --- Handle Check Out ---
+                    
                     this.classList.remove('bg-red-500', 'hover:bg-red-600');
                     this.classList.add('bg-green-500', 'hover:bg-green-600');
                     this.innerHTML = `<span class="flex items-center justify-center"><i data-lucide="play-circle" class="h-6 w-6 mr-2"></i><span>Check In</span></span>`;
@@ -178,7 +177,7 @@
                     const endTime = new Date();
                     statusText.textContent = "Checked Out";
                     checkInTimeDisplay.textContent += ' | Checked out at: ' + endTime.toLocaleTimeString();
-                    //A
+                    
                 }
             });
 

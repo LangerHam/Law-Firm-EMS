@@ -344,7 +344,7 @@ namespace Law_Firm_EMS.Controllers
                 }
 
                 string fileName = Path.GetFileName(file.FileName);
-                //string uniqueFileName = Guid.NewGuid().ToString() + "_" + fileName;
+                
                 string filePath = Path.Combine(uploadsFolder, fileName);
 
                 string dbFilePath = "~/Resources/ClientDocuments/" + fileName;
@@ -602,7 +602,7 @@ namespace Law_Firm_EMS.Controllers
             }
         }
 
-        // GET: Client/GenerateTransactionPdf (actually HTML for printing)
+        // GET: Client/GenerateTransactionPdf
         public ActionResult GenerateTransactionPdf()
         {
             if (Session["UserID"] == null)

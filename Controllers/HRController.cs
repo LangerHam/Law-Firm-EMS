@@ -71,7 +71,7 @@ namespace Law_Firm_EMS.Controllers
             if (Session["RoleID"] == null || (int)Session["RoleID"] != 1)
                 return RedirectToAction("Login", "Login");
 
-            // Change the type to your new ViewModel
+           
             IEnumerable<ConsultantListItemViewModel> consultants = new List<ConsultantListItemViewModel>();
 
             using (var client = GetApiClient())
@@ -79,7 +79,7 @@ namespace Law_Firm_EMS.Controllers
                 var response = await client.GetAsync("api/consultants");
                 if (response.IsSuccessStatusCode)
                 {
-                    // Deserialize directly into the ViewModel that matches the API's output
+                    
                     consultants = await response.Content.ReadAsAsync<List<ConsultantListItemViewModel>>();
                 }
                 else
@@ -453,7 +453,7 @@ namespace Law_Firm_EMS.Controllers
                         UploadPath = "Awaiting upload..."
                     };
                 }
-                else // NewDocument
+                else 
                 {
                     documentToTask = new Document
                     {

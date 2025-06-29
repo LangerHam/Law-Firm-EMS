@@ -29,9 +29,9 @@
 </head>
 <body class="bg-white">
     <div class="flex h-screen">
-        <!-- Sidebar -->
+       
         <aside class="w-64 bg-sky-600 text-white flex-shrink-0 flex flex-col justify-between">
-            <!-- Top -->
+           
             <div>
                 <div class="text-center p-4 mt-4">
                     <div class="text-sm text-gray-200">Welcome</div>
@@ -47,7 +47,7 @@
                 </nav>
             </div>
 
-            <!-- Bottom -->
+           
             <div class="p-4">
                 <ul class="space-y-3">
                     <li><a href="@Url.Action("Settings", "Client")" class="text-sm flex items-center space-x-3 text-white hover:bg-sky-500 px-3 py-2 rounded-md"><i class="bi bi-gear"></i><span>Settings</span></a></li>
@@ -56,7 +56,7 @@
             </div>
         </aside>
 
-        <!-- Main Content Placeholder -->
+       
         <div class="flex-1 flex flex-col overflow-hidden">
             @RenderBody()
         </div>

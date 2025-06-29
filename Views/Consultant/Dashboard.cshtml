@@ -5,7 +5,7 @@
 }
 
 <div class="space-y-6">
-    <!-- Top Section: Check-in and Stats -->
+    
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div class="lg:col-span-1 bg-white p-6 rounded-lg shadow-md text-center">
             <h3 class="font-semibold text-lg text-gray-800 mb-4">Attendance</h3>
@@ -21,7 +21,7 @@
             </button>
         </div>
 
-        <!-- Stats Cards -->
+       
         <div class="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div class="bg-white p-6 rounded-lg shadow-md">
                 <h4 class="font-semibold text-gray-600">Pending Tasks</h4>
@@ -52,7 +52,7 @@
         </div>
     </div>
 
-    <!-- Middle Section: Notice Board -->
+   
     <div class="bg-white p-6 rounded-lg shadow-md">
         <h3 class="text-xl font-bold text-gray-800 mb-4">Notice Board</h3>
         <div class="space-y-3">
@@ -67,7 +67,7 @@
         </div>
     </div>
 
-    <!----- LEAVE SUMMARY & CHART SECTION ----->
+   
     <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
         <!-- Leave Balances -->
         <div class="lg:col-span-2 bg-white p-6 rounded-lg shadow-md">
@@ -121,7 +121,7 @@
 
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // --- Check-in Logic ---
+       
         const checkInBtn = document.getElementById('checkInBtn');
         const timerDisplay = document.getElementById('timer-display');
         const progressCircle = document.getElementById('progress-circle');
@@ -158,7 +158,7 @@
             timerDisplay.textContent = `${hours}:${minutes}:${seconds}`;
         }
 
-        // --- Chart Logic ---
+        
         const ctx = document.getElementById('leaveChart').getContext('2d');
         const leaveChart = new Chart(ctx, {
             type: 'bar',

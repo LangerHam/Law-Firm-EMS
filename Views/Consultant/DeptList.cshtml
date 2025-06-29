@@ -55,7 +55,7 @@
         searchInput.addEventListener("keyup", function () {
             const filter = searchInput.value.toLowerCase();
 
-            // Skip header row (index 0)
+            
             for (let i = 1; i < rows.length; i++) {
                 const cells = rows[i].getElementsByTagName("td");
                 let match = false;

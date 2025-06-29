@@ -112,7 +112,7 @@ namespace Law_Firm_EMS.ViewModels
         public DateTime PaymentDate { get; set; }
     }
 
-    // ViewModel for payment input (optional, can also use raw properties in action)
+    
     public class ProcessPaymentViewModel
     {
         [Required(ErrorMessage = "Amount is required.")]
@@ -122,7 +122,7 @@ namespace Law_Firm_EMS.ViewModels
 
     public class ClientSettingsViewModel
     {
-        public int UserID { get; set; } // The ID of the associated User record (and Client record)
+        public int UserID { get; set; } 
 
         [Required(ErrorMessage = "Full Name is required.")]
         [StringLength(100, ErrorMessage = "Name cannot exceed 100 characters.")]
@@ -139,9 +139,9 @@ namespace Law_Firm_EMS.ViewModels
         [EmailAddress(ErrorMessage = "Invalid email address format.")]
         [StringLength(100, ErrorMessage = "Email cannot exceed 100 characters.")]
         [Display(Name = "Email Address")]
-        public string Email { get; set; } // Now editable
+        public string Email { get; set; } 
 
-        // For changing password
+        
         [DataType(DataType.Password)]
         [Display(Name = "Current Password")]
         public string CurrentPassword { get; set; }
