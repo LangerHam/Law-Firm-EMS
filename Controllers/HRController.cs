@@ -14,6 +14,7 @@ using Rotativa;
 using System.Net.Http.Headers;
 using System.Net.Http;
 using Law_Firm_EMS.ViewModels.Consultant;
+using System.Configuration;
 
 namespace Law_Firm_EMS.Controllers
 {
@@ -61,7 +62,7 @@ namespace Law_Firm_EMS.Controllers
         private HttpClient GetApiClient()
         {
             var client = new HttpClient();
-            client.BaseAddress = new Uri("http://localhost:49269/");
+            client.BaseAddress = new Uri(ConfigurationManager.AppSettings["ApiBaseUrl"]);
             client.DefaultRequestHeaders.Accept.Clear();
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             return client;

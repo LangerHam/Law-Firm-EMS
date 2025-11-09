@@ -246,6 +246,7 @@
     <Content Include="Resources\Forms\G-28.pdf" />
     <Content Include="Resources\Forms\I-140.pdf" />
     <Content Include="Resources\Forms\I-907.pdf" />
+    <None Include="Properties\PublishProfiles\LawFirmEMS-App - Web Deploy.pubxml" />
     <None Include="Scripts\jquery-3.7.0.intellisense.js" />
     <Content Include="Scripts\jquery-3.7.0.js" />
     <Content Include="Scripts\jquery-3.7.0.min.js" />
